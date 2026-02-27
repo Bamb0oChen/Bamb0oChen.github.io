@@ -53,6 +53,12 @@
         <div id="articlesContainer" class="articles-grid"></div>
     </div>
 
+    <!-- 专心做视频 - 本地视频卡片 -->
+    <div class="content">
+        <h2 style="color:white; text-align:center; margin-top:30px;">专心做视频</h2>
+        <div id="focusVideosContainer" class="articles-grid"></div>
+    </div>
+
     <!-- 更新频率统计 -->
     <div class="content">
         <h2 style="color:white; text-align:center; margin-top:30px;">更新频率统计</h2>
@@ -191,8 +197,71 @@
             comment: "感性空间"
         }];
 
+        function getFocusVideos() {
+            if (Array.isArray(window.FOCUS_VIDEO_LIBRARY)) {
+                return window.FOCUS_VIDEO_LIBRARY.filter(item => item && item.src);
+            }
+            return [];
+        }
+
+        function renderFocusVideos() {
+            const container = document.getElementById('focusVideosContainer');
+            if (!container) return;
+
+            const videos = getFocusVideos();
+            container.innerHTML = '';
+
+            if (videos.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.5); padding:30px; grid-column:1/-1;">暂无视频，请将文件放入 photos/focus-videos/ 并在 static/data.js 的 FOCUS_VIDEO_LIBRARY 中添加条目。</div>';
+                return;
+            }
+
+            const grid = document.createElement('div');
+            grid.className = 'articles-grid';
+
+            videos.forEach(videoItem => {
+                const card = document.createElement('div');
+                card.className = 'article-card';
+                card.style.cursor = 'pointer';
+                card.innerHTML = `
+                    <div class="article-image">
+                        <video src="${videoItem.src}" muted loop playsinline preload="metadata"></video>
+                    </div>
+                    <div class="article-content">
+                        <h3>${videoItem.title || '未命名视频'}</h3>
+                        <p>${videoItem.description || '专注记录'}</p>
+                        <div class="article-comment">${videoItem.comment || ''}</div>
+                    </div>
+                `;
+
+                const videoEl = card.querySelector('video');
+                if (videoEl) {
+                    card.addEventListener('mouseenter', () => {
+                        videoEl.currentTime = 0;
+                        videoEl.play().catch(() => {});
+                    });
+                    card.addEventListener('mouseleave', () => {
+                        videoEl.pause();
+                        videoEl.currentTime = 0;
+                    });
+                }
+
+                card.addEventListener('click', () => {
+                    window.open(videoItem.src, '_blank');
+                });
+
+                grid.appendChild(card);
+            });
+
+            container.appendChild(grid);
+        }
+
         // 更新日志数据
         const changelog = [{
+            date: "2026-02-27",
+            title: "新增用心做视频板块，并且上传了第一个视频",
+            description: "支持视频上传、查看、评注功能，完整的前端实现"
+        }, {
             date: "2026-02-13",
             title: "新增光影留痕画廊",
             description: "支持图片上传、查看、评注功能，完整的前端实现"
@@ -373,6 +442,7 @@
         renderHeatmap();
         setupScrollReveal();
         renderArticles();
+        renderFocusVideos();
         renderChangelog();
 
         // 初始化 header 为隐藏状态
