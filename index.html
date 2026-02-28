@@ -53,7 +53,7 @@
         <div id="articlesContainer" class="articles-grid"></div>
     </div>
 
-    <!-- 专心做视频 - 本地视频卡片 -->
+    <!-- 专心做视频 - B站外链卡片 -->
     <div class="content">
         <h2 style="color:white; text-align:center; margin-top:30px;">专心做视频</h2>
         <div id="focusVideosContainer" class="articles-grid"></div>
@@ -199,9 +199,48 @@
 
         function getFocusVideos() {
             if (Array.isArray(window.FOCUS_VIDEO_LIBRARY)) {
-                return window.FOCUS_VIDEO_LIBRARY.filter(item => item && item.src);
+                return window.FOCUS_VIDEO_LIBRARY.filter(item => item && (item.link || item.bvid));
             }
             return [];
+        }
+
+        function extractBvid(value) {
+            const match = String(value || '').match(/BV[0-9A-Za-z]{10}/);
+            return match ? match[0] : '';
+        }
+
+        function resolveBilibiliInfo(videoItem) {
+            const bvid = videoItem.bvid || extractBvid(videoItem.link);
+            if (!bvid) return null;
+
+            return {
+                bvid,
+                openUrl: videoItem.link || `https://www.bilibili.com/video/${bvid}/`,
+                embedUrl: `https://player.bilibili.com/player.html?bvid=${encodeURIComponent(bvid)}&page=1&autoplay=1&muted=1&danmaku=0`
+            };
+        }
+
+        const biliCoverCache = new Map();
+
+        function loadBilibiliCover(bvid) {
+            if (!bvid) return Promise.resolve('');
+
+            if (biliCoverCache.has(bvid)) {
+                return Promise.resolve(biliCoverCache.get(bvid));
+            }
+
+            const apiUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${encodeURIComponent(bvid)}`;
+            return fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) return null;
+                    return response.json();
+                })
+                .then(result => {
+                    const cover = result && result.data && result.data.pic ? result.data.pic : '';
+                    biliCoverCache.set(bvid, cover);
+                    return cover;
+                })
+                .catch(() => '');
         }
 
         function renderFocusVideos() {
@@ -212,7 +251,7 @@
             container.innerHTML = '';
 
             if (videos.length === 0) {
-                container.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.5); padding:30px; grid-column:1/-1;">暂无视频，请将文件放入 photos/focus-videos/ 并在 static/data.js 的 FOCUS_VIDEO_LIBRARY 中添加条目。</div>';
+                container.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.5); padding:30px; grid-column:1/-1;">暂无视频，请在 static/data.js 的 FOCUS_VIDEO_LIBRARY 中添加 B 站 link/bvid 条目。</div>';
                 return;
             }
 
@@ -223,9 +262,22 @@
                 const card = document.createElement('div');
                 card.className = 'article-card';
                 card.style.cursor = 'pointer';
+                const biliInfo = resolveBilibiliInfo(videoItem);
+                if (!biliInfo) {
+                    return;
+                }
+
                 card.innerHTML = `
                     <div class="article-image">
-                        <video src="${videoItem.src}" muted loop playsinline preload="metadata"></video>
+                        <div class="bili-preview-shell">
+                            <div class="bili-preview-cover"></div>
+                            <div class="bili-preview-placeholder">
+                                <span class="bili-preview-title">${videoItem.title || 'B 站视频'}</span>
+                                <span class="bili-preview-hint">悬浮预览</span>
+                            </div>
+                            <div class="bili-preview-player"></div>
+                            <span class="bili-badge">Bilibili</span>
+                        </div>
                     </div>
                     <div class="article-content">
                         <h3>${videoItem.title || '未命名视频'}</h3>
@@ -234,20 +286,44 @@
                     </div>
                 `;
 
-                const videoEl = card.querySelector('video');
-                if (videoEl) {
-                    card.addEventListener('mouseenter', () => {
-                        videoEl.currentTime = 0;
-                        videoEl.play().catch(() => {});
-                    });
-                    card.addEventListener('mouseleave', () => {
-                        videoEl.pause();
-                        videoEl.currentTime = 0;
+                const playerWrap = card.querySelector('.bili-preview-player');
+                const coverWrap = card.querySelector('.bili-preview-cover');
+
+                const presetCover = videoItem.cover || '';
+                if (presetCover && coverWrap) {
+                    coverWrap.style.backgroundImage = `url("${presetCover}")`;
+                    card.classList.add('has-cover');
+                } else {
+                    loadBilibiliCover(biliInfo.bvid).then(coverUrl => {
+                        if (!coverWrap || !coverUrl) return;
+                        coverWrap.style.backgroundImage = `url("${coverUrl}")`;
+                        card.classList.add('has-cover');
                     });
                 }
 
+                card.addEventListener('mouseenter', () => {
+                    if (!playerWrap) return;
+                    if (!playerWrap.querySelector('iframe')) {
+                        const iframe = document.createElement('iframe');
+                        iframe.src = biliInfo.embedUrl;
+                        iframe.setAttribute('title', videoItem.title || biliInfo.bvid);
+                        iframe.setAttribute('frameborder', '0');
+                        iframe.setAttribute('allowfullscreen', 'true');
+                        iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+                        iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
+                        playerWrap.appendChild(iframe);
+                    }
+                    card.classList.add('is-previewing');
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.classList.remove('is-previewing');
+                    if (playerWrap) {
+                        playerWrap.innerHTML = '';
+                    }
+                });
+
                 card.addEventListener('click', () => {
-                    window.open(videoItem.src, '_blank');
+                    window.open(biliInfo.openUrl, '_blank');
                 });
 
                 grid.appendChild(card);
@@ -258,6 +334,10 @@
 
         // 更新日志数据
         const changelog = [{
+            date: "2026-02-28",
+            title: "解决了本地文件无法上传的问题",
+            description: "把用心做视频板块的接口全部接入到B站上"
+        }, {
             date: "2026-02-27",
             title: "新增用心做视频板块，并且上传了第一个视频",
             description: "支持视频上传、查看、评注功能，完整的前端实现"

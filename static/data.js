@@ -47,25 +47,37 @@ if (!window.LIGHTTRACE_LIBRARY || window.LIGHTTRACE_LIBRARY.length === 0) {
 
 window.FEATURED_LIGHTTRACE = (window.LIGHTTRACE_LIBRARY || []).filter(item => item && item.featured);
 
-// 专心做视频 - 本地视频库配置
+// 专心做视频 - 视频库配置（B站外链）
 // 说明:
-// 1) 将视频放入 photos/focus-videos/ 目录（建议 .mp4）
+// 1) 使用 link/bvid（B 站）
 // 2) 在下方清单中维护卡片信息，首页会自动渲染
-// 3) src 使用相对路径，方便开发者直接替换本地文件
+// 3) 建议提供 bvid 以启用嵌入预览
 window.FOCUS_VIDEO_LIBRARY = [
     // Example:
     // {
     //     id: 'vid0001',
     //     title: '番茄钟学习实录',
     //     description: '30 分钟无干扰学习片段',
-    //     src: 'photos/focus-videos/vid0001.mp4',
+    //     bvid: 'BV1QAAhzaEA8',
+    //     link: 'https://www.bilibili.com/video/BV1QAAhzaEA8/',
     //     comment: '学习天地'
     // }
     {
         id: 'vid0001',
         title: 'Everywhere I Go - My Vacation Record',
         description: '从北京-沈阳-哈尔滨-昆明-普洱-西双版纳，或许你想看看我的故事',
-        src: 'photos/focus-videos/wintervacation.mp4',
+        platform: 'bilibili',
+        bvid: 'BV1QAAhzaEA8',
+        link: 'https://www.bilibili.com/video/BV1QAAhzaEA8/',
+        comment: '行者无疆'
+    },
+    {
+        id: 'vid0002',
+        title: '景の故事',
+        description: '在景德镇的记录',
+        platform: 'bilibili',
+        bvid: 'BV1DdY1z7E7M',
+        link: 'https://www.bilibili.com/video/BV1DdY1z7E7M/',
         comment: '行者无疆'
     }
 ];
