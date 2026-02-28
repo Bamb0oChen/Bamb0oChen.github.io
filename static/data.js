@@ -47,6 +47,33 @@ if (!window.LIGHTTRACE_LIBRARY || window.LIGHTTRACE_LIBRARY.length === 0) {
 
 window.FEATURED_LIGHTTRACE = (window.LIGHTTRACE_LIBRARY || []).filter(item => item && item.featured);
 
+// 专心做视频 - 视频库配置（B站外链）
+// 说明:
+// 1) 使用 link/bvid（B 站）
+// 2) 在下方清单中维护卡片信息，首页会自动渲染
+// 3) cover 建议填写 https 地址，避免混合内容拦截
+window.FOCUS_VIDEO_LIBRARY = [{
+        id: 'vid0001',
+        title: 'Everywhere I Go - My Vacation Record',
+        description: '从北京-沈阳-哈尔滨-昆明-普洱-西双版纳，或许你想看看我的故事',
+        platform: 'bilibili',
+        bvid: 'BV1QAAhzaEA8',
+        link: 'https://www.bilibili.com/video/BV1QAAhzaEA8/',
+        cover: 'https://i0.hdslb.com/bfs/archive/7dc8ef49e006b7568859d6def92ce8d58dcf96b6.jpg',
+        comment: '行者无疆'
+    },
+    {
+        id: 'vid0002',
+        title: '景の故事',
+        description: '关于我在景德镇的故事',
+        platform: 'bilibili',
+        bvid: 'BV1DdY1z7E7M',
+        link: 'https://www.bilibili.com/video/BV1DdY1z7E7M/',
+        cover: 'https://i0.hdslb.com/bfs/archive/7cc7b30bd4f0c6af6e5d1f6f886532880b502441.jpg',
+        comment: '行者无疆'
+    }
+];
+
 const RECORDS_PREFIX = 'daily_record_';
 
 /**
