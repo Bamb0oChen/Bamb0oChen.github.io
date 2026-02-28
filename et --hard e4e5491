@@ -1,0 +1,22 @@
+[33m1e70901[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m 修改了视频展示的问题
+[33m637fc56[m Re-add wintervacation.mp4 using Git LFS
+[33m33665e6[m Track video files with Git LFS
+[33m07a27a2[m 新增了用心做视频板块，并且上传了第一个视频，支持视频上传、查看、评注功能，完整的前端实现。
+[33me4e5491[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m 增加了一个新的日志条目，修改了之前的日志条目的描述和评论。
+[33m49b76a0[m 同上
+[33m42b015e[m 手机端完善显示
+[33m0b94a5a[m 情人节更新了星星的样式
+[33ma5393e2[m 更新了“我们为什么要去游乐园”
+[33mbf6f325[m 新增了光影留痕gongsi的照片，并更新了相关的 HTML、CSS 和 JS 文件以支持新的照片库功能。
+[33m89c9853[m 增加了很多功能，删减了记录器
+[33m124f885[m 加上了书签页图标
+[33m740d0f7[m 完善了焦点图功能，增加了焦点图页面和相关的样式和脚本文件，并修改了首页和记录页以支持焦点图的展示。
+[33m55fba81[m adjust commit message for recent edits
+[33m6d5e81e[m complify Update website styles and content
+[33mbcabb51[m Use hero.jpg (relative to CSS) for hero background
+[33m4d27aff[m Fix hero image path to use relative static/hero.jpg
+[33mc9ee86a[m Wrap Jinja template blocks with raw/endraw to avoid Liquid parsing
+[33m3aa8b8e[m Fix Liquid syntax error in DEPLOYMENT.md
+[33m5e6b0b6[m Delete CNAME
+[33m8b5ba22[m Create CNAME
+[33ma76a5bd[m first commit
