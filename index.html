@@ -170,7 +170,7 @@
         const articles = [{
             id: 1,
             title: "python进阶讲义",
-            description: "基于Geminishen'cheng的一份py进阶讲义，主要针对CS61A的学习者",
+            description: "基于Gemini生成的一份py进阶讲义，主要针对CS61A的学习者",
             image: "photos/photo1.webp",
             link: "https://yanzhuchen0901.github.io/notes/#/computer-science/UCB%20CS61A/python",
             comment: "学习天地"
@@ -195,6 +195,13 @@
             image: "photos/photo4.png",
             link: "https://yanzhuchen0901.github.io/notes/#/Diary/star_white",
             comment: "感性空间"
+        }, {
+            id: 5,
+            title: "陈のAI学习路径",
+            description: "记录了我从零开始学习AI的路径，包括基础理论、实践项目和学习心得。",
+            image: "photos/photo5.png",
+            link: "https://yanzhuchen0901.github.io/notes/#/AI/",
+            comment: "一路走来"
         }];
 
         function getFocusVideos() {
@@ -227,7 +234,9 @@
             };
         }
 
+        const DEFAULT_VIDEO_FALLBACK_COVER = 'photos/photo3.jpg';
         const biliCoverCache = new Map();
+        const coverReachabilityCache = new Map();
 
         function loadBilibiliCover(bvid) {
             if (!bvid) return Promise.resolve('');
@@ -248,6 +257,60 @@
                     return cover;
                 })
                 .catch(() => '');
+        }
+
+        function resolveFallbackCover(videoItem) {
+            const candidates = [
+                videoItem && videoItem.fallbackCover,
+                videoItem && videoItem.cover,
+                window.FOCUS_VIDEO_FALLBACK_COVER,
+                DEFAULT_VIDEO_FALLBACK_COVER
+            ];
+
+            for (const candidate of candidates) {
+                const normalized = normalizeSecureCoverUrl(candidate || '');
+                if (normalized) return normalized;
+            }
+
+            return '';
+        }
+
+        function validateCoverUrl(url) {
+            const target = normalizeSecureCoverUrl(url || '');
+            if (!target) return Promise.resolve('');
+
+            if (coverReachabilityCache.has(target)) {
+                return Promise.resolve(coverReachabilityCache.get(target));
+            }
+
+            return new Promise(resolve => {
+                const image = new Image();
+
+                image.onload = () => {
+                    coverReachabilityCache.set(target, target);
+                    resolve(target);
+                };
+
+                image.onerror = () => {
+                    coverReachabilityCache.set(target, '');
+                    resolve('');
+                };
+
+                image.referrerPolicy = 'no-referrer';
+                image.src = target;
+            });
+        }
+
+        function resolveVideoCover(videoItem, biliInfo) {
+            const fallbackCover = resolveFallbackCover(videoItem);
+
+            return loadBilibiliCover(biliInfo && biliInfo.bvid)
+                .then(validateCoverUrl)
+                .then(crawledCover => {
+                    if (crawledCover) return crawledCover;
+                    return validateCoverUrl(fallbackCover);
+                })
+                .catch(() => validateCoverUrl(fallbackCover));
         }
 
         function renderFocusVideos() {
@@ -278,10 +341,7 @@
                     <div class="article-image">
                         <div class="bili-preview-shell">
                             <div class="bili-preview-cover"></div>
-                            <div class="bili-preview-placeholder">
-                                <span class="bili-preview-title">${videoItem.title || 'B 站视频'}</span>
-                                <span class="bili-preview-hint">悬浮预览</span>
-                            </div>
+                            <div class="bili-preview-placeholder"></div>
                             <div class="bili-preview-player"></div>
                             <span class="bili-badge">Bilibili</span>
                         </div>
@@ -296,17 +356,11 @@
                 const playerWrap = card.querySelector('.bili-preview-player');
                 const coverWrap = card.querySelector('.bili-preview-cover');
 
-                const presetCover = normalizeSecureCoverUrl(videoItem.cover || '');
-                if (presetCover && coverWrap) {
-                    coverWrap.style.backgroundImage = `url("${presetCover}")`;
+                resolveVideoCover(videoItem, biliInfo).then(coverUrl => {
+                    if (!coverWrap || !coverUrl) return;
+                    coverWrap.style.backgroundImage = `url("${coverUrl}")`;
                     card.classList.add('has-cover');
-                } else {
-                    loadBilibiliCover(biliInfo.bvid).then(coverUrl => {
-                        if (!coverWrap || !coverUrl) return;
-                        coverWrap.style.backgroundImage = `url("${coverUrl}")`;
-                        card.classList.add('has-cover');
-                    });
-                }
+                });
 
                 card.addEventListener('mouseenter', () => {
                     if (!playerWrap) return;
@@ -342,6 +396,10 @@
 
         // 更新日志数据
         const changelog = [{
+            date: "2026-03-01",
+            title: "视频封面与预览样式优化",
+            description: "重写视频封面读取逻辑为优先爬取、失败回退备用图，并移除悬浮预览文案以降低视觉干扰"
+        }, {
             date: "2026-02-28",
             title: "用心做视频接入 B 站外链",
             description: "首页新增视频卡片、封面展示与悬浮预览，移除本地大视频依赖"
