@@ -654,6 +654,77 @@ textarea {
 }
 
 
+/* 曲苑天地 - 常听歌表格 */
+
+.music-board-wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.music-board-desc {
+    margin: 0 0 14px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.music-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.music-table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+}
+
+.music-table th,
+.music-table td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 12px 10px;
+    text-align: left;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 14px;
+}
+
+.music-table th {
+    color: rgba(255, 255, 255, 0.96);
+    font-weight: 600;
+}
+
+.music-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.music-link-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 165, 0, 0.45);
+    color: rgba(255, 165, 0, 0.95);
+    text-decoration: none;
+    font-size: 12px;
+    transition: all 0.25s ease;
+}
+
+.music-link-btn:hover {
+    background: rgba(255, 165, 0, 0.12);
+    border-color: rgba(255, 165, 0, 0.75);
+}
+
+.music-empty {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+
 /* 更新日志 - 时间线样式 */
 
 .changelog-timeline {
@@ -791,5 +862,18 @@ textarea {
     }
     .photo-item {
         flex: 0 0 160px;
+    }
+    .music-board-wrap {
+        padding: 10px;
+        border-radius: 10px;
+    }
+    .music-board-desc {
+        font-size: 12px;
+        margin-bottom: 10px;
+    }
+    .music-table th,
+    .music-table td {
+        font-size: 12px;
+        padding: 10px 8px;
     }
 }

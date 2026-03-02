@@ -59,6 +59,29 @@
         <div id="focusVideosContainer" class="articles-grid"></div>
     </div>
 
+    <!-- 曲苑天地 - Apple Music 常听歌 -->
+    <div class="content">
+        <h2 style="color:white; text-align:center; margin-top:30px;">曲苑天地</h2>
+        <div class="music-board-wrap">
+            <p class="music-board-desc">基于 Apple Music 分享最近常听歌曲（仅存储歌曲信息与外链，不存本地音频）。</p>
+            <div class="music-table-scroll">
+                <table class="music-table" aria-label="曲苑天地常听歌表格">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>歌曲</th>
+                            <th>歌手</th>
+                            <th>专辑</th>
+                            <th>收录时间</th>
+                            <th>试听</th>
+                        </tr>
+                    </thead>
+                    <tbody id="musicTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- 更新频率统计 -->
     <div class="content">
         <h2 style="color:white; text-align:center; margin-top:30px;">更新频率统计</h2>
@@ -456,6 +479,86 @@
             container.appendChild(grid);
         }
 
+        // 曲苑天地 - 常听歌数据（后续可迁移到 static/data.js 统一管理）
+        const musicFavorites = [{
+            title: 'Midnight City',
+            artist: 'M83',
+            album: 'Hurry Up, We\'re Dreaming',
+            addedAt: '2026-03-02',
+            appleMusicUrl: 'https://music.apple.com/cn/song/midnight-city/429200412'
+        }, {
+            title: '晴天',
+            artist: '周杰伦',
+            album: '叶惠美',
+            addedAt: '2026-03-02',
+            appleMusicUrl: 'https://music.apple.com/cn/song/%E6%99%B4%E5%A4%A9/1454358198'
+        }, {
+            title: 'Yellow',
+            artist: 'Coldplay',
+            album: 'Parachutes',
+            addedAt: '2026-03-02',
+            appleMusicUrl: 'https://music.apple.com/cn/song/yellow/1122775993'
+        }];
+
+        function renderMusicBoard() {
+            const tbody = document.getElementById('musicTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            if (!Array.isArray(musicFavorites) || musicFavorites.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 6;
+                cell.className = 'music-empty';
+                cell.textContent = '暂无歌曲，稍后将在这里更新常听歌单。';
+                row.appendChild(cell);
+                tbody.appendChild(row);
+                return;
+            }
+
+            musicFavorites.forEach((song, index) => {
+                const row = document.createElement('tr');
+
+                const indexCell = document.createElement('td');
+                indexCell.textContent = String(index + 1);
+
+                const titleCell = document.createElement('td');
+                titleCell.textContent = song.title || '未命名歌曲';
+
+                const artistCell = document.createElement('td');
+                artistCell.textContent = song.artist || '-';
+
+                const albumCell = document.createElement('td');
+                albumCell.textContent = song.album || '-';
+
+                const dateCell = document.createElement('td');
+                dateCell.textContent = song.addedAt || '-';
+
+                const actionCell = document.createElement('td');
+                if (song.appleMusicUrl) {
+                    const link = document.createElement('a');
+                    link.href = song.appleMusicUrl;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    link.className = 'music-link-btn';
+                    link.textContent = 'Apple Music';
+                    actionCell.appendChild(link);
+                } else {
+                    actionCell.textContent = '-';
+                }
+
+                row.appendChild(indexCell);
+                row.appendChild(titleCell);
+                row.appendChild(artistCell);
+                row.appendChild(albumCell);
+                row.appendChild(dateCell);
+                row.appendChild(actionCell);
+
+                tbody.appendChild(row);
+            });
+        }
+
         // 渲染更新日志
         function renderChangelog() {
             const container = document.getElementById('changelog-container');
@@ -585,6 +688,7 @@
         setupScrollReveal();
         renderArticles();
         renderFocusVideos();
+        renderMusicBoard();
         renderChangelog();
 
         // 初始化 header 为隐藏状态
