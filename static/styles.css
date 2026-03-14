@@ -38,7 +38,8 @@ header,
 .photos-scroll-wrapper {
     --photos-cols: 5;
     --photos-col-gap: 12px;
-    --photos-row-gap: 60px;
+    /* 在 400~900 之间平滑变化，避免断点附近行距跳变 */
+    --photos-row-gap: clamp(36px, calc(36px + (100vw - 400px) * 0.12), 140px);
     --photos-padding: 16px;
     --photo-size: calc((100% - (var(--photos-padding) * 2) - (var(--photos-col-gap) * (var(--photos-cols) - 1))) / var(--photos-cols));
     display: grid;
@@ -68,7 +69,6 @@ header,
         --photos-cols: 2;
         --photos-padding: 12px;
         --photos-col-gap: 10px;
-        --photos-row-gap: 20px;
     }
 }
 
