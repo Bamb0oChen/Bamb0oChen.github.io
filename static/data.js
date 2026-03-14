@@ -74,6 +74,23 @@ window.FOCUS_VIDEO_LIBRARY = [{
     }
 ];
 
+// 曲苑天地 - 常听歌 / 收藏歌单（首页表格数据源）
+// 说明：
+// - 首页会读取 window.MUSIC_FAVORITES 渲染歌曲表格。
+// - Apple Music 的网页在浏览器端通常会遇到 CORS 限制；而你提供的 /library/playlist 链接还需要登录态，
+//   因此无法在 GitHub Pages 的前端页面里“直接从链接读取歌单”。
+// - 推荐做法：使用 Apple Music 的“分享歌单”公开链接（非 /library/playlist），在本地导出歌曲信息后粘贴到这里。
+window.MUSIC_FAVORITES = [
+    // Example:
+    // {
+    //   title: 'Midnight City',
+    //   artist: 'M83',
+    //   album: "Hurry Up, We're Dreaming",
+    //   addedAt: '2026-03-02',
+    //   appleMusicUrl: 'https://music.apple.com/cn/song/midnight-city/429200412'
+    // }
+];
+
 const RECORDS_PREFIX = 'daily_record_';
 
 /**

@@ -63,21 +63,10 @@
     <div class="content">
         <h2 style="color:white; text-align:center; margin-top:30px;">曲苑天地</h2>
         <div class="music-board-wrap">
-            <p class="music-board-desc">基于 Apple Music 分享最近常听歌曲（仅存储歌曲信息与外链，不存本地音频）。</p>
-            <div class="music-table-scroll">
-                <table class="music-table" aria-label="曲苑天地常听歌表格">
-                    <thead>
-                        <tr>
-                            <th>序号</th>
-                            <th>歌曲</th>
-                            <th>歌手</th>
-                            <th>专辑</th>
-                            <th>收录时间</th>
-                            <th>试听</th>
-                        </tr>
-                    </thead>
-                    <tbody id="musicTableBody"></tbody>
-                </table>
+            <p class="music-board-desc">嵌入 Apple Music 收藏歌单，歌单内容更新后这里会自动同步。</p>
+            <div style="max-width:660px; margin:0 auto; overflow:hidden; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.35);">
+                <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="450" style="width:100%; overflow:hidden; filter: invert(1) hue-rotate(180deg) saturate(0.9) contrast(0.92) brightness(0.9); opacity:0.92;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+                    src="https://embed.music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" loading="lazy"></iframe>
             </div>
         </div>
     </div>
@@ -103,6 +92,23 @@
     <div class="content">
         <h2 style="color:white; text-align:center; margin-top:30px;">更新日志</h2>
         <div id="changelog-container" class="changelog-timeline"></div>
+    </div>
+
+    <!-- 缘分天空 - 友链 -->
+    <div class="content">
+        <h2 style="color:white; text-align:center; margin-top:30px;">缘分天空</h2>
+        <div class="articles-grid" aria-label="友链列表">
+            <a class="article-card" href="https://hubery258.github.io/dreamland-hubery/" target="_blank" rel="noopener noreferrer" aria-label="访问 hubery's notebook" style="text-decoration:none; color:inherit;">
+                <div class="article-content" style="display:flex; align-items:center; gap:16px;">
+                    <img src="https://s41.ax1x.com/2026/03/14/peEfnTx.jpg" alt="hubery's notebook" style="width:56px; height:56px; border-radius:50%; object-fit:cover; flex:0 0 auto; border:1px solid rgba(255,255,255,0.12);" loading="lazy" referrerpolicy="no-referrer" />
+                    <div style="min-width:0; flex:1;">
+                        <h3 style="margin:0 0 8px 0;">hubery's notebook</h3>
+                        <p style="min-height:0; margin:0;">C'est la vie</p>
+                        <div class="article-comment" style="margin-top:12px;">https://hubery258.github.io/dreamland-hubery/</div>
+                    </div>
+                </div>
+            </a>
+        </div>
     </div>
 
     <script src="static/data.js"></script>
@@ -131,18 +137,20 @@
         function getFeaturedPhotoLimit() {
             const container = document.getElementById('featuredPhotosContainer');
             if (!container) return 12;
-            const width = container.clientWidth;
+            const width = container.clientWidth || window.innerWidth || 0;
             if (!width) return 12;
-            // 手机端显示4张（2行2列）
-            if (width < 768) {
-                return 4;
+
+            let columns = 5;
+            if (width <= 400) {
+                columns = 2;
+            } else if (width <= 700) {
+                columns = 3;
+            } else if (width <= 900) {
+                columns = 4;
             }
-            const itemSize = 160;
-            const gap = 12;
-            const padding = 32;
-            const usable = Math.max(0, width - padding);
-            const columns = Math.max(1, Math.floor((usable + gap) / (itemSize + gap)));
-            return Math.max(12, columns * 2);
+
+            // 始终两行：至少渲染一屏以上，保证横向可滚动且不突兀
+            return Math.max(12, columns * 4);
         }
 
         // 渲染精选光影
@@ -419,6 +427,10 @@
 
         // 更新日志数据
         const changelog = [{
+            date: "2026-03-14",
+            title: "首页模块与响应式优化",
+            description: "新增‘缘分天空’友链板块；‘曲苑天地’改为 Apple Music 歌单嵌入并做深色/透明适配；优化‘精选光影’布局为居中对称，按 900/700/400 断点逐级调整为 5/4/3/2 列且保持两行，并拉开上下行间距。"
+        }, {
             date: "2026-03-01",
             title: "视频封面与预览样式优化",
             description: "重写视频封面读取逻辑为优先爬取、失败回退备用图，并移除悬浮预览文案以降低视觉干扰"
@@ -479,31 +491,11 @@
             container.appendChild(grid);
         }
 
-        // 曲苑天地 - 常听歌数据（后续可迁移到 static/data.js 统一管理）
-        const musicFavorites = [{
-            title: 'Midnight City',
-            artist: 'M83',
-            album: 'Hurry Up, We\'re Dreaming',
-            addedAt: '2026-03-02',
-            appleMusicUrl: 'https://music.apple.com/cn/song/midnight-city/429200412'
-        }, {
-            title: '晴天',
-            artist: '周杰伦',
-            album: '叶惠美',
-            addedAt: '2026-03-02',
-            appleMusicUrl: 'https://music.apple.com/cn/song/%E6%99%B4%E5%A4%A9/1454358198'
-        }, {
-            title: 'Yellow',
-            artist: 'Coldplay',
-            album: 'Parachutes',
-            addedAt: '2026-03-02',
-            appleMusicUrl: 'https://music.apple.com/cn/song/yellow/1122775993'
-        }];
-
         function renderMusicBoard() {
             const tbody = document.getElementById('musicTableBody');
             if (!tbody) return;
 
+            const musicFavorites = Array.isArray(window.MUSIC_FAVORITES) ? window.MUSIC_FAVORITES : [];
             tbody.innerHTML = '';
 
             if (!Array.isArray(musicFavorites) || musicFavorites.length === 0) {
@@ -511,7 +503,7 @@
                 const cell = document.createElement('td');
                 cell.colSpan = 6;
                 cell.className = 'music-empty';
-                cell.textContent = '暂无歌曲，稍后将在这里更新常听歌单。';
+                cell.textContent = '暂无歌曲：请在 static/data.js 配置 window.MUSIC_FAVORITES（可由你的 Apple Music 歌单导出生成）。';
                 row.appendChild(cell);
                 tbody.appendChild(row);
                 return;

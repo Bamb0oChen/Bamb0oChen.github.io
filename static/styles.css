@@ -32,16 +32,44 @@ header,
     max-width: 1100px;
     margin: 0 auto;
     scroll-behavior: smooth;
+    width: 100%;
 }
 
 .photos-scroll-wrapper {
+    --photos-cols: 5;
+    --photos-col-gap: 12px;
+    --photos-row-gap: 60px;
+    --photos-padding: 16px;
+    --photo-size: calc((100% - (var(--photos-padding) * 2) - (var(--photos-col-gap) * (var(--photos-cols) - 1))) / var(--photos-cols));
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: 160px;
-    grid-template-rows: repeat(2, 160px);
-    gap: 12px;
-    padding: 16px;
-    justify-content: flex-start;
+    grid-auto-columns: var(--photo-size);
+    grid-template-rows: repeat(2, var(--photo-size));
+    column-gap: var(--photos-col-gap);
+    row-gap: var(--photos-row-gap);
+    padding: var(--photos-padding);
+    justify-content: center;
+}
+
+@media (max-width: 900px) {
+    .photos-scroll-wrapper {
+        --photos-cols: 4;
+    }
+}
+
+@media (max-width: 700px) {
+    .photos-scroll-wrapper {
+        --photos-cols: 3;
+    }
+}
+
+@media (max-width: 400px) {
+    .photos-scroll-wrapper {
+        --photos-cols: 2;
+        --photos-padding: 12px;
+        --photos-col-gap: 10px;
+        --photos-row-gap: 20px;
+    }
 }
 
 .featured-photos-scroll::-webkit-scrollbar {
@@ -63,7 +91,7 @@ header,
 }
 
 .photo-item {
-    width: 160px;
+    width: 100%;
     aspect-ratio: 1;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -495,6 +523,9 @@ textarea {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
     padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .article-card {
@@ -848,20 +879,6 @@ textarea {
     .timeline-content {
         width: 100%;
         margin-left: 30px;
-    }
-    .featured-photos-scroll {
-        overflow: hidden;
-    }
-    .photos-scroll-wrapper {
-        grid-auto-flow: row;
-        grid-template-columns: repeat(2, 1fr);
-        grid-auto-columns: auto;
-        grid-template-rows: repeat(2, 160px);
-        padding: 12px;
-        gap: 10px;
-    }
-    .photo-item {
-        flex: 0 0 160px;
     }
     .music-board-wrap {
         padding: 10px;
