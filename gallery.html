@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh">
 
 <head>
@@ -17,56 +17,8 @@
 </head>
 
 <body>
-
-    <header id="header" style="opacity: 1;">
-        <div style="display:flex; align-items:center; gap:12px; width:100%; max-width:1100px; justify-content:space-between;">
-            <div style="font-weight:bold; font-size:18px;">
-                <a href="index.html" style="color: white; text-decoration: none;">Chen.のhomepage</a>
-            </div>
-            <div>
-                <a href="focus.html" class="nav-btn">专注计时器</a>
-                <a href="gallery.html" class="nav-btn" style="background: rgba(255, 255, 255, 0.2);">光影留痕</a>
-                <a href="https://yanzhuchen0901.github.io/notes/" class="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
-            </div>
-        </div>
-    </header>
-
-    <div class="gallery-container">
-        <div class="gallery-header">
-            <h1>光影留痕📸</h1>
-            <p>记录生活中的精彩瞬间</p>
-        </div>
-        <div id="localLibraryHint" class="gallery-hint"></div>
-
-        <div id="gallery" class="gallery-grid"></div>
-
-        <div id="galleryPagination" class="gallery-pagination"></div>
-
-        <div class="gallery-empty" id="emptyMessage">
-            <p>暂无图片，点击"上传图片"开始</p>
-        </div>
-    </div>
-
-    <!-- 图片预览 Modal -->
-    <div id="imageModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close">&times;</span>
-            <div class="modal-body">
-                <img id="modalImage" src="" alt="">
-                <div class="modal-info">
-                    <div class="modal-comment" id="modalComment"></div>
-                    <div class="modal-actions">
-                        <button id="deleteBtn" class="modal-btn delete-btn">删除</button>
-                        <button id="editCommentBtn" class="modal-btn edit-btn">编辑评注</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="static/data.js"></script>
-    <script src="static/gallery.js"></script>
-
+    <div id="app"></div>
+    <script type="module" src="/src/main-gallery.js"></script>
 </body>
 
 </html>

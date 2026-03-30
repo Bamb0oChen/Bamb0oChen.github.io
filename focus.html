@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh">
 
 <head>
@@ -16,39 +16,8 @@
 </head>
 
 <body>
-
-    <header id="header">
-        <div style="display:flex; align-items:center; gap:12px; width:100%; max-width:1100px; justify-content:space-between;">
-            <div style="font-weight:bold; font-size:18px;">Chen.のhomepage</div>
-            <div>
-                <a href="index.html" class="nav-btn">返回首页</a>
-                <a href="records.html" class="nav-btn">进入记录页</a>
-                <a href="https://yanzhuchen0901.github.io/notes/" class="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
-            </div>
-        </div>
-    </header>
-
-    <section class="hero focus-hero">
-        <!-- 透明灰色蒙版 -->
-        <div class="focus-overlay"></div>
-
-        <!-- 圆形按钮容器 -->
-        <div class="focus-button-wrapper">
-            <!-- 计时器显示 -->
-            <div class="focus-timer-display" id="focusTimerDisplay">
-                <div class="timer-text" id="timerText">25:00</div>
-            </div>
-
-            <!-- 主按钮 -->
-            <button class="focus-btn" id="focusBtn">
-                <span class="btn-text">开始你的专注之旅</span>
-            </button>
-        </div>
-    </section>
-
-    <script src="static/data.js"></script>
-    <script src="static/focus.js"></script>
-
+    <div id="app"></div>
+    <script type="module" src="/src/main-focus.js"></script>
 </body>
 
 </html>

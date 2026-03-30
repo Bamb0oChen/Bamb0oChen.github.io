@@ -1,3 +1,0 @@
-Place Light Trace images here.
-Naming convention: img0001.jpg, img0002.jpg, ...
-Then register them in static/data.js (LIGHTTRACE_LIBRARY).

@@ -1,4 +1,4 @@
-// LocalStorage 数据管理
+﻿// LocalStorage 数据管理与站点数据
 
 // 光影留痕 - 本地图片库配置
 // 说明:
@@ -8,23 +8,24 @@
 // 4) 若清单为空，将回退到浏览器 localStorage 模式
 
 // 手动清单（可选）
-window.LIGHTTRACE_LIBRARY = [
+export const LIGHTTRACE_LIBRARY = [
     // Example:
     // { id: 'img0001', src: 'photos/lighttrace/img0001.jpg', comment: 'Sunset glow', featured: true },
 ];
 
 // 自动清单（可选）
-// count: 图片数量（1..count），自动生成 img0001.jpg
+// count: 图片数量（..count），自动生成 img0001.jpg
 // featuredIds: 需要精选的图片 id 列表
-window.LIGHTTRACE_AUTO = {
+export const LIGHTTRACE_AUTO = {
     count: 13,
-    featuredIds: ['img0001', 'img0002', 'img0003', 'img0004',
+    featuredIds: [
+        'img0001', 'img0002', 'img0003', 'img0004',
         'img0005', 'img0006', 'img0007', 'img0008', 'img0009', 'img0010',
         'img0011', 'img0012', 'img0013'
     ]
 };
 
-function buildAutoLibrary(config) {
+export function buildAutoLibrary(config) {
     if (!config || !config.count || config.count < 1) return [];
     const featuredSet = new Set(config.featuredIds || []);
     const items = [];
@@ -40,22 +41,25 @@ function buildAutoLibrary(config) {
     return items;
 }
 
-const autoLibrary = buildAutoLibrary(window.LIGHTTRACE_AUTO);
-if (!window.LIGHTTRACE_LIBRARY || window.LIGHTTRACE_LIBRARY.length === 0) {
-    window.LIGHTTRACE_LIBRARY = autoLibrary;
+export function getLighttraceLibrary() {
+    if (Array.isArray(LIGHTTRACE_LIBRARY) && LIGHTTRACE_LIBRARY.length > 0) {
+        return LIGHTTRACE_LIBRARY;
+    }
+    return buildAutoLibrary(LIGHTTRACE_AUTO);
 }
 
-window.FEATURED_LIGHTTRACE = (window.LIGHTTRACE_LIBRARY || []).filter(item => item && item.featured);
+export const FEATURED_LIGHTTRACE = getLighttraceLibrary().filter(item => item && item.featured);
 
-// 专心做视频 - 视频库配置（B站外链）
+// 专心做视频 - 视频库配置（B 站外链）
 // 说明:
 // 1) 使用 link/bvid（B 站）
 // 2) 在下方清单中维护卡片信息，首页会自动渲染
 // 3) cover 建议填写 https 地址，避免混合内容拦截
-window.FOCUS_VIDEO_LIBRARY = [{
+export const FOCUS_VIDEO_LIBRARY = [
+    {
         id: 'vid0001',
         title: 'Everywhere I Go - My Vacation Record',
-        description: '从北京-沈阳-哈尔滨-昆明-普洱-西双版纳，或许你想看看我的故事',
+        description: '从北京/沈阳-哈尔滨-昆明-普洱-西双版纳，或许你想看看我的故事',
         platform: 'bilibili',
         bvid: 'BV1QAAhzaEA8',
         link: 'https://www.bilibili.com/video/BV1QAAhzaEA8/',
@@ -64,7 +68,7 @@ window.FOCUS_VIDEO_LIBRARY = [{
     },
     {
         id: 'vid0002',
-        title: '景の故事',
+        title: '景德镇故事',
         description: '关于我在景德镇的故事',
         platform: 'bilibili',
         bvid: 'BV1DdY1z7E7M',
@@ -74,13 +78,12 @@ window.FOCUS_VIDEO_LIBRARY = [{
     }
 ];
 
-// 曲苑天地 - 常听歌 / 收藏歌单（首页表格数据源）
-// 说明：
-// - 首页会读取 window.MUSIC_FAVORITES 渲染歌曲表格。
-// - Apple Music 的网页在浏览器端通常会遇到 CORS 限制；而你提供的 /library/playlist 链接还需要登录态，
-//   因此无法在 GitHub Pages 的前端页面里“直接从链接读取歌单”。
-// - 推荐做法：使用 Apple Music 的“分享歌单”公开链接（非 /library/playlist），在本地导出歌曲信息后粘贴到这里。
-window.MUSIC_FAVORITES = [
+// 曲苑天地 - 常听歌 / 收藏歌单（表格数据源）
+// 说明:
+// - 首页会读取 MUSIC_FAVORITES 渲染歌曲表格
+// - Apple Music 的网页端在浏览器端通常会遇到 CORS 限制；
+//   使用“分享歌单”公开链接，导出后粘贴到这里
+export const MUSIC_FAVORITES = [
     // Example:
     // {
     //   title: 'Midnight City',
@@ -91,12 +94,12 @@ window.MUSIC_FAVORITES = [
     // }
 ];
 
-const RECORDS_PREFIX = 'daily_record_';
+export const RECORDS_PREFIX = 'daily_record_';
 
 /**
  * 获取指定日期的记录
  */
-function getRecord(dateStr) {
+export function getRecord(dateStr) {
     const key = RECORDS_PREFIX + dateStr;
     const stored = localStorage.getItem(key);
 
@@ -108,7 +111,6 @@ function getRecord(dateStr) {
         }
     }
 
-    // 返回默认记录
     return {
         date: dateStr,
         keywords: [],
@@ -123,36 +125,29 @@ function getRecord(dateStr) {
 /**
  * 保存指定日期的记录
  */
-function saveRecordData(dateStr, data) {
+export function saveRecordData(dateStr, data) {
     const key = RECORDS_PREFIX + dateStr;
     try {
         localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
         console.error('Failed to save record:', e);
-        alert('⚠️ 保存失败：浏览器存储空间不足');
+        alert('⚠ 保存失败：浏览器存储空间不足');
     }
 }
 
 /**
  * 获取热图数据（所有有记录的日期及其记录数）
  */
-function getHeatmapData() {
+export function getHeatmapData() {
     const counts = {};
 
-    // 遍历所有localStorage key
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-
-        // 检查是否是记录key
         if (key && key.startsWith(RECORDS_PREFIX)) {
             const dateStr = key.substring(RECORDS_PREFIX.length);
-
-            // 验证日期格式 (YYYY-MM-DD)
             if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
                 try {
                     const data = JSON.parse(localStorage.getItem(key));
-
-                    // 计算该日期有多少条数据（非空字段数）
                     let count = 0;
                     if (data.keywords && data.keywords.length > 0) count++;
                     if (data.today_done && data.today_done.trim()) count++;
@@ -175,21 +170,22 @@ function getHeatmapData() {
 }
 
 /**
- * 导出所有记录为JSON（备份功能）
+ * 导出所有记录为 JSON（备份功能）
  */
-function exportAllRecordsAsJSON() {
+export function exportAllRecordsAsJSON() {
     const allRecords = {};
 
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-
         if (key && key.startsWith(RECORDS_PREFIX)) {
             const dateStr = key.substring(RECORDS_PREFIX.length);
             allRecords[dateStr] = JSON.parse(localStorage.getItem(key));
         }
     }
 
-    const blob = new Blob([JSON.stringify(allRecords, null, 2)], { type: 'application/json;charset=utf-8' });
+    const blob = new Blob([JSON.stringify(allRecords, null, 2)], {
+        type: 'application/json;charset=utf-8'
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -201,9 +197,9 @@ function exportAllRecordsAsJSON() {
 }
 
 /**
- * 从JSON文件导入记录（恢复备份功能）
+ * 从 JSON 文件导入记录（恢复备份功能）
  */
-function importRecordsFromJSON(file) {
+export function importRecordsFromJSON(file) {
     const reader = new FileReader();
 
     reader.onload = function(e) {
@@ -232,8 +228,8 @@ function importRecordsFromJSON(file) {
 /**
  * 清除所有数据（谨慎使用）
  */
-function clearAllData() {
-    if (confirm('⚠️ 确定要清除所有数据吗？此操作无法撤销！')) {
+export function clearAllData() {
+    if (confirm('⚠ 确定要清除所有数据吗？此操作无法撤销！')) {
         const keysToDelete = [];
 
         for (let i = 0; i < localStorage.length; i++) {

@@ -1,8 +1,9 @@
-(function() {
-    const canvas = document.getElementById('starfield');
-    if (!canvas) return;
+﻿export function startStarfield(canvas, particleType = 'heart', container = null) {
+    if (!canvas) return () => {};
 
     const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return () => {};
+
     let width = 0;
     let height = 0;
     let centerX = 0;
@@ -21,12 +22,17 @@
 
     let lastTime = performance.now();
     let rafId = null;
-    let scrollRaf = null;
 
     function resizeCanvas() {
         dpr = window.devicePixelRatio || 1;
-        width = window.innerWidth || 0;
-        height = window.innerHeight || 0;
+        if (container) {
+            const rect = container.getBoundingClientRect();
+            width = rect.width || 0;
+            height = rect.height || 0;
+        } else {
+            width = window.innerWidth || 0;
+            height = window.innerHeight || 0;
+        }
         centerX = width / 2;
         centerY = height / 2;
 
@@ -91,29 +97,22 @@
         ctx.beginPath();
         const s = size;
 
-        // 绘制心形：从顶部开始，左上圆弧、左下、尖端、右下、右上圆弧
         const topY = y - s * 0.6;
         const leftControlX = x - s * 0.8;
         const rightControlX = x + s * 0.8;
         const pointY = y + s * 0.6;
 
-        // 起点：上顶部
         ctx.moveTo(x, topY);
 
-        // 左上圆弧（左叶）
         ctx.bezierCurveTo(
             leftControlX - s * 0.5, topY - s * 0.3,
             leftControlX - s * 0.3, y,
             x - s * 0.3, y + s * 0.3
         );
 
-        // 左下到尖端
         ctx.lineTo(x, pointY);
-
-        // 尖端到右下
         ctx.lineTo(x + s * 0.3, y + s * 0.3);
 
-        // 右下圆弧（右叶）
         ctx.bezierCurveTo(
             rightControlX + s * 0.3, y,
             rightControlX + s * 0.5, topY - s * 0.3,
@@ -125,7 +124,6 @@
 
     function draw() {
         ctx.clearRect(0, 0, width, height);
-        const particleType = (window.particleConfig && window.particleConfig.type) || 'heart';
 
         for (let i = 0; i < stars.length; i++) {
             const star = stars[i];
@@ -149,27 +147,6 @@
         rafId = requestAnimationFrame(animate);
     }
 
-    function getHeroFadeProgress() {
-        const hero = document.querySelector('.hero');
-        if (!hero) return 1;
-        const heroHeight = hero.offsetHeight || window.innerHeight || 1;
-        const scrollY = window.scrollY || window.pageYOffset || 0;
-        return Math.max(0, Math.min(1, scrollY / heroHeight));
-    }
-
-    function updateOpacity() {
-        const progress = getHeroFadeProgress();
-        canvas.style.opacity = String(progress);
-    }
-
-    function onScroll() {
-        if (scrollRaf) return;
-        scrollRaf = requestAnimationFrame(() => {
-            scrollRaf = null;
-            updateOpacity();
-        });
-    }
-
     function onVisibilityChange() {
         if (document.hidden) {
             if (rafId) cancelAnimationFrame(rafId);
@@ -180,15 +157,21 @@
         }
     }
 
-    window.addEventListener('resize', () => {
+    const onResize = () => {
         resizeCanvas();
-        updateOpacity();
-    }, { passive: true });
+        canvas.style.opacity = '1';
+    };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize, { passive: true });
     document.addEventListener('visibilitychange', onVisibilityChange);
 
     resizeCanvas();
-    updateOpacity();
+    canvas.style.opacity = '1';
     rafId = requestAnimationFrame(animate);
-})();
+
+    return () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+        window.removeEventListener('resize', onResize);
+    };
+}
