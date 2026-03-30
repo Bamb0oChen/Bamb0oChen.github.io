@@ -903,7 +903,7 @@ onBeforeUnmount(() => {
     height: min(560px, 70vh);
     border-radius: 26px;
     overflow: hidden;
-    background: url("hero.jpg") center/cover no-repeat;
+    background: url("/static/hero.jpg") center/cover no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
