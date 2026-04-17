@@ -123,27 +123,6 @@
             </div>
         </div>
 
-        <!-- 更新频率统计 -->
-        <div class="content">
-            <h2 style="color:white; text-align:center; margin-top:30px;">更新频率统计</h2>
-            <div class="heatmap" :style="{ opacity: heatmapOpacity }">
-                <div v-for="(col, colIndex) in heatmapColumns" :key="`col-${colIndex}`" class="heat-col">
-                    <div v-for="cell in col" :key="cell.key" class="heat-cell" :class="`level-${cell.level}`" :title="cell.title"></div>
-                </div>
-            </div>
-            <div class="heat-legend">
-                <span>少</span>
-                <div class="legend-blocks">
-                    <div class="legend-cell level-0"></div>
-                    <div class="legend-cell level-1"></div>
-                    <div class="legend-cell level-2"></div>
-                    <div class="legend-cell level-3"></div>
-                    <div class="legend-cell level-4"></div>
-                </div>
-                <span>多</span>
-            </div>
-        </div>
-
         <!-- 更新日志 - 时间线 -->
         <div class="content">
             <h2 style="color:white; text-align:center; margin-top:30px;">更新日志</h2>
@@ -182,7 +161,7 @@
 
 <script setup>
 import { computed, onMounted, onBeforeUnmount, nextTick, ref } from 'vue';
-import { FEATURED_LIGHTTRACE, FOCUS_VIDEO_LIBRARY, getHeatmapData } from '../data/siteData';
+import { FEATURED_LIGHTTRACE, FOCUS_VIDEO_LIBRARY } from '../data/siteData';
 import { startStarfield } from '../utils/starfield';
 
 const featuredContainer = ref(null);
@@ -201,8 +180,6 @@ const EDGE_COUNT = 2;
 const VISIBLE_COUNT = 6;
 const headerOpacity = ref(0);
 const heroOpacity = ref(1);
-const heatmapOpacity = ref(0);
-const heatmapColumns = ref([]);
 const typedText = ref('');
 const starfieldCanvas = ref(null);
 
@@ -295,11 +272,6 @@ const changelog = [
         date: '2026-02-13',
         title: '新增光影留痕画廊',
         description: '支持图片上传、查看、评注功能，完整的前端实现'
-    },
-    {
-        date: '2026-02-12',
-        title: '优化更新频率统计',
-        description: '改进热力图展示，提升用户体验'
     },
     {
         date: '2026-02-10',
@@ -693,95 +665,11 @@ function handleVideoLeave(video) {
     video.isPreviewing = false;
 }
 
-function buildHeatmap() {
-    const counts = getHeatmapData();
-    const today = new Date();
-    const weeks = 52;
-    const oneDay = 24 * 60 * 60 * 1000;
-    const endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const columns = [];
-
-    for (let w = weeks - 1; w >= 0; w--) {
-        const col = [];
-        for (let d = 6; d >= 0; d--) {
-            const dayOffset = w * 7 + d;
-            const date = new Date(endDate.getTime() - dayOffset * oneDay);
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const key = `${y}-${m}-${day}`;
-            const value = counts[key] || 0;
-            let lvl = 0;
-            if (value >= 4) lvl = 4;
-            else if (value >= 3) lvl = 3;
-            else if (value >= 2) lvl = 2;
-            else if (value >= 1) lvl = 1;
-            col.push({
-                key,
-                level: lvl,
-                title: `${key}: ${value}`
-            });
-        }
-        columns.push(col);
-    }
-
-    heatmapColumns.value = columns;
-}
-
-function initSampleHeatmapData() {
-    const RECORDS_PREFIX = 'daily_record_';
-    let hasData = false;
-
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith(RECORDS_PREFIX)) {
-            hasData = true;
-            break;
-        }
-    }
-
-    if (!hasData) {
-        const today = new Date();
-        for (let i = 0; i < 30; i++) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            const key = `${RECORDS_PREFIX}${y}-${m}-${d}`;
-
-            const activity = Math.floor(Math.random() * 6);
-
-            if (activity > 0) {
-                const sampleData = {
-                    date: `${y}-${m}-${d}`,
-                    keywords: activity > 2 ? ['更新'] : [],
-                    today_done: activity > 1 ? '完成了一些工作' : '',
-                    tomorrow_plan: activity > 3 ? ['继续努力'] : [],
-                    insights: activity > 3 ? '有所收获' : '',
-                    todos: activity > 2 ? ['任务1'] : [],
-                    focus_sessions: activity > 1 ? [{
-                        duration: 30
-                    }] : []
-                };
-                localStorage.setItem(key, JSON.stringify(sampleData));
-            }
-        }
-    }
-}
-
-function setupScrollReveal() {
-    const scrollY = window.scrollY;
-    const windowH = window.innerHeight;
-    heatmapOpacity.value = Math.min(1, Math.max(0, (scrollY - windowH / 2) / (windowH / 2)));
-}
-
 function updateHeaderHeroOpacity() {
     const scrollY = window.scrollY;
     const windowH = window.innerHeight;
     heroOpacity.value = Math.max(0, 1 - scrollY / windowH);
     headerOpacity.value = Math.min(1, Math.max(0, (scrollY - windowH / 2) / (windowH / 2)));
-    setupScrollReveal();
 }
 
 function startTyping() {
@@ -858,8 +746,6 @@ onMounted(async () => {
     await nextTick();
     renderFeaturedPhotos();
     buildFocusVideos();
-    initSampleHeatmapData();
-    buildHeatmap();
     updateHeaderHeroOpacity();
     startTyping();
 

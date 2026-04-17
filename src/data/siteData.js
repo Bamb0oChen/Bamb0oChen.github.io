@@ -55,8 +55,7 @@ export const FEATURED_LIGHTTRACE = getLighttraceLibrary().filter(item => item &&
 // 1) 使用 link/bvid（B 站）
 // 2) 在下方清单中维护卡片信息，首页会自动渲染
 // 3) cover 建议填写 https 地址，避免混合内容拦截
-export const FOCUS_VIDEO_LIBRARY = [
-    {
+export const FOCUS_VIDEO_LIBRARY = [{
         id: 'vid0001',
         title: 'Everywhere I Go - My Vacation Record',
         description: '从北京/沈阳-哈尔滨-昆明-普洱-西双版纳，或许你想看看我的故事',
@@ -133,40 +132,6 @@ export function saveRecordData(dateStr, data) {
         console.error('Failed to save record:', e);
         alert('⚠ 保存失败：浏览器存储空间不足');
     }
-}
-
-/**
- * 获取热图数据（所有有记录的日期及其记录数）
- */
-export function getHeatmapData() {
-    const counts = {};
-
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith(RECORDS_PREFIX)) {
-            const dateStr = key.substring(RECORDS_PREFIX.length);
-            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-                try {
-                    const data = JSON.parse(localStorage.getItem(key));
-                    let count = 0;
-                    if (data.keywords && data.keywords.length > 0) count++;
-                    if (data.today_done && data.today_done.trim()) count++;
-                    if (data.tomorrow_plan && data.tomorrow_plan.length > 0) count++;
-                    if (data.insights && data.insights.trim()) count++;
-                    if (data.todos && data.todos.length > 0) count++;
-                    if (data.focus_sessions && data.focus_sessions.length > 0) count++;
-
-                    if (count > 0) {
-                        counts[dateStr] = count;
-                    }
-                } catch (e) {
-                    console.error('Failed to parse heatmap data:', e);
-                }
-            }
-        }
-    }
-
-    return counts;
 }
 
 /**
