@@ -14,7 +14,7 @@
         </header>
 
         <section class="hero" :style="{ opacity: heroOpacity }">
-            <div class="hero-tilt" :style="heroTiltStyle">
+            <div class="hero-tilt" :style="heroTiltStyle" @mousemove="handleHeroTilt" @mouseleave="resetHeroTilt">
                 <div class="hero-shell">
                     <div class="hero-content">
                         <h1 class="greeting">✨欢迎来到Chen.のhomepage🧤</h1>
@@ -432,8 +432,8 @@ function updatePhotoStyles(isActive) {
     if (!strip) return;
 
     const stripRect = strip.getBoundingClientRect();
-    const viewportCenterX = window.innerWidth / 2;
-    const viewportCenterY = window.innerHeight / 2;
+    const stripCenterX = stripRect.left + stripRect.width / 2;
+    const stripCenterY = stripRect.top + stripRect.height / 2;
 
     photoMoveStyles.value = displayPhotos.value.map((_, idx) => {
         const el = photoRefs.value[idx];
@@ -442,8 +442,8 @@ function updatePhotoStyles(isActive) {
             const rect = el.getBoundingClientRect();
             const itemCenterX = rect.left + rect.width / 2;
             const itemCenterY = rect.top + rect.height / 2;
-            const dx = viewportCenterX - itemCenterX;
-            const dy = viewportCenterY - itemCenterY;
+            const dx = stripCenterX - itemCenterX;
+            const dy = stripCenterY - itemCenterY;
             return {
                 transform: `translate(${dx}px, ${dy}px) perspective(900px) rotateY(0deg)`,
                 zIndex: 12
@@ -705,9 +705,15 @@ function startTyping() {
     typedTimer = setTimeout(tick, 400);
 }
 
-function handleGlobalHeroTilt(event) {
-    const viewportX = event.clientX / window.innerWidth;
-    const viewportY = event.clientY / window.innerHeight;
+function handleHeroTilt(event) {
+    const currentTarget = event.currentTarget;
+    if (!currentTarget || typeof currentTarget.getBoundingClientRect !== 'function') return;
+
+    const rect = currentTarget.getBoundingClientRect();
+    const localX = (event.clientX - rect.left) / (rect.width || 1);
+    const localY = (event.clientY - rect.top) / (rect.height || 1);
+    const viewportX = Math.max(0, Math.min(1, localX));
+    const viewportY = Math.max(0, Math.min(1, localY));
     const maxTilt = 6;
     const percentX = (viewportX - 0.5) * 2;
     const percentY = (viewportY - 0.5) * 2;
@@ -761,8 +767,6 @@ onMounted(async () => {
     };
     window.addEventListener('resize', resizeHandler);
     window.addEventListener('scroll', updateHeaderHeroOpacity, { passive: true });
-    window.addEventListener('mousemove', handleGlobalHeroTilt, { passive: true });
-    window.addEventListener('mouseleave', resetHeroTilt);
 });
 
 onBeforeUnmount(() => {
@@ -782,8 +786,6 @@ onBeforeUnmount(() => {
     if (resizeHandler) {
         window.removeEventListener('resize', resizeHandler);
     }
-    window.removeEventListener('mousemove', handleGlobalHeroTilt);
-    window.removeEventListener('mouseleave', resetHeroTilt);
 });
 </script>
 
