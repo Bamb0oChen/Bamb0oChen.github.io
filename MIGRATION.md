@@ -146,10 +146,6 @@ link.click();
   "todos": [
     {"text": "鎻愪氦鎶ュ憡", "completed": true},
     {"text": "鍥炲閭欢", "completed": false}
-  ],
-  "focus_sessions": [
-    {"task": "缂栫爜", "duration": 45, "timestamp": "14:30:00"},
-    {"task": "璁捐", "duration": 25, "timestamp": "15:45:00"}
   ]
 }
 ```

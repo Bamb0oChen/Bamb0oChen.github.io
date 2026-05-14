@@ -6,7 +6,6 @@
             <div style="display:flex; align-items:center; gap:12px; width:100%; max-width:1100px; justify-content:space-between;">
                 <div style="font-weight:bold; font-size:18px;">Chen.のhomepage</div>
                 <div>
-                    <a href="focus.html" class="nav-btn">专注计时器</a>
                     <a href="gallery.html" class="nav-btn">光影留痕</a>
                     <a href="https://yanzhuchen0901.github.io/notes/" class="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
                 </div>

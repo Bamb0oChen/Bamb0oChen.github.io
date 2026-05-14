@@ -11,7 +11,6 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: 'index.html',
-                focus: 'focus.html',
                 gallery: 'gallery.html',
                 records: 'records.html'
             }

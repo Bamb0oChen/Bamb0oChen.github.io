@@ -5,7 +5,6 @@
                 <div style="font-weight:bold; font-size:18px;">Chen.のhomepage</div>
                 <div>
                     <a href="index.html" class="nav-btn">返回首页</a>
-                    <a href="focus.html" class="nav-btn">专注计时器</a>
                     <a href="https://yanzhuchen0901.github.io/notes/" class="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
                 </div>
             </div>
@@ -79,27 +78,6 @@
             <div class="section-title">📎 感悟（可选）</div>
             <textarea v-model="insights" placeholder="记录今天的感悟、思考或反思.."></textarea>
 
-            <div class="section-title">⏱️ 专注模式统计</div>
-            <div class="stats-panel">
-                <div class="stat-item">
-                    <span class="stat-label">今日专注总时长：</span>
-                    <span class="stat-value">{{ totalFocusTime }} 分钟</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">专注次数：</span>
-                    <span class="stat-value">{{ focusCount }} 次</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">平均专注时长：</span>
-                    <span class="stat-value">{{ avgFocusTime }} 分钟</span>
-                </div>
-                <div v-if="focusSessions.length" style="margin-top: 15px;">
-                    <div v-for="(session, index) in focusSessions" :key="session.timestamp + index" style="padding:8px; background:#f0f0f0; margin:5px 0; border-radius:3px;">
-                        🕒 {{ session.timestamp }} - {{ session.task }} ({{ session.duration }}分钟)
-                    </div>
-                </div>
-            </div>
-
             <div class="btn-group" style="margin-top: 30px;">
                 <button class="btn btn-success" @click="saveRecord">💾 保存所有修改</button>
                 <button class="btn btn-primary" @click="exportRecord">📜 导出为纯文本</button>
@@ -121,7 +99,6 @@ const insights = ref('');
 const keywords = ref([]);
 const tomorrowPlans = ref([]);
 const todos = ref([]);
-const focusSessions = ref([]);
 const aiSuggestions = ref([]);
 const showSuggestions = ref(false);
 
@@ -129,13 +106,6 @@ const currentDateText = computed(() => {
     const dateStr = getDateString();
     const weekday = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][currentDate.value.getDay()];
     return `📅 ${dateStr} (${weekday})`;
-});
-
-const totalFocusTime = computed(() => focusSessions.value.reduce((sum, s) => sum + s.duration, 0));
-const focusCount = computed(() => focusSessions.value.length);
-const avgFocusTime = computed(() => {
-    if (!focusSessions.value.length) return 0;
-    return Math.round(totalFocusTime.value / focusSessions.value.length);
 });
 
 function getDateString() {
@@ -154,7 +124,6 @@ function loadRecord() {
     insights.value = data.insights || '';
     tomorrowPlans.value = [...(data.tomorrow_plan || [])];
     todos.value = (data.todos || []).map(todo => ({ ...todo }));
-    focusSessions.value = [...(data.focus_sessions || [])];
 }
 
 function goToToday() {
@@ -184,8 +153,7 @@ function saveRecord() {
         today_done: todayDone.value,
         tomorrow_plan: tomorrowPlans.value,
         insights: insights.value,
-        todos: todos.value,
-        focus_sessions: focusSessions.value
+        todos: todos.value
     };
 
     saveRecordData(dateStr, data);
@@ -281,15 +249,6 @@ function exportRecord() {
 
     if (data.insights) {
         text += `\n📎 感悟:\n${data.insights}\n`;
-    }
-
-    if (data.focus_sessions && data.focus_sessions.length > 0) {
-        const total = data.focus_sessions.reduce((sum, s) => sum + s.duration, 0);
-        text += `\n⏱️  今日专注时长: ${total}分钟\n`;
-        text += '📋 专注记录:\n';
-        data.focus_sessions.forEach(session => {
-            text += `  - ${session.duration}分钟 - ${session.task}\n`;
-        });
     }
 
     text += '\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';

@@ -134,13 +134,6 @@ clearAllData()  // 会要求确认，此操作无法撤销！
 - `static/styles.css` - 修改样式、颜色、布局
 - `index.html` 和 `records.html` - 修改 HTML 结构和内容
 
-### Q: 专注模式的时间能改吗？
-**A**: 可以的。在 `records.html` 中，找到这一行：
-```javascript
-let focusInitialSeconds = 25 * 60;  // 25 分钟
-```
-改为你想要的秒数，比如 `30 * 60` 表示 30 分钟。
-
 ### Q: 能离线使用吗？
 **A**: 是的！这是完全静态的网站，可以：
 1. 保存页面为本地文件

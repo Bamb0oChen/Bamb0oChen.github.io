@@ -116,8 +116,7 @@ export function getRecord(dateStr) {
         today_done: '',
         tomorrow_plan: [],
         insights: '',
-        todos: [],
-        focus_sessions: []
+        todos: []
     };
 }
 

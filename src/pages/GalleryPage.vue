@@ -6,7 +6,6 @@
                     <a href="index.html" style="color: white; text-decoration: none;">Chen.のhomepage</a>
                 </div>
                 <div>
-                    <a href="focus.html" class="nav-btn">专注计时器</a>
                     <a href="gallery.html" class="nav-btn" style="background: rgba(255, 255, 255, 0.2);">光影留痕</a>
                     <a href="https://yanzhuchen0901.github.io/notes/" class="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
                 </div>
