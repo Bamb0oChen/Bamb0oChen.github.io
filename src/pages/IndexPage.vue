@@ -7,7 +7,7 @@
                 <div style="font-weight:bold; font-size:18px;">Chen.のhomepage</div>
                 <div>
                     <a href="gallery.html" class="nav-btn">光影留痕</a>
-                    <a href="https://yanzhuchen0901.github.io/notes/" class="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
+                    <a href="https://Bamb0oChen.github.io/notes/" class="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
                 </div>
             </div>
         </header>
@@ -198,7 +198,7 @@ const articles = [
         title: 'python进阶讲义',
         description: '基于Gemini生成的一份py进阶讲义，主要针对CS61A的学习者',
         image: 'photos/photo1.webp',
-        link: 'https://yanzhuchen0901.github.io/notes/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/UCB%20CS61A/python%E5%9F%BA%E7%A1%80/',
+        link: 'https://Bamb0oChen.github.io/notes/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/UCB%20CS61A/python%E5%9F%BA%E7%A1%80/',
         comment: '学习天地'
     },
     {
@@ -206,7 +206,7 @@ const articles = [
         title: '我们为什么要去游乐园',
         description: '记录于高中去游乐园后的返程',
         image: 'photos/photo2.png',
-        link: 'https://yanzhuchen0901.github.io/notes/%E6%9D%82%E8%B0%88%E6%96%87%E7%AB%A0/%E6%96%87%E5%AD%A6%E6%84%9F%E6%82%9F/%E4%B8%BA%E4%BB%80%E4%B9%88%E6%88%91%E4%BB%AC%E8%A6%81%E5%8E%BB%E6%B8%B8%E4%B9%90%E5%9B%AD/',
+        link: 'https://Bamb0oChen.github.io/notes/%E6%9D%82%E8%B0%88%E6%96%87%E7%AB%A0/%E6%96%87%E5%AD%A6%E6%84%9F%E6%82%9F/%E4%B8%BA%E4%BB%80%E4%B9%88%E6%88%91%E4%BB%AC%E8%A6%81%E5%8E%BB%E6%B8%B8%E4%B9%90%E5%9B%AD/',
         comment: '感性空间'
     },
     {
@@ -214,7 +214,7 @@ const articles = [
         title: 'CET-6正课笔记',
         description: '记录六级正课的听力、阅读、写作笔记，持续更新中',
         image: 'photos/photo3.jpg',
-        link: 'https://yanzhuchen0901.github.io/notes/%E8%8B%B1%E6%96%87%E5%AD%A6%E4%B9%A0/CET-6/%E7%B4%A2%E5%BC%95/',
+        link: 'https://Bamb0oChen.github.io/notes/%E8%8B%B1%E6%96%87%E5%AD%A6%E4%B9%A0/CET-6/%E7%B4%A2%E5%BC%95/',
         comment: '学习天地'
     },
     {
@@ -222,7 +222,7 @@ const articles = [
         title: '星空列车与白的旅行测评',
         description: '很久没因为一个艺术作品而体会过眼泪决堤了，不过我想这就是一款好的gal该做的，让玩家在有限的时间里，亲身体会一段别人的故事。',
         image: 'photos/photo4.png',
-        link: 'https://yanzhuchen0901.github.io/notes/%E6%9D%82%E8%B0%88%E6%96%87%E7%AB%A0/%E6%89%B9%E5%88%A4%E6%80%A7%E6%B8%B8%E7%8E%A9/%E6%98%9F%E7%A9%BA%E5%88%97%E8%BD%A6%E4%B8%8E%E7%99%BD%E7%9A%84%E6%97%85%E8%A1%8C%E6%89%B9%E5%88%A4%E6%80%A7%E6%B8%B8%E7%8E%A9%E4%BD%93%E9%AA%8C/',
+        link: 'https://Bamb0oChen.github.io/notes/%E6%9D%82%E8%B0%88%E6%96%87%E7%AB%A0/%E6%89%B9%E5%88%A4%E6%80%A7%E6%B8%B8%E7%8E%A9/%E6%98%9F%E7%A9%BA%E5%88%97%E8%BD%A6%E4%B8%8E%E7%99%BD%E7%9A%84%E6%97%85%E8%A1%8C%E6%89%B9%E5%88%A4%E6%80%A7%E6%B8%B8%E7%8E%A9%E4%BD%93%E9%AA%8C/',
         comment: '感性空间'
     },
     {
@@ -230,7 +230,7 @@ const articles = [
         title: '“お元気ですか？”——泡沫经济与物哀美学',
         description: '情书真的是一部很好的电影',
         image: 'photos/photo5.png',
-        link: 'https://yanzhuchen0901.github.io/notes/%E6%9D%82%E8%B0%88%E6%96%87%E7%AB%A0/%E6%96%87%E5%AD%A6%E6%84%9F%E6%82%9F/%E2%80%9C%E3%81%8A%E5%85%83%E6%B0%97%E3%81%A7%E3%81%99%E3%81%8B%EF%BC%9F%E2%80%9D%E2%80%94%E2%80%94%E6%B3%A1%E6%B2%AB%E7%BB%8F%E6%B5%8E%E4%B8%8E%E7%89%A9%E5%93%80%E7%BE%8E%E5%AD%A6/',
+        link: 'https://Bamb0oChen.github.io/notes/%E6%9D%82%E8%B0%88%E6%96%87%E7%AB%A0/%E6%96%87%E5%AD%A6%E6%84%9F%E6%82%9F/%E2%80%9C%E3%81%8A%E5%85%83%E6%B0%97%E3%81%A7%E3%81%99%E3%81%8B%EF%BC%9F%E2%80%9D%E2%80%94%E2%80%94%E6%B3%A1%E6%B2%AB%E7%BB%8F%E6%B5%8E%E4%B8%8E%E7%89%A9%E5%93%80%E7%BE%8E%E5%AD%A6/',
         comment: '感性空间'
     },
     {
@@ -238,7 +238,7 @@ const articles = [
         title: 'NLP的发展历史，我们怎么让AI读懂我们',
         description: '纵观发展史，NLP是AI发展中不可或缺的一部分',
         image: 'photos/photo6.png',
-        link: 'https://yanzhuchen0901.github.io/notes/%E6%9D%82%E8%B0%88%E6%96%87%E7%AB%A0/%E6%8A%80%E6%9C%AF%E6%9D%82%E8%B0%88/NLP%E7%9A%84%E5%8E%86%E5%8F%B2%EF%BC%8C%E6%88%91%E4%BB%AC%E6%80%8E%E4%B9%88%E8%AE%A9%E7%94%B5%E8%84%91%E2%80%9C%E8%AF%BB%E6%87%82%E2%80%9D%E6%88%91%E4%BB%AC/',
+        link: 'https://Bamb0oChen.github.io/notes/%E6%9D%82%E8%B0%88%E6%96%87%E7%AB%A0/%E6%8A%80%E6%9C%AF%E6%9D%82%E8%B0%88/NLP%E7%9A%84%E5%8E%86%E5%8F%B2%EF%BC%8C%E6%88%91%E4%BB%AC%E6%80%8E%E4%B9%88%E8%AE%A9%E7%94%B5%E8%84%91%E2%80%9C%E8%AF%BB%E6%87%82%E2%80%9D%E6%88%91%E4%BB%AC/',
         comment: '编程技术'
     },
     {
@@ -246,7 +246,7 @@ const articles = [
         title: '2025年终总结',
         description: '虽然有自吹自擂之嫌，但是回望过去的一年，我还是想分享“他”的故事',
         image: 'photos/photo7.jpg',
-        link: 'https://yanzhuchen0901.github.io/notes/%E6%9D%82%E8%B0%88%E6%96%87%E7%AB%A0/%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/2025%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/',
+        link: 'https://Bamb0oChen.github.io/notes/%E6%9D%82%E8%B0%88%E6%96%87%E7%AB%A0/%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/2025%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/',
         comment: '一路走来'
     }
 ];

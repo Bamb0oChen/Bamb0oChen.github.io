@@ -7,7 +7,7 @@
                 </div>
                 <div>
                     <a href="gallery.html" class="nav-btn" style="background: rgba(255, 255, 255, 0.2);">光影留痕</a>
-                    <a href="https://yanzhuchen0901.github.io/notes/" class="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
+                    <a href="https://Bamb0oChen.github.io/notes/" class="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
                 </div>
             </div>
         </header>

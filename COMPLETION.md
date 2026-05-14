@@ -9,7 +9,7 @@
 ## 馃摝 椤圭洰缁撴瀯
 
 ```
-yanzhuchen0901.gtihub.io-main/
+Bamb0oChen.github.io-main/
 鈹溾攢鈹€ index.html                    # 棣栭〉锛堢儹鍥?+ 蹇€熷鑸級
 鈹溾攢鈹€ records.html                  # 姣忔棩璁板綍椤甸潰
 鈹溾攢鈹€ hero.jpg                       # 鑻遍泟鍖哄煙鑳屾櫙鍥?

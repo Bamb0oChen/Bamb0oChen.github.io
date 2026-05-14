@@ -5,7 +5,7 @@
                 <div style="font-weight:bold; font-size:18px;">Chen.のhomepage</div>
                 <div>
                     <a href="index.html" class="nav-btn">返回首页</a>
-                    <a href="https://yanzhuchen0901.github.io/notes/" class="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
+                    <a href="https://Bamb0oChen.github.io/notes/" class="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
                 </div>
             </div>
         </header>

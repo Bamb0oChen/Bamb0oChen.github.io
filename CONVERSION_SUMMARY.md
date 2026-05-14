@@ -16,7 +16,7 @@
 ## 📁 最终项目结构
 
 ```
-yanzhuchen0901.gtihub.io-main/
+Bamb0oChen.github.io-main/
 │
 ├── 📄 index.html                  ← 首页（热图 + 快速导航）
 ├── 📄 records.html                ← 记录页面（完整日记系统）
