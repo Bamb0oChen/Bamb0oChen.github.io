@@ -253,8 +253,8 @@ const articles = [
         id: 8,
         title: '那天下雨了',
         description: '如果再回到那一个下雨天',
-        image: 'photos/photo8.jpg',
-        link: 'https://Bamb0oChen.github.io/notes/%E6%9D%82%E8%B0%88%E6%96%87%E7%AB%A0/%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/%E9%82%A3%E5%A4%A9%E4%B8%8B%E9%9B%A8%E4%BA%86/',
+        image: 'photos/photo8.png',
+        link: 'https://bamb0ochen.github.io/notes/%E6%9D%82%E8%B0%88%E6%96%87%E7%AB%A0/%E6%96%87%E5%AD%A6%E6%84%9F%E6%82%9F/%E9%82%A3%E5%A4%A9%E4%B8%8B%E9%9B%A8%E4%BA%86/',
         comment: '感性空间'
     }
 ];
