@@ -680,7 +680,7 @@ function updateHeaderHeroOpacity() {
 }
 
 function startTyping() {
-    const phrases = ['欢迎来到竹篁秘境', 'Bamboo Chen🎍', '📖ZJUer', '💻CS Learner', 'both conter strike & computer science', 'Coffee☕ & Pingpong🏓 Lover', 'Billiards experienced🎱', 'Member of Koala@ZJU & Xlab@ZJU'];
+    const phrases = ['欢迎来到Bamb0ochenの空間', 'Bambooooooooooooo Chen🎍', '📖ZJUer', '💻CS Learner', 'both conter strike & computer science', 'Coffee☕ & Pingpong🏓 Lover', 'Billiards experienced🎱', 'Member of Koala@ZJU & Xlab@ZJU'];
     let pi = 0;
     let ci = 0;
     let deleting = false;
