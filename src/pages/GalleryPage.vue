@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div>
         <header id="header" style="opacity: 1;">
             <div style="display:flex; align-items:center; gap:12px; width:100%; max-width:1100px; justify-content:space-between;">
@@ -14,21 +14,23 @@
 
         <div class="gallery-container">
             <div class="gallery-header">
-                <h1>光影留痕📷</h1>
+                <h1>光影留痕</h1>
                 <p>记录生活中的精彩瞬间</p>
             </div>
             <div id="localLibraryHint" class="gallery-hint">{{ localLibraryHint }}</div>
 
             <div class="gallery-grid">
-                <div v-for="cell in displayCells" :key="cell.key" class="gallery-cell" @click="cell.onClick">
+                <button v-for="cell in displayCells" :key="cell.key" class="gallery-cell" type="button" @click="cell.onClick">
                     <template v-if="cell.type === 'image'">
-                        <img :src="cell.data" :alt="cell.fileName" class="gallery-image" />
-                        <div v-if="cell.comment" class="gallery-comment" :title="cell.comment">{{ cell.comment }}</div>
+                        <img :src="cell.data" :alt="cell.title || cell.fileName" class="gallery-image" />
+                        <div v-if="cell.title || cell.comment" class="gallery-comment" :title="cell.comment || cell.title">
+                            {{ cell.title || cell.comment }}
+                        </div>
                     </template>
                     <template v-else>
                         <div class="gallery-placeholder">+</div>
                     </template>
-                </div>
+                </button>
             </div>
 
             <div v-if="showEmpty" class="gallery-empty">
@@ -43,15 +45,34 @@
         </div>
 
         <div class="modal" v-show="isModalOpen" @click.self="closeModal">
-            <div class="modal-content">
-                <span class="modal-close" @click="closeModal">&times;</span>
+            <div class="modal-content photo-detail-modal">
+                <button class="modal-close" type="button" aria-label="关闭" @click="closeModal">&times;</button>
                 <div class="modal-body">
-                    <img :src="modalImage?.data" alt="" />
+                    <div class="detail-image-wrap">
+                        <img :src="modalImage?.data" :alt="modalImage?.title || modalImage?.fileName || ''" />
+                    </div>
                     <div class="modal-info">
-                        <div class="modal-comment">{{ modalImage?.comment || '暂无评注' }}</div>
+                        <div>
+                            <div class="detail-kicker">Lighttrace</div>
+                            <h2 class="detail-title">{{ modalImage?.title || modalImage?.fileName || '未命名光影' }}</h2>
+                            <div class="detail-meta">
+                                <span v-if="modalImage?.date">{{ modalImage.date }}</span>
+                                <span v-if="modalImage?.location">{{ modalImage.location }}</span>
+                                <span v-if="modalImage?.device">{{ modalImage.device }}</span>
+                            </div>
+                            <div v-if="modalImage?.tags?.length" class="detail-tags">
+                                <span v-for="tag in modalImage.tags" :key="tag">{{ tag }}</span>
+                            </div>
+                            <div v-if="modalImage?.comment" class="modal-comment">{{ modalImage.comment }}</div>
+                            <div v-else class="modal-comment muted">暂无评注</div>
+                        </div>
                         <div class="modal-actions">
-                            <button v-if="!useLocalLibrary" class="modal-btn delete-btn" @click="deleteImage">删除</button>
-                            <button v-if="!useLocalLibrary" class="modal-btn edit-btn" @click="editComment">编辑评注</button>
+                            <div class="detail-nav">
+                                <button class="modal-btn" type="button" :disabled="!previousImage" @click="openModal(previousImage, true)">上一张</button>
+                                <button class="modal-btn" type="button" :disabled="!nextImage" @click="openModal(nextImage, true)">下一张</button>
+                            </div>
+                            <button v-if="!useLocalLibrary" class="modal-btn delete-btn" type="button" @click="deleteImage">删除</button>
+                            <button v-if="!useLocalLibrary" class="modal-btn edit-btn" type="button" @click="editComment">编辑评注</button>
                         </div>
                     </div>
                 </div>
@@ -61,12 +82,11 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { getLighttraceLibrary } from '../data/siteData';
 
 const GALLERY_KEY = 'gallery_images_v1';
 const MAX_IMAGES = 25;
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const PAGE_SIZE = 25;
 
 const localLibrary = getLighttraceLibrary();
@@ -78,20 +98,48 @@ const currentPage = ref(1);
 const isModalOpen = ref(false);
 const modalImage = ref(null);
 
-function loadLocalLibrary() {
-    return localLibrary.filter(item => item && (item.src || item.file)).map(item => ({
-        id: item.id || item.src || item.file,
-        data: item.src || item.file,
+const modalImageIndex = computed(() => {
+    if (!modalImage.value) return -1;
+    return images.value.findIndex(img => img.id === modalImage.value.id);
+});
+
+const previousImage = computed(() => {
+    const index = modalImageIndex.value;
+    if (index <= 0) return null;
+    return images.value[index - 1];
+});
+
+const nextImage = computed(() => {
+    const index = modalImageIndex.value;
+    if (index < 0 || index >= images.value.length - 1) return null;
+    return images.value[index + 1];
+});
+
+function normalizeImage(item) {
+    const src = item.src || item.file || item.data;
+    return {
+        id: item.id || src,
+        data: src,
+        title: item.title || item.fileName || item.id || src,
         comment: item.comment || '',
-        createdAt: item.createdAt || '',
-        fileName: item.id || item.src || item.file
-    }));
+        createdAt: item.createdAt || item.date || '',
+        date: item.date || item.createdAt || '',
+        location: item.location || '',
+        device: item.device || '',
+        tags: item.tags || [],
+        fileName: item.fileName || item.id || src
+    };
+}
+
+function loadLocalLibrary() {
+    return localLibrary.filter(item => item && (item.src || item.file)).map(normalizeImage);
 }
 
 function loadImages() {
     try {
         const stored = localStorage.getItem(GALLERY_KEY);
-        return stored ? JSON.parse(stored) : [];
+        const parsed = stored ? JSON.parse(stored) : [];
+        return parsed.map(normalizeImage);
     } catch (e) {
         console.error('Failed to load images:', e);
         return [];
@@ -103,7 +151,7 @@ function saveImages() {
         localStorage.setItem(GALLERY_KEY, JSON.stringify(images.value));
     } catch (e) {
         console.error('Failed to save images:', e);
-        alert('⚠ 保存失败：浏览器存储空间不足\n建议清除部分图片或清空浏览器缓存');
+        alert('保存失败：浏览器存储空间不足\n建议清除部分图片或清空浏览器缓存');
     }
 }
 
@@ -130,9 +178,7 @@ const displayCells = computed(() => {
             cells.push({
                 key: img.id || i,
                 type: 'image',
-                data: img.data,
-                fileName: img.fileName,
-                comment: img.comment,
+                ...img,
                 onClick: () => openModal(img)
             });
         } else {
@@ -150,16 +196,26 @@ const displayCells = computed(() => {
 const showEmpty = computed(() => pagedImages.value.length === 0);
 const showPagination = computed(() => useLocalLibrary && totalPages.value > 1);
 
-function openModal(image) {
+function updateHashForImage(image) {
+    if (!image || !image.id) return;
+    history.replaceState(null, '', `#photo=${encodeURIComponent(image.id)}`);
+}
+
+function openModal(image, fromNav = false) {
+    if (!image) return;
     modalImage.value = image;
     isModalOpen.value = true;
     document.body.style.overflow = 'hidden';
+    if (!fromNav || image.id) updateHashForImage(image);
 }
 
 function closeModal() {
     isModalOpen.value = false;
     document.body.style.overflow = 'auto';
     modalImage.value = null;
+    if (location.hash.startsWith('#photo=')) {
+        history.replaceState(null, '', location.pathname + location.search);
+    }
 }
 
 function deleteImage() {
@@ -185,4 +241,33 @@ function goToPage(page) {
     const next = Math.max(1, Math.min(page, totalPages.value));
     currentPage.value = next;
 }
+
+function openImageFromHash() {
+    const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const targetId = params.get('photo');
+    if (!targetId) return;
+    const targetIndex = images.value.findIndex(img => img.id === targetId || img.fileName === targetId);
+    if (targetIndex < 0) return;
+    currentPage.value = Math.floor(targetIndex / PAGE_SIZE) + 1;
+    openModal(images.value[targetIndex], true);
+}
+
+function handleKeydown(event) {
+    if (!isModalOpen.value) return;
+    if (event.key === 'Escape') closeModal();
+    if (event.key === 'ArrowLeft' && previousImage.value) openModal(previousImage.value, true);
+    if (event.key === 'ArrowRight' && nextImage.value) openModal(nextImage.value, true);
+}
+
+onMounted(() => {
+    openImageFromHash();
+    window.addEventListener('hashchange', openImageFromHash);
+    window.addEventListener('keydown', handleKeydown);
+});
+
+onBeforeUnmount(() => {
+    document.body.style.overflow = 'auto';
+    window.removeEventListener('hashchange', openImageFromHash);
+    window.removeEventListener('keydown', handleKeydown);
+});
 </script>

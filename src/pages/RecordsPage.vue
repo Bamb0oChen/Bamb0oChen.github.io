@@ -10,7 +10,7 @@
             </div>
         </header>
 
-        <section class="hero">
+        <section class="records-hero">
             <h1>📝 每日记录（独立页面）</h1>
         </section>
 
@@ -45,7 +45,9 @@
             <div class="input-group">
                 <input type="text" v-model.trim="tomorrowInput" placeholder="输入明天的计划，按回车添加" @keypress.enter.prevent="addTomorrowPlan">
                 <button class="btn btn-primary" @click="addTomorrowPlan">添加</button>
-                <button class="btn btn-primary" @click="suggestPlans">🤖 AI建议</button>
+                <button class="btn btn-primary" @click="suggestPlans" :disabled="isSuggesting">
+                    {{ isSuggesting ? '生成中...' : '🤖 AI建议' }}
+                </button>
             </div>
             <ul class="tomorrow-list">
                 <li v-for="(plan, index) in tomorrowPlans" :key="plan + index" class="tomorrow-item">
@@ -55,6 +57,7 @@
             </ul>
             <div class="ai-suggestions" v-if="showSuggestions">
                 <h4>AI建议的明天计划：</h4>
+                <p v-if="suggestionSource" class="ai-source">{{ suggestionSource }}</p>
                 <ul class="ai-suggestions-list">
                     <li v-for="(suggestion, index) in aiSuggestions" :key="suggestion + index">
                         <span @click="applySuggestion(suggestion)" style="cursor:pointer; color:#28a745; font-weight:bold;">{{ suggestion }}</span>
@@ -88,7 +91,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { getRecord, saveRecordData } from '../data/siteData';
+import { getRecord, requestAIPlanSuggestions, saveRecordData } from '../data/siteData';
 
 const currentDate = ref(new Date());
 const keywordInput = ref('');
@@ -101,6 +104,8 @@ const tomorrowPlans = ref([]);
 const todos = ref([]);
 const aiSuggestions = ref([]);
 const showSuggestions = ref(false);
+const isSuggesting = ref(false);
+const suggestionSource = ref('');
 
 const currentDateText = computed(() => {
     const dateStr = getDateString();
@@ -182,14 +187,40 @@ function removeTomorrowPlan(index) {
     tomorrowPlans.value.splice(index, 1);
 }
 
-function suggestPlans() {
+async function suggestPlans() {
     if (!todayDone.value.trim()) {
         alert('请先填写今天做了什么，AI才能给出建议！');
         return;
     }
 
-    aiSuggestions.value = generatePlanSuggestions(todayDone.value);
-    showSuggestions.value = true;
+    isSuggesting.value = true;
+    suggestionSource.value = '';
+
+    try {
+        const remoteSuggestions = await requestAIPlanSuggestions({
+            date: getDateString(),
+            keywords: keywords.value,
+            todayDone: todayDone.value,
+            tomorrowPlan: tomorrowPlans.value,
+            insights: insights.value,
+            todos: todos.value
+        });
+
+        if (remoteSuggestions.length > 0) {
+            aiSuggestions.value = remoteSuggestions;
+            suggestionSource.value = '来自已配置的 AI 接口';
+        } else {
+            aiSuggestions.value = generatePlanSuggestions(todayDone.value);
+            suggestionSource.value = '当前未启用远程 AI，使用本地规则建议';
+        }
+    } catch (e) {
+        console.error('AI suggestions failed:', e);
+        aiSuggestions.value = generatePlanSuggestions(todayDone.value);
+        suggestionSource.value = 'AI 接口暂不可用，已回退到本地规则建议';
+    } finally {
+        showSuggestions.value = true;
+        isSuggesting.value = false;
+    }
 }
 
 function applySuggestion(text) {
@@ -266,3 +297,17 @@ function exportRecord() {
 
 goToToday();
 </script>
+
+<style scoped>
+.records-hero {
+    padding: 110px 20px 36px;
+    color: white;
+    text-align: center;
+    background: radial-gradient(circle at top, rgba(255, 165, 0, 0.18), rgba(0, 0, 0, 0) 58%);
+}
+
+.records-hero h1 {
+    margin: 0;
+    font-size: clamp(30px, 5vw, 48px);
+}
+</style>

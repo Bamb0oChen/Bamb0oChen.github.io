@@ -4,38 +4,46 @@
     position: fixed;
     top: 0;
     width: 100%;
-    height: 60px;
-    background: linear-gradient(90deg, #bd6c1a, #f49612);
+    height: 72px;
+    background: rgba(10, 14, 18, 0.74);
+    backdrop-filter: saturate(180%) blur(22px);
+    -webkit-backdrop-filter: saturate(180%) blur(22px);
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: opacity 0.3s;
+    transition: background 0.3s, border-color 0.3s, opacity 0.3s;
     z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 50px rgba(0, 0, 0, 0.18);
 }
 
 #header>div {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 18px;
     width: 100%;
-    max-width: 1100px;
+    max-width: 1240px;
     justify-content: space-between;
+    padding: 0 30px;
+    box-sizing: border-box;
 }
 
 .nav-btn {
-    background: rgba(255, 255, 255, 0.08);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.76);
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-size: 15px;
     text-decoration: none;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: background 0.15s, transform 0.12s;
+    border: 1px solid transparent;
+    transition: color 0.18s, background 0.18s, border-color 0.18s;
 }
 
 .nav-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
-    transform: translateY(-2px);
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 
@@ -44,16 +52,16 @@
 @media (max-width: 768px) {
     #header {
         height: auto;
-        padding: 12px 0;
+        padding: 12px 0 14px;
     }
     #header>div {
         flex-wrap: wrap;
-        gap: 8px;
-        padding: 0 12px;
+        gap: 10px;
+        padding: 0 16px;
     }
     #header>div>div:first-child {
         width: 100%;
-        font-size: 16px;
+        font-size: 18px;
     }
     #header>div>div:nth-child(2) {
         width: 100%;
@@ -62,7 +70,7 @@
         flex-wrap: wrap;
     }
     .nav-btn {
-        padding: 6px 10px;
+        padding: 8px 10px;
         font-size: 13px;
         flex: 1;
         min-width: 80px;
