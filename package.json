@@ -1,4 +1,4 @@
-﻿{
+{
     "name": "yanzhuchen-homepage",
     "private": true,
     "version": "0.0.0",
@@ -9,10 +9,14 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "vue": "^3.4.0"
+        "@use-gesture/react": "^10.3.1",
+        "@vitejs/plugin-react": "^4.7.0",
+        "gsap": "^3.15.0",
+        "react": "^19.2.7",
+        "react-dom": "^19.2.7",
+        "three": "^0.184.0"
     },
     "devDependencies": {
-        "@vitejs/plugin-vue": "^5.0.0",
         "vite": "^5.0.0"
     }
 }

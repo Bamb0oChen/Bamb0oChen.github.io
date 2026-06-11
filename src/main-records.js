@@ -1,4 +1,5 @@
-﻿import { createApp } from 'vue';
-import RecordsPage from './pages/RecordsPage.vue';
+import { createRoot } from 'react-dom/client';
+import React from 'react';
+import RecordsPage from './pages/RecordsPage.jsx';
 
-createApp(RecordsPage).mount('#app');
+createRoot(document.getElementById('app')).render(React.createElement(RecordsPage));

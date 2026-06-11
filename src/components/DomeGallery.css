@@ -1,0 +1,212 @@
+.dg-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    --radius: 520px;
+    --viewer-pad: 72px;
+    --circ: calc(var(--radius) * 3.14);
+    --rot-y: calc((360deg / var(--segments-x)) / 2);
+    --rot-x: calc((360deg / var(--segments-y)) / 2);
+    --item-width: calc(var(--circ) / var(--segments-x));
+    --item-height: calc(var(--circ) / var(--segments-y));
+}
+
+.dg-root * {
+    box-sizing: border-box;
+}
+
+.dg-sphere,
+.dg-item,
+.dg-item-image {
+    transform-style: preserve-3d;
+}
+
+.dg-main {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    background: transparent;
+}
+
+.dg-stage {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    perspective: calc(var(--radius) * 2);
+    perspective-origin: 50% 50%;
+    contain: layout paint size;
+}
+
+.dg-sphere {
+    transform: translateZ(calc(var(--radius) * -1));
+    will-change: transform;
+}
+
+.dg-overlay,
+.dg-overlay-blur {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.dg-overlay {
+    background-image: radial-gradient(rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, 0.72) 100%);
+}
+
+.dg-overlay-blur {
+    display: none;
+}
+
+.dg-item {
+    width: calc(var(--item-width) * var(--item-size-x));
+    height: calc(var(--item-height) * var(--item-size-y));
+    position: absolute;
+    inset: -999px;
+    margin: auto;
+    transform-origin: 50% 50%;
+    backface-visibility: hidden;
+    transition: transform 300ms;
+    transform:
+        rotateY(calc(var(--rot-y) * (var(--offset-x) + ((var(--item-size-x) - 1) / 2))))
+        rotateX(calc(var(--rot-x) * (var(--offset-y) - ((var(--item-size-y) - 1) / 2))))
+        translateZ(var(--radius));
+}
+
+.dg-item-image {
+    position: absolute;
+    display: block;
+    inset: 10px;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    border-radius: var(--tile-radius, 12px);
+    background: transparent;
+    overflow: hidden;
+    backface-visibility: hidden;
+    transition: transform 300ms, box-shadow 300ms, filter 300ms;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    pointer-events: auto;
+    padding: 0;
+    transform: translateZ(0);
+    box-shadow: none;
+}
+
+.dg-item-image:hover {
+    transform: translateZ(16px) scale(1.02);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+}
+
+.dg-item-image:focus {
+    outline: none;
+}
+
+.dg-item-image:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.86);
+    outline-offset: 4px;
+}
+
+.dg-item-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    backface-visibility: hidden;
+    filter: var(--image-filter, none);
+}
+
+.dg-viewer {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--viewer-pad);
+}
+
+.dg-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 500ms ease;
+    backdrop-filter: blur(3px);
+}
+
+.dg-scrim.is-visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.dg-enlarge {
+    position: relative;
+    z-index: 30;
+    border: 0;
+    border-radius: var(--enlarge-radius, 32px);
+    overflow: hidden;
+    padding: 0;
+    cursor: zoom-out;
+    pointer-events: all;
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 26px 80px rgba(0, 0, 0, 0.45);
+    animation: dg-pop-in 300ms ease both;
+}
+
+.dg-enlarge img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--image-filter, none);
+}
+
+.dg-edge-fade {
+    display: none;
+}
+
+.dg-edge-fade-top {
+    top: 0;
+    transform: rotate(180deg);
+}
+
+.dg-edge-fade-bottom {
+    bottom: 0;
+}
+
+.dg-scroll-lock {
+    overflow: hidden;
+}
+
+@keyframes dg-pop-in {
+    from {
+        opacity: 0;
+        transform: scale(0.78);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 760px) {
+    .dg-root {
+        --viewer-pad: 28px;
+    }
+
+    .dg-item-image {
+        inset: 8px;
+    }
+}

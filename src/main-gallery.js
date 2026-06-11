@@ -1,4 +1,5 @@
-﻿import { createApp } from 'vue';
-import GalleryPage from './pages/GalleryPage.vue';
+import { createRoot } from 'react-dom/client';
+import React from 'react';
+import GalleryPage from './pages/GalleryPage.jsx';
 
-createApp(GalleryPage).mount('#app');
+createRoot(document.getElementById('app')).render(React.createElement(GalleryPage));
