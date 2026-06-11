@@ -20,7 +20,7 @@ const NOTES_SEARCH_INDEX_URL = `${NOTES_BASE_URL}search/search_index.json`;
 const SEARCH_LIMIT = 20;
 const EDGE_COUNT = 2;
 const VISIBLE_COUNT = 6;
-const DEFAULT_VIDEO_FALLBACK_COVER = 'photos/photo3.jpg';
+const DEFAULT_VIDEO_FALLBACK_COVER = 'photos/optimized/photo3.webp';
 const CHANGELOG_DOC_URL = 'docs/changelog.html';
 
 const biliCoverCache = new Map();
@@ -179,12 +179,15 @@ export default function IndexPage() {
     const photoRefs = useRef([]);
     const fluidCanvas = useRef(null);
     const starfieldCanvas = useRef(null);
+    const videoSectionRef = useRef(null);
     const searchInput = useRef(null);
     const giscusContainer = useRef(null);
     const activeIndexRef = useRef(-1);
     const stripStepRef = useRef(0);
     const hoverRef = useRef(false);
     const heroScrollProgressRef = useRef(0);
+    const heroOpacityRef = useRef(1);
+    const videoCoversLoadedRef = useRef(false);
 
     const [featuredPhotos, setFeaturedPhotos] = useState([]);
     const [displayPhotos, setDisplayPhotos] = useState([]);
@@ -211,6 +214,7 @@ export default function IndexPage() {
 
     const heroTarget = useRef({ x: 0, y: 0 });
     const heroTilt = useRef({ x: 0, y: 0 });
+    const heroTiltRafRef = useRef(null);
 
     useEffect(() => {
         activeIndexRef.current = activeIndex;
@@ -567,24 +571,10 @@ export default function IndexPage() {
         setIsSearchOpen(false);
     }
 
-    function buildFocusVideos() {
-        const videos = Array.isArray(FOCUS_VIDEO_LIBRARY)
-            ? FOCUS_VIDEO_LIBRARY.filter(item => item && (item.link || item.bvid))
-            : [];
-        const nextVideos = videos.map(videoItem => {
-            const biliInfo = resolveBilibiliInfo(videoItem);
-            if (!biliInfo) return null;
-            return {
-                ...videoItem,
-                bvid: biliInfo.bvid,
-                openUrl: biliInfo.openUrl,
-                embedUrl: biliInfo.embedUrl,
-                coverUrl: '',
-                isPreviewing: false
-            };
-        }).filter(Boolean);
-        setFocusVideos(nextVideos);
-        nextVideos.forEach(video => {
+    function loadVideoCovers(videos) {
+        if (videoCoversLoadedRef.current) return;
+        videoCoversLoadedRef.current = true;
+        videos.forEach(video => {
             loadBilibiliCover(video.bvid)
                 .then(validateCoverUrl)
                 .then(crawledCover => crawledCover || validateCoverUrl(resolveFallbackCover(video)))
@@ -597,6 +587,26 @@ export default function IndexPage() {
         });
     }
 
+    function buildFocusVideos() {
+        const videos = Array.isArray(FOCUS_VIDEO_LIBRARY)
+            ? FOCUS_VIDEO_LIBRARY.filter(item => item && (item.link || item.bvid))
+            : [];
+        const nextVideos = videos.map(videoItem => {
+            const biliInfo = resolveBilibiliInfo(videoItem);
+            if (!biliInfo) return null;
+            return {
+                ...videoItem,
+                bvid: biliInfo.bvid,
+                openUrl: biliInfo.openUrl,
+                embedUrl: biliInfo.embedUrl,
+                coverUrl: resolveFallbackCover(videoItem),
+                isPreviewing: false
+            };
+        }).filter(Boolean);
+        setFocusVideos(nextVideos);
+        return nextVideos;
+    }
+
     function handleVideoEnter(video) {
         setFocusVideos(items => items.map(item => item.id === video.id ? { ...item, isPreviewing: true } : item));
     }
@@ -605,12 +615,36 @@ export default function IndexPage() {
         setFocusVideos(items => items.map(item => item.id === video.id ? { ...item, isPreviewing: false } : item));
     }
 
+    function startHeroTiltLoop() {
+        if (heroTiltRafRef.current) return;
+        const tickTilt = () => {
+            const ease = 0.08;
+            const dx = heroTarget.current.x - heroTilt.current.x;
+            const dy = heroTarget.current.y - heroTilt.current.y;
+            const done = Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01;
+            heroTilt.current = {
+                x: done ? heroTarget.current.x : heroTilt.current.x + dx * ease,
+                y: done ? heroTarget.current.y : heroTilt.current.y + dy * ease
+            };
+            setHeroTiltX(current => Math.abs(current - heroTilt.current.x) > 0.01 ? heroTilt.current.x : current);
+            setHeroTiltY(current => Math.abs(current - heroTilt.current.y) > 0.01 ? heroTilt.current.y : current);
+            if (done) {
+                heroTiltRafRef.current = null;
+                return;
+            }
+            heroTiltRafRef.current = window.requestAnimationFrame(tickTilt);
+        };
+        heroTiltRafRef.current = window.requestAnimationFrame(tickTilt);
+    }
+
     function updateHeaderHeroOpacity() {
         const progress = Math.max(0, Math.min(1, window.scrollY / (window.innerHeight * 0.68)));
         const eased = 1 - Math.pow(1 - progress, 1.8);
-        setHeroScrollProgress(progress);
-        setHeroOpacity(Math.max(0, 1 - eased));
-        setHeaderOpacity(1);
+        const nextOpacity = Math.max(0, 1 - eased);
+        heroScrollProgressRef.current = progress;
+        heroOpacityRef.current = nextOpacity;
+        setHeroScrollProgress(current => Math.abs(current - progress) > 0.004 ? progress : current);
+        setHeroOpacity(current => Math.abs(current - nextOpacity) > 0.004 ? nextOpacity : current);
     }
 
     function handleHeroTilt(event) {
@@ -624,10 +658,12 @@ export default function IndexPage() {
             y: Math.max(-maxTilt, Math.min(maxTilt, (viewportX - 0.5) * 2 * maxTilt)),
             x: Math.max(-maxTilt, Math.min(maxTilt, -(viewportY - 0.5) * 2 * maxTilt))
         };
+        startHeroTiltLoop();
     }
 
     function resetHeroTilt() {
         heroTarget.current = { x: 0, y: 0 };
+        startHeroTiltLoop();
     }
 
     useEffect(() => {
@@ -643,7 +679,7 @@ export default function IndexPage() {
 
     useEffect(() => {
         renderFeaturedPhotos();
-        buildFocusVideos();
+        const initialVideos = buildFocusVideos();
         updateHeaderHeroOpacity();
 
         const cleanupStarfield = startStarfield(starfieldCanvas.current, 'star');
@@ -687,22 +723,8 @@ export default function IndexPage() {
         };
         typedTimer = window.setTimeout(tickTyping, 400);
 
-        let heroTiltRaf = null;
-        const tickTilt = () => {
-            const ease = 0.08;
-            const dx = heroTarget.current.x - heroTilt.current.x;
-            const dy = heroTarget.current.y - heroTilt.current.y;
-            heroTilt.current = {
-                x: Math.abs(dx) < 0.01 ? heroTarget.current.x : heroTilt.current.x + dx * ease,
-                y: Math.abs(dy) < 0.01 ? heroTarget.current.y : heroTilt.current.y + dy * ease
-            };
-            setHeroTiltX(heroTilt.current.x);
-            setHeroTiltY(heroTilt.current.y);
-            heroTiltRaf = window.requestAnimationFrame(tickTilt);
-        };
-        heroTiltRaf = window.requestAnimationFrame(tickTilt);
-
         let resizeTimer = null;
+        let scrollRaf = null;
         const resizeHandler = () => {
             window.clearTimeout(resizeTimer);
             resizeTimer = window.setTimeout(() => {
@@ -711,11 +733,36 @@ export default function IndexPage() {
                 updateStripStep();
             }, 150);
         };
+        const scrollHandler = () => {
+            if (scrollRaf) return;
+            scrollRaf = window.requestAnimationFrame(() => {
+                scrollRaf = null;
+                updateHeaderHeroOpacity();
+            });
+        };
         window.addEventListener('resize', resizeHandler);
-        window.addEventListener('scroll', updateHeaderHeroOpacity, { passive: true });
+        window.addEventListener('scroll', scrollHandler, { passive: true });
+
+        let videoObserver = null;
+        if ('IntersectionObserver' in window && videoSectionRef.current) {
+            videoObserver = new IntersectionObserver(entries => {
+                if (entries.some(entry => entry.isIntersecting)) {
+                    loadVideoCovers(initialVideos);
+                    videoObserver.disconnect();
+                    videoObserver = null;
+                }
+            }, { rootMargin: '360px 0px' });
+            videoObserver.observe(videoSectionRef.current);
+        } else {
+            window.setTimeout(() => loadVideoCovers(initialVideos), 1600);
+        }
 
         let giscusFailTimer = null;
-        if (giscusContainer.current) {
+        let giscusObserver = null;
+        let giscusLoaded = false;
+        const loadGiscus = () => {
+            if (giscusLoaded || !giscusContainer.current) return;
+            giscusLoaded = true;
             const script = document.createElement('script');
             script.src = 'https://giscus.app/client.js';
             script.async = true;
@@ -741,6 +788,21 @@ export default function IndexPage() {
                 const iframe = giscusContainer.current && giscusContainer.current.querySelector('iframe');
                 if (!iframe) setGiscusFailed(true);
             }, 8000);
+        };
+
+        if (giscusContainer.current) {
+            if ('IntersectionObserver' in window) {
+                giscusObserver = new IntersectionObserver(entries => {
+                    if (entries.some(entry => entry.isIntersecting)) {
+                        loadGiscus();
+                        giscusObserver.disconnect();
+                        giscusObserver = null;
+                    }
+                }, { rootMargin: '420px 0px' });
+                giscusObserver.observe(giscusContainer.current);
+            } else {
+                window.setTimeout(loadGiscus, 2200);
+            }
         }
 
         return () => {
@@ -748,12 +810,15 @@ export default function IndexPage() {
             window.clearTimeout(typedTimer);
             window.clearTimeout(resizeTimer);
             window.clearTimeout(giscusFailTimer);
+            if (scrollRaf) window.cancelAnimationFrame(scrollRaf);
+            if (videoObserver) videoObserver.disconnect();
+            if (giscusObserver) giscusObserver.disconnect();
             if (cleanupStarfield) cleanupStarfield();
             if (cleanupHeroFluid) cleanupHeroFluid();
-            if (heroTiltRaf) window.cancelAnimationFrame(heroTiltRaf);
+            if (heroTiltRafRef.current) window.cancelAnimationFrame(heroTiltRafRef.current);
             document.body.style.overflow = '';
             window.removeEventListener('resize', resizeHandler);
-            window.removeEventListener('scroll', updateHeaderHeroOpacity);
+            window.removeEventListener('scroll', scrollHandler);
         };
     }, []);
 
@@ -875,7 +940,7 @@ export default function IndexPage() {
                 </div>
             </section>
 
-            <section className="content">
+            <section className="content" ref={videoSectionRef}>
                 <div className="video-showcase">
                     <div className="video-copy">
                         <p className="section-kicker">Video</p>
@@ -980,7 +1045,7 @@ export default function IndexPage() {
                     {FRIEND_LINKS.map(friend => (
                         <a key={friend.id} className="article-card friend-card" href={friend.url} target="_blank" rel="noopener noreferrer" aria-label={`访问 ${friend.name}`}>
                             <div className="article-content friend-content">
-                                <img src={friend.avatar} alt={friend.name} loading="lazy" referrerPolicy="no-referrer" />
+                                <img src={friend.avatar} alt={friend.name} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
                                 <div><h3>{friend.name}</h3><p>{friend.description}</p><div className="article-comment">{friend.note}</div></div>
                             </div>
                         </a>

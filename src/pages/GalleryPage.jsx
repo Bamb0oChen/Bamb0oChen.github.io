@@ -195,7 +195,7 @@ export default function GalleryPage() {
                         <button key={cell.key} className="gallery-cell" type="button" onClick={() => cell.type === 'image' && openModal(cell)}>
                             {cell.type === 'image' ? (
                                 <>
-                                    <img src={cell.data} alt={cell.title || cell.fileName} className="gallery-image" />
+                                    <img src={cell.data} alt={cell.title || cell.fileName} className="gallery-image" loading="lazy" decoding="async" />
                                     {(cell.title || cell.comment) && (
                                         <div className="gallery-comment" title={cell.comment || cell.title}>
                                             {cell.title || cell.comment}
@@ -226,7 +226,7 @@ export default function GalleryPage() {
                         <button className="modal-close" type="button" aria-label="关闭" onClick={closeModal}>&times;</button>
                         <div className="modal-body">
                             <div className="detail-image-wrap">
-                                <img src={modalImage?.data} alt={modalImage?.title || modalImage?.fileName || ''} />
+                                <img src={modalImage?.data} alt={modalImage?.title || modalImage?.fileName || ''} decoding="async" />
                             </div>
                             <div className="modal-info">
                                 <div>

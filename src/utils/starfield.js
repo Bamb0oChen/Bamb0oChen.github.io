@@ -11,11 +11,12 @@
     let dpr = 1;
 
     const stars = [];
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
     const config = {
-        spawnRate: 26,
+        spawnRate: isMobile ? 10 : 16,
         speedMin: 40,
         speedMax: 80,
-        maxStars: 120,
+        maxStars: isMobile ? 52 : 82,
         spawnRadiusFactor: 0.5,
         margin: 0
     };
@@ -24,7 +25,7 @@
     let rafId = null;
 
     function resizeCanvas() {
-        dpr = window.devicePixelRatio || 1;
+        dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.25 : 1.5);
         if (container) {
             const rect = container.getBoundingClientRect();
             width = rect.width || 0;

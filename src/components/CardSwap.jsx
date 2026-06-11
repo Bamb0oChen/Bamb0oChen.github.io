@@ -65,6 +65,7 @@ export default function CardSwap({
     const tlRef = useRef(null);
     const intervalRef = useRef();
     const container = useRef(null);
+    const visibleRef = useRef(false);
 
     useEffect(() => {
         const total = refs.length;
@@ -115,6 +116,7 @@ export default function CardSwap({
         };
 
         const start = () => {
+            if (!visibleRef.current || document.hidden) return;
             window.clearInterval(intervalRef.current);
             intervalRef.current = window.setInterval(swap, delay);
         };
@@ -123,14 +125,39 @@ export default function CardSwap({
             window.clearInterval(intervalRef.current);
         };
         const resume = () => {
+            if (!visibleRef.current || document.hidden) return;
             tlRef.current?.play();
             start();
         };
 
-        swap();
-        start();
-
         const node = container.current;
+        let observer = null;
+        if (node && 'IntersectionObserver' in window) {
+            observer = new IntersectionObserver(entries => {
+                visibleRef.current = entries.some(entry => entry.isIntersecting);
+                if (visibleRef.current) {
+                    if (!tlRef.current) swap();
+                    resume();
+                } else {
+                    pause();
+                }
+            }, { rootMargin: '240px 0px' });
+            observer.observe(node);
+        } else {
+            visibleRef.current = true;
+            swap();
+            start();
+        }
+
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                pause();
+            } else {
+                resume();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
         if (pauseOnHover && node) {
             node.addEventListener('mouseenter', pause);
             node.addEventListener('mouseleave', resume);
@@ -139,6 +166,8 @@ export default function CardSwap({
         return () => {
             window.clearInterval(intervalRef.current);
             tlRef.current?.kill();
+            observer?.disconnect();
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
             if (pauseOnHover && node) {
                 node.removeEventListener('mouseenter', pause);
                 node.removeEventListener('mouseleave', resume);

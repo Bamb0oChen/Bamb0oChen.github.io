@@ -87,14 +87,14 @@ function GlobalSpotlight({
             transform: translate(-50%, -50%);
             mix-blend-mode: screen;
         `;
+        const sectionEl = gridRef.current.closest('.mb-bento-section') || gridRef.current;
         document.body.appendChild(spotlight);
         spotlightRef.current = spotlight;
 
         const handleMouseMove = event => {
             if (!spotlightRef.current || !gridRef.current) return;
 
-            const section = gridRef.current.closest('.mb-bento-section');
-            const rect = section?.getBoundingClientRect();
+            const rect = sectionEl?.getBoundingClientRect();
             const mouseInside = rect
                 && event.clientX >= rect.left
                 && event.clientX <= rect.right
@@ -157,12 +157,12 @@ function GlobalSpotlight({
             }
         };
 
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseleave', handleMouseLeave);
+        sectionEl.addEventListener('mousemove', handleMouseMove);
+        sectionEl.addEventListener('mouseleave', handleMouseLeave);
 
         return () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseleave', handleMouseLeave);
+            sectionEl.removeEventListener('mousemove', handleMouseMove);
+            sectionEl.removeEventListener('mouseleave', handleMouseLeave);
             spotlightRef.current?.parentNode?.removeChild(spotlightRef.current);
         };
     }, [disableAnimations, enabled, glowColor, gridRef, spotlightRadius]);

@@ -146,7 +146,9 @@ export function startHeroFluid(canvas, options = {}) {
     scene.add(mesh);
 
     let rafId = null;
+    let idleTimer = null;
     let active = false;
+    let pageVisible = !document.hidden;
     let lastTime = performance.now();
     const targetPointer = new THREE.Vector2(0.5, 0.48);
     const targetVelocity = new THREE.Vector2(0, 0);
@@ -175,30 +177,50 @@ export function startHeroFluid(canvas, options = {}) {
     function animate(now) {
         const dt = Math.min((now - lastTime) / 1000, 0.05);
         lastTime = now;
+        const scrollOpacity = typeof options.getOpacity === 'function' ? options.getOpacity() : 1;
+        const nearlyHidden = scrollOpacity < 0.03 && uniforms.uOpacity.value < 0.04 && !active;
+
+        if (!pageVisible || nearlyHidden) {
+            idleTimer = window.setTimeout(() => {
+                lastTime = performance.now();
+                rafId = requestAnimationFrame(animate);
+            }, pageVisible ? 220 : 800);
+            return;
+        }
+
         uniforms.uTime.value = now / 1000;
         uniforms.uPointer.value.lerp(targetPointer, 1 - Math.pow(0.04, dt));
         uniforms.uVelocity.value.lerp(targetVelocity, active ? 0.18 : 0.08);
         uniforms.uPointerStrength.value += ((active ? 1 : 0) - uniforms.uPointerStrength.value) * (1 - Math.pow(0.08, dt));
         targetVelocity.multiplyScalar(0.92);
-        const scrollOpacity = typeof options.getOpacity === 'function' ? options.getOpacity() : 1;
         uniforms.uOpacity.value += (scrollOpacity - uniforms.uOpacity.value) * 0.08;
         renderer.render(scene, camera);
         rafId = requestAnimationFrame(animate);
     }
 
+    function handleVisibilityChange() {
+        pageVisible = !document.hidden;
+        if (pageVisible && !rafId) {
+            lastTime = performance.now();
+            rafId = requestAnimationFrame(animate);
+        }
+        handlePointerLeave();
+    }
+
     window.addEventListener('resize', resize, { passive: true });
     window.addEventListener('pointermove', handlePointerMove, { passive: true });
     window.addEventListener('pointerleave', handlePointerLeave, { passive: true });
-    document.addEventListener('visibilitychange', handlePointerLeave);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     resize();
     rafId = requestAnimationFrame(animate);
 
     return () => {
         if (rafId) cancelAnimationFrame(rafId);
+        if (idleTimer) window.clearTimeout(idleTimer);
         window.removeEventListener('resize', resize);
         window.removeEventListener('pointermove', handlePointerMove);
         window.removeEventListener('pointerleave', handlePointerLeave);
-        document.removeEventListener('visibilitychange', handlePointerLeave);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
         geometry.dispose();
         material.dispose();
         renderer.dispose();

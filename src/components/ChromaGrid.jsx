@@ -97,7 +97,7 @@ export default function ChromaGrid({
                     }}
                 >
                     <div className="chroma-img-wrapper">
-                        <img src={item.image} alt={item.title} loading="lazy" />
+                        <img src={item.image} alt={item.title} loading="lazy" decoding="async" />
                     </div>
                     <footer className="chroma-info">
                         <h3 className="name">{item.title}</h3>

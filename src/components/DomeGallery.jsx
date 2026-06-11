@@ -232,7 +232,7 @@ export default function DomeGallery({
                                     aria-label={item.alt || 'Open image'}
                                     onClick={() => handleTileClick(item)}
                                 >
-                                    <img src={item.src} draggable={false} alt={item.alt || ''} />
+                                    <img src={item.src} draggable={false} alt={item.alt || ''} loading="lazy" decoding="async" />
                                 </button>
                             </div>
                         ))}
