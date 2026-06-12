@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getLighttraceLibrary } from '../data/siteData';
+import { startStarfield } from '../utils/starfield';
 
 const GALLERY_KEY = 'gallery_images_v1';
 const MAX_IMAGES = 25;
@@ -52,6 +53,7 @@ function saveImages(images) {
 }
 
 export default function GalleryPage() {
+    const starfieldCanvas = useRef(null);
     const [images, setImages] = useState(() => (useLocalLibrary ? loadLocalLibrary() : loadImages()));
     const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,6 +80,11 @@ export default function GalleryPage() {
     const nextImage = modalImageIndex < 0 || modalImageIndex >= images.length - 1 ? null : images[modalImageIndex + 1];
     const showEmpty = pagedImages.length === 0;
     const showPagination = useLocalLibrary && totalPages > 1;
+
+    useEffect(() => {
+        const cleanupStarfield = startStarfield(starfieldCanvas.current, 'star');
+        return () => cleanupStarfield?.();
+    }, []);
 
     const updateHashForImage = useCallback(image => {
         if (!image || !image.id) return;
@@ -170,14 +177,17 @@ export default function GalleryPage() {
     }
 
     return (
-        <div>
+        <div className="gallery-page-shell">
+            <canvas ref={starfieldCanvas} id="starfield" className="starfield-canvas" aria-hidden="true"></canvas>
             <header id="header" style={{ opacity: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', maxWidth: 1100, justifyContent: 'space-between' }}>
-                    <div style={{ fontWeight: 'bold', fontSize: 18 }}>
-                        <a href="index.html" style={{ color: 'white', textDecoration: 'none' }}>Chen.のhomepage</a>
+                <div className="site-header-inner">
+                    <div className="site-brand">
+                        <a href="index.html">Chen.のhomepage</a>
                     </div>
-                    <div>
-                        <a href="gallery.html" className="nav-btn" style={{ background: 'rgba(255, 255, 255, 0.2)' }}>光影留痕</a>
+                    <div className="site-nav">
+                        <a href="index.html" className="nav-btn">主页</a>
+                        <a href="gallery.html" className="nav-btn is-active">光影留痕</a>
+                        <a href="index.html#guestbook" className="nav-btn">留言</a>
                         <a href="https://Bamb0oChen.github.io/notes/" className="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
                     </div>
                 </div>

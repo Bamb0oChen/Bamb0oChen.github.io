@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     CHANGELOG,
     CONTENT_ARTICLES,
@@ -10,7 +10,6 @@ import {
 import { startStarfield } from '../utils/starfield';
 import DomeGallery from '../components/DomeGallery';
 import CardSwap, { Card } from '../components/CardSwap';
-import MagicBento from '../components/MagicBento';
 import ChromaGrid from '../components/ChromaGrid';
 import BorderGlow from '../components/BorderGlow';
 import '../styles/index-page.css';
@@ -22,6 +21,37 @@ const EDGE_COUNT = 2;
 const VISIBLE_COUNT = 6;
 const DEFAULT_VIDEO_FALLBACK_COVER = 'photos/optimized/photo3.webp';
 const CHANGELOG_DOC_URL = 'docs/changelog.html';
+const ModelViewer = lazy(() => import('../components/ModelViewer'));
+const TAILSCALE_SERVER = '100.109.179.26';
+const SERVER_SERVICES = [
+    {
+        id: 'qb',
+        label: 'Torrent',
+        title: 'qBittorrent',
+        description: '下载队列、种子任务与速度面板。',
+        href: `http://${TAILSCALE_SERVER}:8080`,
+        status: 'LAN only',
+        illustration: 'qb'
+    },
+    {
+        id: 'immich',
+        label: 'Photos',
+        title: 'Immich',
+        description: '相册备份、人物时间线与照片回忆。',
+        href: `http://${TAILSCALE_SERVER}:2283`,
+        status: 'Private cloud',
+        illustration: 'immich'
+    },
+    {
+        id: 'nginx',
+        label: 'Gateway',
+        title: 'Nginx',
+        description: '反向代理入口、服务主页与站点调度。',
+        href: `http://${TAILSCALE_SERVER}`,
+        status: 'Proxy',
+        illustration: 'nginx'
+    }
+];
 
 const biliCoverCache = new Map();
 const coverReachabilityCache = new Map();
@@ -245,11 +275,6 @@ export default function IndexPage() {
         transform: `perspective(900px) rotateX(${heroTiltX}deg) rotateY(${heroTiltY}deg)`
     }), [heroTiltX, heroTiltY]);
 
-    const statusInputs = useMemo(() => [
-        ...(SITE_STATUS.reading || []).slice(0, 2),
-        ...(SITE_STATUS.listening || []).slice(0, 1)
-    ], []);
-
     const articleTags = useMemo(() => {
         const tags = new Set(['全部']);
         CONTENT_ARTICLES.forEach(article => (article.tags || []).forEach(tag => tags.add(tag)));
@@ -302,51 +327,6 @@ export default function IndexPage() {
             .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
             .slice(0, 8);
     }, []);
-
-    const bentoCards = useMemo(() => {
-        const topFeed = recentFeed.slice(0, 3);
-        return [
-            {
-                label: 'Now',
-                title: '最近状态',
-                description: SITE_STATUS.motto,
-                color: '#101821'
-            },
-            {
-                label: 'Focus',
-                title: '当前专注',
-                items: SITE_STATUS.currentFocus || [],
-                color: '#102233'
-            },
-            {
-                label: 'Updates',
-                title: '最近创作流',
-                description: topFeed.map(item => `${item.typeLabel} / ${item.title}`).join(' · '),
-                meta: `${recentFeed.length} items`,
-                color: '#101d2b',
-                href: topFeed[0]?.link,
-                external: topFeed[0]?.external
-            },
-            {
-                label: 'Learning',
-                title: '正在学习',
-                items: SITE_STATUS.learning || [],
-                color: '#122235'
-            },
-            {
-                label: 'Input',
-                title: '最近输入',
-                items: statusInputs,
-                color: '#111a26'
-            },
-            {
-                label: 'Projects',
-                title: '近期项目',
-                items: SITE_STATUS.projects || [],
-                color: '#10262e'
-            }
-        ];
-    }, [recentFeed, statusInputs]);
 
     const chromaArticleItems = useMemo(() => {
         const palettes = [
@@ -876,20 +856,34 @@ export default function IndexPage() {
                 </div>
             </section>
 
-            <section className="content compact-section bento-home-section">
-                <MagicBento
-                    cards={bentoCards}
-                    textAutoHide
-                    enableStars
-                    enableSpotlight
-                    enableBorderGlow
-                    enableTilt
-                    enableMagnetism
-                    clickEffect
-                    spotlightRadius={300}
-                    particleCount={12}
-                    glowColor="92, 213, 196"
-                />
+            <section className="content compact-section server-nav-section" aria-labelledby="server-nav-title">
+                <div className="server-nav-shell">
+                    <div className="server-nav-copy">
+                        <p className="section-kicker">Homelab</p>
+                        <h2 id="server-nav-title">内网服务入口</h2>
+                        <p>Tailscale 节点 <span>{TAILSCALE_SERVER}</span>，回到自己的下载、相册和网关控制台。</p>
+                    </div>
+                    <div className="server-service-grid">
+                        {SERVER_SERVICES.map(service => (
+                            <a key={service.id} className={`server-service-card server-service-card--${service.illustration}`} href={service.href} target="_blank" rel="noopener noreferrer">
+                                <div className="server-card-topline">
+                                    <span>{service.label}</span>
+                                    <span>{service.status}</span>
+                                </div>
+                                <div className="server-illustration" aria-hidden="true">
+                                    <span className="server-ill-main"></span>
+                                    <span className="server-ill-accent"></span>
+                                    <span className="server-ill-dot"></span>
+                                </div>
+                                <div className="server-card-content">
+                                    <h3>{service.title}</h3>
+                                    <p>{service.description}</p>
+                                    <span className="server-card-link">{service.href.replace(/^https?:\/\//, '')}</span>
+                                </div>
+                            </a>
+                        ))}
+                    </div>
+                </div>
             </section>
 
             <section className="content" ref={featuredContainer}>
@@ -1019,24 +1013,44 @@ export default function IndexPage() {
 
             <section className="content">
                 <div className="section-heading"><p className="section-kicker">Music</p><h2>曲苑天地</h2></div>
-                <BorderGlow
-                    className="music-board-wrap music-border-glow"
-                    edgeSensitivity={28}
-                    glowColor="184 82 72"
-                    backgroundColor="rgba(6, 16, 26, 0.72)"
-                    borderRadius={24}
-                    glowRadius={46}
-                    glowIntensity={1.15}
-                    coneSpread={24}
-                    animated
-                    colors={['#5cd5c4', '#8ec5ff', '#f4a261']}
-                    fillOpacity={0.32}
-                >
-                    <p className="music-board-desc">嵌入 Apple Music 收藏歌单，歌单内容更新后这里会自动同步。</p>
-                    <div className="music-embed">
-                        <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameBorder="0" width="100%" height="450" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" loading="lazy"></iframe>
+                <div className="music-feature-layout">
+                    <BorderGlow
+                        className="music-board-wrap music-border-glow"
+                        edgeSensitivity={28}
+                        glowColor="184 82 72"
+                        backgroundColor="rgba(6, 16, 26, 0.72)"
+                        borderRadius={24}
+                        glowRadius={46}
+                        glowIntensity={1.15}
+                        coneSpread={24}
+                        animated
+                        colors={['#5cd5c4', '#8ec5ff', '#f4a261']}
+                        fillOpacity={0.32}
+                    >
+                        <p className="music-board-desc">嵌入 Apple Music 收藏歌单，歌单内容更新后这里会自动同步。</p>
+                        <div className="music-embed">
+                            <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameBorder="0" width="100%" height="450" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" loading="lazy"></iframe>
+                        </div>
+                    </BorderGlow>
+                    <div className="music-model-card" aria-label="可旋转留声机模型">
+                        <Suspense fallback={<div className="model-viewer model-viewer-placeholder">Preparing model</div>}>
+                            <ModelViewer
+                                url="models/gramophone/Gramophone.fbx"
+                                height="clamp(500px, 48vw, 620px)"
+                                defaultZoom={3.86}
+                                modelScale={3.02}
+                                modelXOffset={0.12}
+                                modelYOffset={-0.04}
+                                minZoomDistance={2.8}
+                                maxZoomDistance={6}
+                                autoRotate
+                                autoRotateSpeed={0.55}
+                                enableManualZoom={false}
+                                environmentPreset="warehouse"
+                            />
+                        </Suspense>
                     </div>
-                </BorderGlow>
+                </div>
             </section>
 
             <section className="content">
