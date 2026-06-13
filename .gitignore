@@ -39,5 +39,6 @@ records/  # Flask 数据存储目录
 # 其他
 *.log
 .env
+public/agent-config.json
 .pytest_cache/
 node_modules/

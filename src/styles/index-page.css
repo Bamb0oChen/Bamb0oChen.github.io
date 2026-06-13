@@ -38,6 +38,67 @@
     font: inherit;
 }
 
+.nav-btn-button.is-active {
+    color: rgba(255, 255, 255, 0.96);
+    background:
+        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.18), transparent 62%),
+        rgba(255, 255, 255, 0.09);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 10px 32px rgba(92, 213, 196, 0.12);
+}
+
+.page-transition-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: grid;
+    place-items: start center;
+    padding-top: 82px;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(92, 213, 196, 0.12), transparent 30%),
+        rgba(0, 0, 0, 0);
+    animation: pageTransitionVeil 0.22s ease-out forwards;
+}
+
+.page-transition-pill {
+    width: min(360px, calc(100vw - 80px));
+    height: 3px;
+    min-height: 3px;
+    display: block;
+    padding: 0;
+    border-radius: 999px;
+    color: transparent;
+    font-size: 0;
+    background: linear-gradient(90deg, transparent, rgba(92, 213, 196, 0.9), rgba(244, 162, 97, 0.8), transparent);
+    border: 0;
+    box-shadow:
+        0 0 24px rgba(92, 213, 196, 0.46),
+        0 0 42px rgba(244, 162, 97, 0.16);
+    transform-origin: top center;
+    animation: pageTransitionPill 0.22s cubic-bezier(0.2, 0.75, 0.2, 1) forwards;
+}
+
+@keyframes pageTransitionVeil {
+    to {
+        background:
+            radial-gradient(circle at 50% 0%, rgba(92, 213, 196, 0.12), transparent 30%),
+            rgba(0, 0, 0, 0.28);
+    }
+}
+
+@keyframes pageTransitionPill {
+    0% {
+        opacity: 0;
+        transform: translateY(-4px) scaleX(0.35);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scaleX(1);
+    }
+}
+
 .hero-tilt {
     display: inline-block;
     padding: 1px;
@@ -274,6 +335,17 @@
     margin: 24px 0 0;
     max-width: 340px;
     color: rgba(255, 255, 255, 0.66);
+    line-height: 1.75;
+}
+
+.server-nav-copy p:not(.section-kicker):not(.server-private-note):last-child {
+    display: none;
+}
+
+.server-private-note {
+    margin: 24px 0 0;
+    max-width: 360px;
+    color: rgba(255, 255, 255, 0.68);
     line-height: 1.75;
 }
 
@@ -1267,6 +1339,354 @@
     line-height: 1.5;
 }
 
+.agent-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    padding: clamp(12px, 2vw, 28px);
+    background:
+        radial-gradient(circle at 20% 8%, rgba(92, 213, 196, 0.16), transparent 28%),
+        radial-gradient(circle at 82% 92%, rgba(244, 162, 97, 0.12), transparent 30%),
+        rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    overflow: hidden;
+    opacity: 0;
+    animation: agentOverlayIn 0.34s cubic-bezier(0.2, 0.75, 0.2, 1) forwards;
+}
+
+.agent-panel {
+    width: min(1280px, 100%);
+    height: min(840px, calc(100vh - 40px));
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.035)),
+        rgba(5, 9, 14, 0.78);
+    box-shadow:
+        0 36px 120px rgba(0, 0, 0, 0.52),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    overflow: hidden;
+    transform-origin: top center;
+    transform: translateY(-18px) scale(0.965);
+    opacity: 0;
+    filter: blur(8px);
+    animation: agentPanelIn 0.46s cubic-bezier(0.16, 0.9, 0.22, 1) 0.03s forwards;
+    will-change: transform, opacity, filter;
+}
+
+.agent-overlay.is-closing {
+    pointer-events: none;
+    animation: agentOverlayOut 0.24s ease forwards;
+}
+
+.agent-overlay.is-closing .agent-panel {
+    animation: agentPanelOut 0.24s cubic-bezier(0.55, 0.05, 0.7, 0.2) forwards;
+}
+
+.agent-panel .search-header {
+    flex: 0 0 auto;
+    padding: 22px 24px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.agent-panel .search-close {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.agent-panel .legacy-search-control,
+.agent-panel .search-meta,
+.agent-panel .search-results {
+    display: none;
+}
+
+.agent-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(240px, 0.34fr) minmax(0, 1fr);
+}
+
+.agent-sidebar {
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 24px;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        radial-gradient(circle at 20% 0%, rgba(92, 213, 196, 0.12), transparent 36%),
+        rgba(255, 255, 255, 0.025);
+    opacity: 0;
+    transform: translateX(-12px);
+    animation: agentContentIn 0.42s cubic-bezier(0.2, 0.75, 0.2, 1) 0.17s forwards;
+}
+
+.agent-sidebar h2 {
+    margin: 0 0 16px;
+    font-size: clamp(32px, 4vw, 56px);
+    line-height: 0.95;
+    letter-spacing: 0;
+}
+
+.agent-sidebar p:not(.section-kicker) {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.66);
+    line-height: 1.7;
+}
+
+.agent-source-stack {
+    display: grid;
+    gap: 10px;
+}
+
+.agent-source-stack span {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 13px;
+}
+
+.agent-chat {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background:
+        radial-gradient(circle at 76% 12%, rgba(142, 197, 255, 0.08), transparent 34%),
+        rgba(0, 0, 0, 0.12);
+}
+
+.agent-messages {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 28px clamp(18px, 4vw, 58px);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: agentContentIn 0.42s cubic-bezier(0.2, 0.75, 0.2, 1) 0.22s forwards;
+}
+
+.agent-message {
+    width: min(760px, 100%);
+    padding: 16px 18px;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.032)),
+        rgba(8, 16, 24, 0.72);
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.18);
+}
+
+.agent-message--user {
+    align-self: flex-end;
+    background:
+        linear-gradient(135deg, rgba(92, 213, 196, 0.18), rgba(142, 197, 255, 0.08)),
+        rgba(8, 16, 24, 0.74);
+}
+
+.agent-message--assistant {
+    align-self: flex-start;
+}
+
+.agent-message-role {
+    margin-bottom: 8px;
+    color: rgba(255, 255, 255, 0.48);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.agent-message p {
+    margin: 0;
+    white-space: pre-wrap;
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.75;
+}
+
+.agent-citations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.agent-citations a {
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration: none;
+    font-size: 12px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.agent-error {
+    margin: 0 clamp(18px, 4vw, 58px) 10px;
+    color: #ffd7a8;
+    font-size: 13px;
+}
+
+.agent-composer {
+    display: flex;
+    gap: 12px;
+    padding: 16px clamp(18px, 4vw, 58px) 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    transform: translateY(14px);
+    animation: agentContentIn 0.38s cubic-bezier(0.2, 0.75, 0.2, 1) 0.26s forwards;
+}
+
+.agent-composer textarea {
+    flex: 1;
+    min-height: 48px;
+    max-height: 160px;
+    resize: vertical;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    padding: 14px 16px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.055);
+    outline: none;
+    font: inherit;
+    line-height: 1.45;
+}
+
+.agent-composer textarea:focus {
+    border-color: rgba(92, 213, 196, 0.46);
+    box-shadow: 0 0 0 3px rgba(92, 213, 196, 0.08);
+}
+
+.agent-composer button {
+    flex: 0 0 auto;
+    align-self: stretch;
+    border: 0;
+    border-radius: 18px;
+    padding: 0 22px;
+    color: #071018;
+    font-weight: 800;
+    background: linear-gradient(135deg, #8ef3df, #f4c084);
+    cursor: pointer;
+}
+
+.agent-composer button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+@keyframes agentOverlayIn {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0) saturate(100%);
+        -webkit-backdrop-filter: blur(0) saturate(100%);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(18px) saturate(140%);
+        -webkit-backdrop-filter: blur(18px) saturate(140%);
+    }
+}
+
+@keyframes agentOverlayOut {
+    from {
+        opacity: 1;
+        backdrop-filter: blur(18px) saturate(140%);
+        -webkit-backdrop-filter: blur(18px) saturate(140%);
+    }
+    to {
+        opacity: 0;
+        backdrop-filter: blur(0) saturate(100%);
+        -webkit-backdrop-filter: blur(0) saturate(100%);
+    }
+}
+
+@keyframes agentPanelIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.962);
+        filter: blur(10px);
+    }
+    58% {
+        opacity: 1;
+        transform: translateY(4px) scale(1.004);
+        filter: blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes agentPanelOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-14px) scale(0.972);
+        filter: blur(8px);
+    }
+}
+
+@keyframes agentContentIn {
+    to {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .agent-overlay,
+    .agent-panel,
+    .agent-sidebar,
+    .agent-messages,
+    .agent-composer {
+        animation: none !important;
+        opacity: 1;
+        transform: none;
+        filter: none;
+    }
+
+    .page-transition-overlay,
+    .page-transition-pill {
+        animation: none !important;
+        opacity: 1;
+        transform: none;
+        filter: none;
+    }
+}
+
+.server-service-card.is-disabled {
+    cursor: default;
+}
+
+.server-service-card.is-disabled:hover {
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 24px 84px rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
 @media (max-width: 900px) {
     .status-panel,
     .search-results {
@@ -1422,5 +1842,40 @@ body {
     .search-panel {
         margin: 2vh auto;
         padding: 16px;
+    }
+
+    .agent-overlay {
+        padding: 8px;
+        overflow-y: auto;
+    }
+
+    .agent-panel {
+        height: auto;
+        min-height: calc(100vh - 16px);
+        border-radius: 22px;
+    }
+
+    .agent-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .agent-sidebar {
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 20px;
+    }
+
+    .agent-messages {
+        max-height: 54vh;
+        padding: 18px;
+    }
+
+    .agent-composer {
+        padding: 12px;
+        flex-direction: column;
+    }
+
+    .agent-composer button {
+        min-height: 44px;
     }
 }

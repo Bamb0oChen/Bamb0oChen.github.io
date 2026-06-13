@@ -613,6 +613,56 @@
     border-color: rgba(255, 255, 255, 0.18);
 }
 
+html.is-page-transitioning::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(92, 213, 196, 0.12), transparent 30%),
+        rgba(0, 0, 0, 0.28);
+    animation: galleryTransitionVeil 0.22s ease-out forwards;
+}
+
+html.is-page-transitioning::after {
+    content: "";
+    position: fixed;
+    top: 82px;
+    left: 50%;
+    z-index: 5001;
+    width: min(360px, calc(100vw - 80px));
+    height: 3px;
+    min-height: 3px;
+    box-sizing: border-box;
+    display: block;
+    padding: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, rgba(92, 213, 196, 0.9), rgba(244, 162, 97, 0.8), transparent);
+    border: 0;
+    box-shadow:
+        0 0 24px rgba(92, 213, 196, 0.46),
+        0 0 42px rgba(244, 162, 97, 0.16);
+    transform-origin: top center;
+    animation: galleryTransitionPill 0.22s cubic-bezier(0.2, 0.75, 0.2, 1) forwards;
+}
+
+@keyframes galleryTransitionVeil {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes galleryTransitionPill {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -4px) scaleX(0.35);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, 0) scaleX(1);
+    }
+}
+
 .gallery-container {
     position: relative;
     z-index: 1;

@@ -17,38 +17,43 @@ import '../styles/index-page.css';
 const NOTES_BASE_URL = 'https://bamb0ochen.github.io/notes/';
 const NOTES_SEARCH_INDEX_URL = `${NOTES_BASE_URL}search/search_index.json`;
 const SEARCH_LIMIT = 20;
+const AGENT_CONTEXT_LIMIT = 8;
+const AGENT_CONFIG_URL = 'agent-config.json';
 const EDGE_COUNT = 2;
 const VISIBLE_COUNT = 6;
 const DEFAULT_VIDEO_FALLBACK_COVER = 'photos/optimized/photo3.webp';
 const CHANGELOG_DOC_URL = 'docs/changelog.html';
 const ModelViewer = lazy(() => import('../components/ModelViewer'));
-const TAILSCALE_SERVER = '100.109.179.26';
+const DEFAULT_AGENT_MESSAGE = {
+    role: 'assistant',
+    content: '你好，我是 Chen.のhomepage Agent。可以问我主页内容、光影、视频，也可以基于笔记库帮你找线索。'
+};
 const SERVER_SERVICES = [
     {
         id: 'qb',
+        configKey: 'qb',
         label: 'Torrent',
         title: 'qBittorrent',
         description: '下载队列、种子任务与速度面板。',
-        href: `http://${TAILSCALE_SERVER}:8080`,
-        status: 'LAN only',
+        status: 'Private',
         illustration: 'qb'
     },
     {
         id: 'immich',
+        configKey: 'immich',
         label: 'Photos',
         title: 'Immich',
         description: '相册备份、人物时间线与照片回忆。',
-        href: `http://${TAILSCALE_SERVER}:2283`,
-        status: 'Private cloud',
+        status: 'Private',
         illustration: 'immich'
     },
     {
         id: 'nginx',
+        configKey: 'nginx',
         label: 'Gateway',
         title: 'Nginx',
         description: '反向代理入口、服务主页与站点调度。',
-        href: `http://${TAILSCALE_SERVER}`,
-        status: 'Proxy',
+        status: 'Private',
         illustration: 'nginx'
     }
 ];
@@ -96,6 +101,29 @@ function searchItems(items, query) {
 function normalizeNotesUrl(location) {
     const cleanLocation = String(location || '').replace(/^\//, '');
     return new URL(cleanLocation, NOTES_BASE_URL).toString();
+}
+
+function normalizeNotesDocs(result) {
+    const docs = Array.isArray(result?.docs) ? result.docs : [];
+    return docs.map((doc, index) => {
+        const text = stripHtml(doc.text || '');
+        return {
+            id: `note-${index}-${doc.location || ''}`,
+            title: doc.title || 'Untitled note',
+            description: text.slice(0, 160),
+            body: text,
+            url: normalizeNotesUrl(doc.location)
+        };
+    });
+}
+
+function fetchNotesDocuments() {
+    return fetch(NOTES_SEARCH_INDEX_URL)
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to load notes index');
+            return response.json();
+        })
+        .then(normalizeNotesDocs);
 }
 
 function normalizeSecureCoverUrl(url) {
@@ -211,6 +239,8 @@ export default function IndexPage() {
     const starfieldCanvas = useRef(null);
     const videoSectionRef = useRef(null);
     const searchInput = useRef(null);
+    const agentInputRef = useRef(null);
+    const agentMessagesRef = useRef([DEFAULT_AGENT_MESSAGE]);
     const giscusContainer = useRef(null);
     const activeIndexRef = useRef(-1);
     const stripStepRef = useRef(0);
@@ -218,6 +248,8 @@ export default function IndexPage() {
     const heroScrollProgressRef = useRef(0);
     const heroOpacityRef = useRef(1);
     const videoCoversLoadedRef = useRef(false);
+    const remoteDocsPromiseRef = useRef(null);
+    const runtimeConfigPromiseRef = useRef(null);
 
     const [featuredPhotos, setFeaturedPhotos] = useState([]);
     const [displayPhotos, setDisplayPhotos] = useState([]);
@@ -234,7 +266,15 @@ export default function IndexPage() {
     const [selectedArticleTag, setSelectedArticleTag] = useState('全部');
     const [focusVideos, setFocusVideos] = useState([]);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isAgentClosing, setIsAgentClosing] = useState(false);
+    const [isPageTransitioning, setIsPageTransitioning] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [agentInput, setAgentInput] = useState('');
+    const [agentMessages, setAgentMessages] = useState([DEFAULT_AGENT_MESSAGE]);
+    const [agentLoading, setAgentLoading] = useState(false);
+    const [agentError, setAgentError] = useState('');
+    const [runtimeConfig, setRuntimeConfig] = useState(null);
+    const [runtimeConfigLoaded, setRuntimeConfigLoaded] = useState(false);
     const [remoteDocs, setRemoteDocs] = useState([]);
     const [remoteLoading, setRemoteLoading] = useState(false);
     const [remoteError, setRemoteError] = useState(false);
@@ -249,6 +289,10 @@ export default function IndexPage() {
     useEffect(() => {
         activeIndexRef.current = activeIndex;
     }, [activeIndex]);
+
+    useEffect(() => {
+        agentMessagesRef.current = agentMessages;
+    }, [agentMessages]);
 
     useEffect(() => {
         hoverRef.current = isHoveringPhotos;
@@ -517,6 +561,30 @@ export default function IndexPage() {
         window.location.href = id ? `gallery.html#photo=${encodeURIComponent(id)}` : 'gallery.html';
     }
 
+    const loadRuntimeConfig = useCallback(() => {
+        if (runtimeConfigLoaded) return Promise.resolve(runtimeConfig);
+        if (runtimeConfigPromiseRef.current) return runtimeConfigPromiseRef.current;
+
+        runtimeConfigPromiseRef.current = fetch(AGENT_CONFIG_URL, { cache: 'no-store' })
+            .then(response => response.ok ? response.json() : null)
+            .catch(() => null)
+            .then(config => {
+                setRuntimeConfig(config);
+                setRuntimeConfigLoaded(true);
+                return config;
+            })
+            .finally(() => {
+                runtimeConfigPromiseRef.current = null;
+            });
+
+        return runtimeConfigPromiseRef.current;
+    }, [runtimeConfig, runtimeConfigLoaded]);
+
+    function getServiceHref(service) {
+        const serviceLinks = runtimeConfig?.services || runtimeConfig?.homelab || {};
+        return String(serviceLinks[service.configKey] || '').trim();
+    }
+
     const loadRemoteSearchIndex = useCallback(() => {
         if (remoteDocs.length || remoteLoading) return;
         setRemoteLoading(true);
@@ -544,11 +612,145 @@ export default function IndexPage() {
     }, [remoteDocs.length, remoteLoading]);
 
     function openSearch() {
+        setIsAgentClosing(false);
         setIsSearchOpen(true);
     }
 
     function closeSearch() {
-        setIsSearchOpen(false);
+        setIsAgentClosing(true);
+        window.setTimeout(() => {
+            setIsSearchOpen(false);
+            setIsAgentClosing(false);
+        }, 260);
+    }
+
+    function navigateWithTransition(event, href) {
+        if (!href) return;
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault();
+        if (isPageTransitioning) return;
+
+        setIsPageTransitioning(true);
+        window.setTimeout(() => {
+            window.location.href = href;
+        }, 180);
+    }
+
+    function extractAgentReply(result) {
+        return result?.reply
+            || result?.content
+            || result?.message
+            || result?.choices?.[0]?.message?.content
+            || result?.choices?.[0]?.text
+            || '';
+    }
+
+    async function getAgentContext(query) {
+        let docs = remoteDocs;
+        if (!docs.length) {
+            try {
+                setRemoteLoading(true);
+                setRemoteError(false);
+                docs = await fetchNotesDocuments();
+                setRemoteDocs(docs);
+            } catch (error) {
+                setRemoteError(true);
+                docs = [];
+            } finally {
+                setRemoteLoading(false);
+            }
+        }
+
+        const localContext = searchItems(localSearchIndex, query).map(item => ({
+            source: 'homepage',
+            type: item.type,
+            title: item.title,
+            description: item.description,
+            url: item.url,
+            body: item.body
+        }));
+        const notesContext = searchItems(docs, query).map(item => ({
+            source: 'notes',
+            type: '笔记',
+            title: item.title,
+            description: item.description,
+            url: item.url,
+            body: item.body
+        }));
+
+        return [...notesContext, ...localContext].slice(0, AGENT_CONTEXT_LIMIT);
+    }
+
+    function buildFallbackAgentReply(query, context) {
+        if (!context.length) {
+            return `我已经检索了主页与笔记索引，但暂时没有找到和「${query}」直接相关的内容。你可以换一个更具体的关键词，或稍后配置 Agent API endpoint 让模型做更宽松的语义理解。`;
+        }
+
+        const lines = context.slice(0, 5).map((item, index) => {
+            const text = item.description || item.body || '';
+            return `${index + 1}. ${item.title}：${text.slice(0, 90)}${text.length > 90 ? '...' : ''}`;
+        });
+        return `我先从笔记库和主页里找到了这些线索：\n\n${lines.join('\n')}\n\nAPI endpoint 配好后，我会把这些召回片段作为上下文交给模型，回答会更像真正的知识库 Agent。`;
+    }
+
+    async function submitAgentMessage(event) {
+        event.preventDefault();
+        const prompt = agentInput.trim();
+        if (!prompt || agentLoading) return;
+
+        setAgentInput('');
+        setAgentError('');
+        const nextMessages = [...agentMessagesRef.current, { role: 'user', content: prompt }];
+        setAgentMessages(nextMessages);
+        setAgentLoading(true);
+
+        try {
+            const [config, context] = await Promise.all([
+                loadRuntimeConfig(),
+                getAgentContext(prompt)
+            ]);
+            const agentConfig = config?.agent || {};
+            const endpoint = String(agentConfig.endpoint || config?.agentEndpoint || '').trim();
+
+            if (!endpoint) {
+                setAgentMessages(messages => [...messages, {
+                    role: 'assistant',
+                    content: buildFallbackAgentReply(prompt, context),
+                    context
+                }]);
+                return;
+            }
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(agentConfig.headers || {})
+                },
+                body: JSON.stringify({
+                    query: prompt,
+                    messages: nextMessages,
+                    context,
+                    options: agentConfig.options || {},
+                    source: 'chen-homepage-agent'
+                })
+            });
+
+            if (!response.ok) throw new Error(`Agent API failed: ${response.status}`);
+            const result = await response.json();
+            const reply = extractAgentReply(result) || buildFallbackAgentReply(prompt, context);
+            setAgentMessages(messages => [...messages, { role: 'assistant', content: reply, context }]);
+        } catch (error) {
+            setAgentError('Agent 暂时没有连上 API，已保留你的问题。');
+            const context = await getAgentContext(prompt);
+            setAgentMessages(messages => [...messages, {
+                role: 'assistant',
+                content: buildFallbackAgentReply(prompt, context),
+                context
+            }]);
+        } finally {
+            setAgentLoading(false);
+        }
     }
 
     function loadVideoCovers(videos) {
@@ -649,15 +851,17 @@ export default function IndexPage() {
     useEffect(() => {
         document.body.style.overflow = isSearchOpen ? 'hidden' : '';
         if (isSearchOpen) {
-            window.setTimeout(() => searchInput.current && searchInput.current.focus(), 0);
+            window.setTimeout(() => agentInputRef.current && agentInputRef.current.focus(), 0);
+            loadRuntimeConfig();
             loadRemoteSearchIndex();
         }
         return () => {
             if (!isSearchOpen) document.body.style.overflow = '';
         };
-    }, [isSearchOpen, loadRemoteSearchIndex]);
+    }, [isSearchOpen, loadRemoteSearchIndex, loadRuntimeConfig]);
 
     useEffect(() => {
+        loadRuntimeConfig();
         renderFeaturedPhotos();
         const initialVideos = buildFocusVideos();
         updateHeaderHeroOpacity();
@@ -834,9 +1038,9 @@ export default function IndexPage() {
                 <div className="site-header-inner">
                     <div className="site-brand">Chen.のhomepage</div>
                     <nav className="site-nav" aria-label="主导航">
-                        <button className="nav-btn nav-btn-button" type="button" onClick={openSearch}>搜索</button>
-                        <a href="gallery.html" className="nav-btn">光影留痕</a>
-                        <a href="#guestbook" className="nav-btn">留言</a>
+                        <button className={`nav-btn nav-btn-button ${isSearchOpen ? 'is-active' : ''}`} type="button" onClick={openSearch}>Agent</button>
+                        <a href="gallery.html" className="nav-btn" onClick={event => navigateWithTransition(event, 'gallery.html')}>光影留痕</a>
+                        <a href={CHANGELOG_DOC_URL} className="nav-btn" onClick={event => navigateWithTransition(event, CHANGELOG_DOC_URL)}>更新日志</a>
                         <a href="https://Bamb0oChen.github.io/notes/" className="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
                     </nav>
                 </div>
@@ -860,12 +1064,15 @@ export default function IndexPage() {
                 <div className="server-nav-shell">
                     <div className="server-nav-copy">
                         <p className="section-kicker">Homelab</p>
-                        <h2 id="server-nav-title">内网服务入口</h2>
-                        <p>Tailscale 节点 <span>{TAILSCALE_SERVER}</span>，回到自己的下载、相册和网关控制台。</p>
+                        <h2 id="server-nav-title">Private Dock</h2>
+                        <p className="server-private-note">服务入口由运行时配置接管，页面不暴露节点地址、端口或内部路径。</p>
+                        <p className="server-legacy-note" aria-hidden="true"></p>
                     </div>
                     <div className="server-service-grid">
-                        {SERVER_SERVICES.map(service => (
-                            <a key={service.id} className={`server-service-card server-service-card--${service.illustration}`} href={service.href} target="_blank" rel="noopener noreferrer">
+                        {SERVER_SERVICES.map(service => {
+                            const serviceHref = getServiceHref(service);
+                            return (
+                            <a key={service.id} className={`server-service-card server-service-card--${service.illustration} ${serviceHref ? '' : 'is-disabled'}`} href={serviceHref || undefined} target={serviceHref ? '_blank' : undefined} rel={serviceHref ? 'noopener noreferrer' : undefined} aria-disabled={!serviceHref} onClick={event => !serviceHref && event.preventDefault()}>
                                 <div className="server-card-topline">
                                     <span>{service.label}</span>
                                     <span>{service.status}</span>
@@ -878,10 +1085,11 @@ export default function IndexPage() {
                                 <div className="server-card-content">
                                     <h3>{service.title}</h3>
                                     <p>{service.description}</p>
-                                    <span className="server-card-link">{service.href.replace(/^https?:\/\//, '')}</span>
+                                    <span className="server-card-link">{serviceHref ? 'Open private route' : 'Configure route'}</span>
                                 </div>
                             </a>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </section>
@@ -1081,13 +1289,58 @@ export default function IndexPage() {
             </section>
 
             {isSearchOpen && (
-                <div className="search-overlay" onClick={event => event.target === event.currentTarget && closeSearch()}>
-                    <section className="search-panel" role="dialog" aria-modal="true" aria-label="站内搜索">
+                <div className={`agent-overlay ${isAgentClosing ? 'is-closing' : 'is-open'}`} onClick={event => event.target === event.currentTarget && closeSearch()}>
+                    <section className="agent-panel" role="dialog" aria-modal="true" aria-label="Homepage Agent">
                         <div className="search-header">
-                            <div><p className="section-kicker">Search</p><h2>搜索主页与笔记</h2></div>
+                            <div><p className="section-kicker">Agent</p><h2>Chen.のhomepage Agent</h2></div>
                             <button className="search-close" type="button" onClick={closeSearch}>×</button>
                         </div>
-                        <input ref={searchInput} value={searchQuery} onChange={event => setSearchQuery(event.target.value.trimStart())} className="search-input" type="search" placeholder="试试 NLP、线性代数、游乐园..." onKeyDown={event => event.key === 'Escape' && closeSearch()} />
+                        <div className="agent-layout">
+                            <aside className="agent-sidebar">
+                                <div>
+                                    <p className="section-kicker">Agent</p>
+                                    <h2>Notes Copilot</h2>
+                                    <p>以主页内容和 notes 搜索索引为上下文。API 端点从运行时配置读取，不写入仓库。</p>
+                                </div>
+                                <div className="agent-source-stack">
+                                    <span>{remoteLoading ? 'Index loading' : remoteError ? 'Notes fallback' : 'Notes ready'}</span>
+                                    <span>{runtimeConfig?.agent?.endpoint || runtimeConfig?.agentEndpoint ? 'API connected' : 'API not configured'}</span>
+                                    <span>{remoteDocs.length || 0} note chunks</span>
+                                </div>
+                            </aside>
+                            <div className="agent-chat">
+                                <div className="agent-messages">
+                                    {agentMessages.map((message, index) => (
+                                        <div key={`${message.role}-${index}`} className={`agent-message agent-message--${message.role}`}>
+                                            <div className="agent-message-role">{message.role === 'user' ? 'You' : 'Agent'}</div>
+                                            <p>{message.content}</p>
+                                            {message.context?.length > 0 && (
+                                                <div className="agent-citations">
+                                                    {message.context.slice(0, 3).map(item => (
+                                                        <a key={`${item.source}-${item.url}-${item.title}`} href={item.url} target="_blank" rel="noopener noreferrer">{item.title}</a>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                    {agentLoading && (
+                                        <div className="agent-message agent-message--assistant is-loading">
+                                            <div className="agent-message-role">Agent</div>
+                                            <p>正在检索笔记并组织回答...</p>
+                                        </div>
+                                    )}
+                                </div>
+                                {agentError && <div className="agent-error">{agentError}</div>}
+                                <form className="agent-composer" onSubmit={submitAgentMessage}>
+                                    <textarea ref={agentInputRef} value={agentInput} onChange={event => setAgentInput(event.target.value)} placeholder="问问笔记库，比如：线性代数里我写过什么？" rows={1} onKeyDown={event => {
+                                        if (event.key === 'Escape') closeSearch();
+                                        if (event.key === 'Enter' && !event.shiftKey) submitAgentMessage(event);
+                                    }} />
+                                    <button type="submit" disabled={!agentInput.trim() || agentLoading}>Send</button>
+                                </form>
+                            </div>
+                        </div>
+                        <input ref={searchInput} value={searchQuery} onChange={event => setSearchQuery(event.target.value.trimStart())} className="search-input legacy-search-control" type="search" placeholder="试试 NLP、线性代数、游乐园..." onKeyDown={event => event.key === 'Escape' && closeSearch()} />
                         <div className="search-meta">
                             {remoteLoading ? <span>正在载入笔记索引...</span> : remoteError ? <span>远程笔记索引暂不可用，当前仅显示主页结果。</span> : <span>结果来自主页内容与 notes 搜索索引。</span>}
                         </div>
@@ -1104,6 +1357,11 @@ export default function IndexPage() {
                             </div>
                         </div>
                     </section>
+                </div>
+            )}
+            {isPageTransitioning && (
+                <div className="page-transition-overlay" aria-hidden="true">
+                    <div className="page-transition-pill">Chen.のhomepage</div>
                 </div>
             )}
         </div>

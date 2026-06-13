@@ -5,6 +5,17 @@ import { startStarfield } from '../utils/starfield';
 const GALLERY_KEY = 'gallery_images_v1';
 const MAX_IMAGES = 25;
 const PAGE_SIZE = 25;
+const CHANGELOG_DOC_URL = 'docs/changelog.html';
+
+function navigateWithTransition(event, href) {
+    if (!href) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    event.preventDefault();
+    document.documentElement.classList.add('is-page-transitioning');
+    window.setTimeout(() => {
+        window.location.href = href;
+    }, 180);
+}
 
 const localLibrary = getLighttraceLibrary();
 const useLocalLibrary = localLibrary.length > 0;
@@ -185,9 +196,9 @@ export default function GalleryPage() {
                         <a href="index.html">Chen.のhomepage</a>
                     </div>
                     <div className="site-nav">
-                        <a href="index.html" className="nav-btn">主页</a>
+                        <a href="index.html" className="nav-btn" onClick={event => navigateWithTransition(event, 'index.html')}>主页</a>
                         <a href="gallery.html" className="nav-btn is-active">光影留痕</a>
-                        <a href="index.html#guestbook" className="nav-btn">留言</a>
+                        <a href={CHANGELOG_DOC_URL} className="nav-btn" onClick={event => navigateWithTransition(event, CHANGELOG_DOC_URL)}>更新日志</a>
                         <a href="https://Bamb0oChen.github.io/notes/" className="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
                     </div>
                 </div>

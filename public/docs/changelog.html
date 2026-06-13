@@ -7,15 +7,20 @@
     <style>
         :root {
             color-scheme: dark;
-            --bg: #030507;
+            --bg: #020406;
             --text: rgba(255, 255, 255, 0.94);
             --muted: rgba(255, 255, 255, 0.58);
-            --line: rgba(255, 255, 255, 0.16);
-            --glass: rgba(255, 255, 255, 0.075);
+            --line: rgba(255, 255, 255, 0.12);
+            --cyan: #5cd5c4;
+            --amber: #f4a261;
         }
 
         * {
             box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
@@ -24,187 +29,301 @@
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
             color: var(--text);
             background:
-                radial-gradient(circle at 50% -20%, rgba(60, 124, 190, 0.28), transparent 38rem),
-                radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.06), transparent 26rem),
+                radial-gradient(circle at 50% -10%, rgba(42, 112, 128, 0.28), transparent 34rem),
+                radial-gradient(circle at 12% 28%, rgba(92, 213, 196, 0.08), transparent 30rem),
+                radial-gradient(circle at 92% 70%, rgba(244, 162, 97, 0.07), transparent 28rem),
                 var(--bg);
+            overflow-x: hidden;
         }
 
         body::before {
-            content: '';
+            content: "";
             position: fixed;
             inset: 0;
             pointer-events: none;
             background-image:
-                radial-gradient(circle, rgba(255, 255, 255, 0.68) 0 1px, transparent 1.4px),
-                radial-gradient(circle, rgba(255, 255, 255, 0.32) 0 1px, transparent 1.3px);
-            background-size: 170px 170px, 260px 260px;
-            background-position: 18px 30px, 70px 90px;
-            opacity: 0.46;
-        }
-
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 5;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 72px;
-            padding: 0 max(24px, calc((100vw - 960px) / 2));
-            background: rgba(8, 10, 12, 0.72);
-            backdrop-filter: saturate(180%) blur(22px);
-            -webkit-backdrop-filter: saturate(180%) blur(22px);
-            border-bottom: 1px solid var(--line);
+                radial-gradient(circle, rgba(255, 255, 255, 0.7) 0 1px, transparent 1.5px),
+                radial-gradient(circle, rgba(255, 255, 255, 0.28) 0 1px, transparent 1.4px);
+            background-size: 180px 180px, 280px 280px;
+            background-position: 28px 36px, 90px 120px;
+            opacity: 0.38;
         }
 
         a {
             color: inherit;
         }
 
-        .brand {
-            font-weight: 700;
-            text-decoration: none;
-        }
-
-        .nav {
+        #header {
+            position: fixed;
+            top: 14px;
+            left: 50%;
+            z-index: 20;
+            width: min(1200px, calc(100vw - 32px));
+            height: 64px;
+            transform: translateX(-50%);
             display: flex;
-            gap: 18px;
-            color: var(--muted);
-            font-size: 14px;
+            align-items: center;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background:
+                radial-gradient(circle at 62% 0%, rgba(255, 255, 255, 0.18), transparent 44%),
+                linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(14, 18, 20, 0.68) 52%, rgba(14, 44, 54, 0.72));
+            box-shadow:
+                0 24px 80px rgba(0, 0, 0, 0.36),
+                inset 0 1px 0 rgba(255, 255, 255, 0.24);
+            backdrop-filter: saturate(145%) blur(18px);
+            -webkit-backdrop-filter: saturate(145%) blur(18px);
         }
 
-        .nav a {
+        .site-header-inner {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 0 28px;
+        }
+
+        .site-brand {
+            color: rgba(255, 255, 255, 0.94);
             text-decoration: none;
+            font-weight: 800;
+            letter-spacing: 0;
         }
 
-        .nav a:hover {
-            color: var(--text);
+        .site-nav {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+            border-radius: 999px;
+            color: rgba(255, 255, 255, 0.72);
+            text-decoration: none;
+            transition: color 0.22s ease, background 0.22s ease;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.is-active {
+            color: rgba(255, 255, 255, 0.96);
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        html.is-page-transitioning::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 50% 0%, rgba(92, 213, 196, 0.12), transparent 30%),
+                rgba(0, 0, 0, 0.28);
+            animation: pageTransitionVeil 0.22s ease-out forwards;
+        }
+
+        html.is-page-transitioning::after {
+            content: "";
+            position: fixed;
+            top: 82px;
+            left: 50%;
+            z-index: 5001;
+            width: min(360px, calc(100vw - 80px));
+            height: 3px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, transparent, rgba(92, 213, 196, 0.9), rgba(244, 162, 97, 0.8), transparent);
+            box-shadow:
+                0 0 24px rgba(92, 213, 196, 0.46),
+                0 0 42px rgba(244, 162, 97, 0.16);
+            transform-origin: top center;
+            animation: pageTransitionLine 0.22s cubic-bezier(0.2, 0.75, 0.2, 1) forwards;
+        }
+
+        @keyframes pageTransitionVeil {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pageTransitionLine {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -4px) scaleX(0.35);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, 0) scaleX(1);
+            }
         }
 
         main {
-            width: min(960px, calc(100vw - 36px));
+            position: relative;
+            z-index: 1;
+            width: min(1080px, calc(100vw - 36px));
             margin: 0 auto;
-            padding: 96px 0 120px;
+            padding: 150px 0 120px;
         }
 
         .hero {
-            margin-bottom: 44px;
+            min-height: 360px;
+            display: grid;
+            align-items: end;
+            padding-bottom: 42px;
         }
 
         .kicker {
-            margin: 0 0 12px;
-            color: var(--muted);
+            margin: 0 0 14px;
+            color: rgba(255, 255, 255, 0.46);
             font-size: 12px;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
         }
 
         h1 {
             margin: 0;
-            font-size: clamp(42px, 7vw, 84px);
-            line-height: 1;
+            font-size: clamp(48px, 8vw, 96px);
+            line-height: 0.95;
             letter-spacing: 0;
         }
 
         .lede {
             max-width: 680px;
-            margin: 22px 0 0;
+            margin: 24px 0 0;
             color: rgba(255, 255, 255, 0.68);
             font-size: 17px;
             line-height: 1.8;
         }
 
         .doc {
+            position: relative;
             display: grid;
             gap: 18px;
         }
 
+        .doc::before {
+            content: "";
+            position: absolute;
+            top: 18px;
+            bottom: 18px;
+            left: 19px;
+            width: 1px;
+            background: linear-gradient(180deg, transparent, rgba(92, 213, 196, 0.38), rgba(244, 162, 97, 0.26), transparent);
+        }
+
         .entry {
             position: relative;
+            margin-left: 54px;
             overflow: hidden;
-            padding: 24px;
+            padding: 24px 26px;
             border-radius: 22px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             background:
-                radial-gradient(circle at 14% 0%, rgba(255, 255, 255, 0.18), transparent 28%),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.12), var(--glass));
-            backdrop-filter: saturate(180%) blur(26px);
-            -webkit-backdrop-filter: saturate(180%) blur(26px);
+                radial-gradient(circle at 14% 0%, rgba(255, 255, 255, 0.1), transparent 28%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.074), rgba(255, 255, 255, 0.032)),
+                rgba(8, 16, 24, 0.68);
             box-shadow:
-                0 28px 90px rgba(0, 0, 0, 0.36),
-                inset 0 1px 0 rgba(255, 255, 255, 0.32);
-            scroll-margin-top: 96px;
+                0 24px 84px rgba(0, 0, 0, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            scroll-margin-top: 108px;
         }
 
         .entry::before {
-            content: '';
+            content: "";
             position: absolute;
-            inset: 1px;
-            border-radius: inherit;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 42%);
-            pointer-events: none;
-        }
-
-        .entry time,
-        .entry h2,
-        .entry p {
-            position: relative;
-            z-index: 1;
+            left: -42px;
+            top: 30px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: var(--cyan);
+            box-shadow: 0 0 24px rgba(92, 213, 196, 0.68);
         }
 
         .entry time {
-            color: rgba(255, 198, 92, 0.95);
-            font-weight: 700;
+            color: rgba(244, 162, 97, 0.94);
+            font-weight: 800;
             font-size: 13px;
         }
 
         .entry h2 {
             margin: 10px 0 10px;
-            font-size: clamp(20px, 3vw, 30px);
+            font-size: clamp(22px, 3vw, 32px);
             letter-spacing: 0;
         }
 
         .entry p {
             margin: 0;
+            max-width: 760px;
             color: rgba(255, 255, 255, 0.66);
             line-height: 1.75;
         }
 
         @media (max-width: 720px) {
-            header {
+            #header {
+                top: 8px;
                 height: auto;
-                padding: 16px 18px;
-                align-items: flex-start;
-                gap: 12px;
-                flex-direction: column;
+                border-radius: 24px;
             }
 
-            .nav {
-                width: 100%;
-                justify-content: space-between;
+            .site-header-inner {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 14px 16px;
+                gap: 10px;
+            }
+
+            .site-nav {
+                justify-content: stretch;
+            }
+
+            .nav-btn {
+                flex: 1;
             }
 
             main {
-                padding-top: 72px;
+                padding-top: 150px;
+            }
+
+            .doc::before {
+                left: 8px;
+            }
+
+            .entry {
+                margin-left: 28px;
+                padding: 20px;
+            }
+
+            .entry::before {
+                left: -26px;
             }
         }
     </style>
 </head>
 <body>
-    <header>
-        <a class="brand" href="../">Chen.のhomepage</a>
-        <nav class="nav" aria-label="文档导航">
-            <a href="../">首页</a>
-            <a href="../gallery.html">光影留痕</a>
-            <a href="https://Bamb0oChen.github.io/notes/" target="_blank" rel="noopener noreferrer">笔记</a>
-        </nav>
+    <header id="header">
+        <div class="site-header-inner">
+            <a class="site-brand" href="../index.html">Chen.のhomepage</a>
+            <nav class="site-nav" aria-label="文档导航">
+                <a href="../index.html" class="nav-btn">主页</a>
+                <a href="../gallery.html" class="nav-btn">光影留痕</a>
+                <a href="changelog.html" class="nav-btn is-active">更新日志</a>
+                <a href="https://Bamb0oChen.github.io/notes/" class="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
+            </nav>
+        </div>
     </header>
 
     <main>
         <section class="hero">
-            <p class="kicker">Document</p>
-            <h1>更新日志</h1>
-            <p class="lede">这里记录主页本身的迭代。它不再作为首页模块占用浏览动线，而是像一份笔记文档一样沉淀在站内。</p>
+            <div>
+                <p class="kicker">Document</p>
+                <h1>更新日志</h1>
+                <p class="lede">这里记录主页本身的迭代。它不再作为首页模块挤占浏览动线，而是像一份笔记文档一样沉淀在站内。</p>
+            </div>
         </section>
 
         <article class="doc">
@@ -247,9 +366,23 @@
             <section class="entry" id="2026-02-05">
                 <time datetime="2026-02-05">2026-02-05</time>
                 <h2>修复样式兼容性问题</h2>
-                <p>改进移动端适配、优化深色主题。</p>
+                <p>改进移动端适配，优化深色主题。</p>
             </section>
         </article>
     </main>
+    <script>
+        document.querySelectorAll('.site-nav a[href]').forEach(link => {
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('http') || link.classList.contains('is-active')) return;
+            link.addEventListener('click', event => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+                event.preventDefault();
+                document.documentElement.classList.add('is-page-transitioning');
+                window.setTimeout(() => {
+                    window.location.href = href;
+                }, 180);
+            });
+        });
+    </script>
 </body>
 </html>

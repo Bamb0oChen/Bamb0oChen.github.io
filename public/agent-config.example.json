@@ -1,0 +1,15 @@
+{
+  "agent": {
+    "endpoint": "/api/agent",
+    "headers": {},
+    "options": {
+      "model": "fill-on-your-server",
+      "temperature": 0.4
+    }
+  },
+  "services": {
+    "qb": "/go/qb",
+    "immich": "/go/immich",
+    "nginx": "/go/nginx"
+  }
+}

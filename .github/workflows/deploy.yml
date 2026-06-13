@@ -32,6 +32,37 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Create runtime config
+        env:
+          AGENT_ENDPOINT: ${{ vars.AGENT_ENDPOINT || secrets.AGENT_ENDPOINT }}
+          AGENT_MODEL: ${{ vars.AGENT_MODEL || secrets.AGENT_MODEL }}
+          QB_ROUTE: ${{ vars.QB_ROUTE || secrets.QB_ROUTE }}
+          IMMICH_ROUTE: ${{ vars.IMMICH_ROUTE || secrets.IMMICH_ROUTE }}
+          NGINX_ROUTE: ${{ vars.NGINX_ROUTE || secrets.NGINX_ROUTE }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+
+          const config = {
+            agent: {
+              endpoint: process.env.AGENT_ENDPOINT || '',
+              headers: {},
+              options: {
+                model: process.env.AGENT_MODEL || '',
+                temperature: 0.4
+              }
+            },
+            services: {
+              qb: process.env.QB_ROUTE || '',
+              immich: process.env.IMMICH_ROUTE || '',
+              nginx: process.env.NGINX_ROUTE || ''
+            }
+          };
+
+          fs.mkdirSync('public', { recursive: true });
+          fs.writeFileSync('public/agent-config.json', `${JSON.stringify(config, null, 2)}\n`);
+          NODE
+
       - name: Build
         run: npm run build
 
