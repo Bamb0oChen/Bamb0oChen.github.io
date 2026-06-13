@@ -19,6 +19,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -61,6 +63,14 @@ jobs:
 
           fs.mkdirSync('public', { recursive: true });
           fs.writeFileSync('public/agent-config.json', `${JSON.stringify(config, null, 2)}\n`);
+
+          console.log('Runtime config generated:', {
+            agentEndpoint: Boolean(config.agent.endpoint),
+            agentModel: Boolean(config.agent.options.model),
+            qbRoute: Boolean(config.services.qb),
+            immichRoute: Boolean(config.services.immich),
+            nginxRoute: Boolean(config.services.nginx)
+          });
           NODE
 
       - name: Build
