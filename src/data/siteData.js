@@ -17,11 +17,13 @@ export const LIGHTTRACE_LIBRARY = [
 // count: 图片数量（..count），自动生成 img0001.jpg
 // featuredIds: 需要精选的图片 id 列表
 export const LIGHTTRACE_AUTO = {
-    count: 13,
+    count: 22,
     featuredIds: [
         'img0001', 'img0002', 'img0003', 'img0004',
         'img0005', 'img0006', 'img0007', 'img0008', 'img0009', 'img0010',
-        'img0011', 'img0012', 'img0013'
+        'img0011', 'img0012', 'img0013', 'img0014', 'img0015',
+        'img0016', 'img0017', 'img0018', 'img0019', 'img0020',
+        'img0021', 'img0022'
     ],
     meta: {
         img0001: {
@@ -43,7 +45,16 @@ export const LIGHTTRACE_AUTO = {
         img0010: { title: 'Lighttrace 010', date: '2026-02-13', tags: ['旅行'], comment: '下一站之前的停顿。' },
         img0011: { title: 'Lighttrace 011', date: '2026-02-13', tags: ['光影'], comment: '一点点亮，一点点远。' },
         img0012: { title: 'Lighttrace 012', date: '2026-02-13', tags: ['生活'], comment: '心情在画面边缘慢慢展开。' },
-        img0013: { title: 'Lighttrace 013', date: '2026-02-13', tags: ['旅行'], comment: '这一刻被留了下来。' }
+        img0013: { title: 'Lighttrace 013', date: '2026-02-13', tags: ['旅行'], comment: '这一刻被留了下来。' },
+        img0014: { title: '暮色檐影', date: '2026-07-17', tags: ['晚霞', '建筑'], comment: '粉紫暮色落在屋檐之后。' },
+        img0015: { title: '云霞余温', date: '2026-07-17', tags: ['天空', '晚霞'], comment: '天光散开，云层还留着余温。' },
+        img0016: { title: '夏荷', date: '2026-07-17', tags: ['荷花', '夏日'], comment: '荷叶深处，一朵花正好盛开。' },
+        img0017: { title: '湖岸金时', date: '2026-07-17', tags: ['湖景', '黄昏'], comment: '远岸与水面共享同一层金色。' },
+        img0018: { title: '落日熔金', date: '2026-07-17', tags: ['落日', '湖景'], comment: '落日把湖心照成一条发亮的路。' },
+        img0019: { title: '夕照同行', date: '2026-07-17', tags: ['剪影', '生活'], comment: '树影和人影，都被夕阳温柔收拢。' },
+        img0020: { title: '湖畔塔影', date: '2026-07-17', tags: ['湖景', '塔影'], comment: '青山渐暗，塔影在湖边亮起。' },
+        img0021: { title: '林荫来路', date: '2026-07-17', tags: ['街景', '光影'], comment: '阳光穿过树梢，照亮回去的路。' },
+        img0022: { title: '晨光塑像', date: '2026-07-17', tags: ['人文', '建筑'], comment: '蓝天之下，金色塑像迎着光。' }
     }
 };
 
