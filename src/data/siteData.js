@@ -1,4 +1,4 @@
-﻿// LocalStorage 数据管理与站点数据
+// LocalStorage 数据管理与站点数据
 
 // 光影留痕 - 本地图片库配置
 // 说明:
@@ -252,6 +252,28 @@ export const FRIEND_LINKS = [
 // 2) 在下方清单中维护卡片信息，首页会自动渲染
 // 3) cover 建议填写 https 地址，避免混合内容拦截
 export const FOCUS_VIDEO_LIBRARY = [{
+        id: 'vid0003',
+        title: '朋友，不管什么时候请别放弃对生活的热爱 ——浙大天坑的一年半载',
+        description: '20 岁生日的长文自白：记录 2025.9.1-2026.9.1，在求是园脱胎换骨的一年。',
+        platform: 'bilibili',
+        bvid: 'BV1EGt869EWA',
+        link: 'https://www.bilibili.com/video/BV1EGt869EWA/',
+        cover: 'https://i1.hdslb.com/bfs/archive/7230daa199495e2d120f239d65f1022eb3a74bac.jpg',
+        date: '2026-09-01',
+        comment: '生活随笔'
+    },
+    {
+        id: 'vid0004',
+        title: '浙大冠军点直击 niko 夺冠',
+        description: '在浙大线下观赛现场直击：NiKo 终于圆梦 2026 科隆 Major。',
+        platform: 'bilibili',
+        bvid: 'BV11j7M6LEVe',
+        link: 'https://www.bilibili.com/video/BV11j7M6LEVe/',
+        cover: 'https://i0.hdslb.com/bfs/archive/f6147045163a56202dbef6575c89c6ea1356111f.jpg',
+        date: '2026-06-22',
+        comment: '电竞现场'
+    },
+    {
         id: 'vid0001',
         title: 'Everywhere I Go - My Vacation Record',
         description: '从北京/沈阳-哈尔滨-昆明-普洱-西双版纳，或许你想看看我的故事',
