@@ -37,7 +37,7 @@
 }
 
 #header {
-    transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s, border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s, background 0.3s, border-color 0.3s, opacity 0.3s, box-shadow 0.3s;
+    transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, background 0.3s, border-color 0.3s, opacity 0.3s, box-shadow 0.3s;
 }
 
 #header.is-private-open {
@@ -51,6 +51,9 @@
 #header > .site-header-inner {
     position: absolute;
     top: 0;
+    left: 0;
+    right: 0;
+    width: auto;
     height: 66px;
 }
 
@@ -89,21 +92,41 @@
     right: 24px;
     width: auto;
     max-width: none;
+    z-index: 2;
     padding: 16px 2px 0;
     border-top: 1px solid rgba(255, 255, 255, 0.12);
-    opacity: 0;
     visibility: hidden;
-    transform: translateY(-14px);
     pointer-events: none;
-    transition: opacity 0.18s ease, transform 0.22s ease, visibility 0s linear 0.22s;
+    transition: visibility 0s linear 0.25s;
 }
 
 #header.is-private-open > .private-bar-panel {
-    opacity: 1;
     visibility: visible;
-    transform: translateY(0);
     pointer-events: auto;
-    transition: opacity 0.22s ease 0.3s, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1) 0.3s, visibility 0s;
+    transition: visibility 0s;
+}
+
+.private-bar-heading {
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.17s ease, transform 0.22s ease;
+}
+
+#header.is-private-open .private-bar-heading {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.private-bar-panel .server-service-grid {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.16s ease, transform 0.22s ease;
+}
+
+#header.is-private-open .server-service-grid {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.22s ease 0.25s, transform 0.26s ease 0.25s;
 }
 
 .private-bar-heading {
@@ -1774,6 +1797,8 @@
 @media (prefers-reduced-motion: reduce) {
     #header,
     #header > .private-bar-panel,
+    .private-bar-heading,
+    .private-bar-panel .server-service-grid,
     .private-dock-toggle,
     .private-bar-backdrop {
         transition: none !important;
