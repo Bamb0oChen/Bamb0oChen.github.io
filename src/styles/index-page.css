@@ -19,6 +19,96 @@
     padding: 0 30px;
 }
 
+.private-bar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    border: 0;
+    background: rgba(3, 8, 15, 0.36);
+    cursor: default;
+}
+
+#header {
+    transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s, border-color 0.3s, opacity 0.3s, box-shadow 0.3s;
+}
+
+#header.is-private-open {
+    height: 430px;
+    border-radius: 30px;
+    background: rgba(13, 22, 34, 0.9);
+    box-shadow: 0 32px 100px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.19);
+}
+
+#header > .site-header-inner {
+    position: absolute;
+    top: 0;
+    height: 66px;
+}
+
+.private-dock-toggle {
+    position: absolute;
+    left: 50%;
+    top: 12px;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 17px;
+    border: 1px solid rgba(126, 226, 218, 0.25);
+    border-radius: 999px;
+    background: rgba(92, 213, 196, 0.1);
+    color: #e7fffb;
+    font: inherit;
+    font-size: 14px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+}
+
+.private-dock-toggle:hover,
+.private-dock-toggle.is-active {
+    background: rgba(92, 213, 196, 0.18);
+    border-color: rgba(126, 226, 218, 0.5);
+    box-shadow: 0 0 24px rgba(92, 213, 196, 0.12);
+}
+
+#header > .private-bar-panel {
+    display: block;
+    position: absolute;
+    top: 78px;
+    left: 24px;
+    right: 24px;
+    width: auto;
+    max-width: none;
+    padding: 16px 2px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-14px);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.45s;
+}
+
+#header.is-private-open > .private-bar-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.private-bar-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 18px;
+}
+
+.private-bar-heading .section-kicker { margin-bottom: 3px; }
+.private-bar-heading h2 { margin: 0; font-size: 25px; }
+.private-bar-heading > p { margin: 0; color: rgba(255, 255, 255, 0.55); font-size: 13px; }
+.private-bar-panel .server-service-card { min-height: 245px; }
+
 .site-brand {
     font-weight: 700;
     font-size: 18px;
@@ -1672,6 +1762,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    #header,
+    #header > .private-bar-panel,
+    .private-dock-toggle {
+        transition: none !important;
+    }
+
     .hero-tilt,
     .hero,
     .hero-actions a {
@@ -1721,6 +1817,11 @@
 }
 
 @media (max-width: 900px) {
+    .private-dock-toggle { left: 47%; }
+    .site-brand { font-size: 15px; }
+    .private-bar-panel .server-service-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .private-bar-panel .server-service-card { min-height: 245px; }
+
     .hero-title {
         font-size: clamp(31px, 4.5vw, 44px);
     }
@@ -1786,6 +1887,43 @@ html,
 body {
     overflow-x: hidden;
 }
+
+    #header {
+        height: 96px;
+        padding: 0;
+    }
+    #header.is-private-open {
+        height: min(650px, calc(100dvh - 20px));
+        border-radius: 26px;
+    }
+    #header > .site-header-inner {
+        height: 96px;
+        padding: 10px 16px;
+        align-content: space-between;
+    }
+    #header > .site-header-inner > .site-brand {
+        display: none;
+    }
+    .private-dock-toggle {
+        top: 10px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        padding: 7px 11px;
+        font-size: 12px;
+    }
+    #header > .private-bar-panel {
+        top: 102px;
+        left: 16px;
+        right: 16px;
+        bottom: 12px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+    .private-bar-heading { display: block; }
+    .private-bar-heading > p { margin-top: 8px; line-height: 1.5; }
+    .private-bar-panel .server-service-grid { grid-template-columns: 1fr; }
+    .private-bar-panel .server-service-card { min-height: 210px; }
 
 .hero-fluid-canvas {
         opacity: 0.72;

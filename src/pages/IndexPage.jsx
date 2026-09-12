@@ -266,6 +266,7 @@ export default function IndexPage() {
     const [selectedArticleTag, setSelectedArticleTag] = useState('全部');
     const [focusVideos, setFocusVideos] = useState([]);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isPrivateBarOpen, setIsPrivateBarOpen] = useState(false);
     const [isAgentClosing, setIsAgentClosing] = useState(false);
     const [isPageTransitioning, setIsPageTransitioning] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -285,6 +286,15 @@ export default function IndexPage() {
     const heroTarget = useRef({ x: 0, y: 0 });
     const heroTilt = useRef({ x: 0, y: 0 });
     const heroTiltRafRef = useRef(null);
+
+    useEffect(() => {
+        if (!isPrivateBarOpen) return undefined;
+        const closeOnEscape = event => {
+            if (event.key === 'Escape') setIsPrivateBarOpen(false);
+        };
+        window.addEventListener('keydown', closeOnEscape);
+        return () => window.removeEventListener('keydown', closeOnEscape);
+    }, [isPrivateBarOpen]);
 
     useEffect(() => {
         activeIndexRef.current = activeIndex;
@@ -1042,15 +1052,37 @@ export default function IndexPage() {
             <canvas ref={starfieldCanvas} id="starfield" className="starfield-canvas" aria-hidden="true"></canvas>
             <canvas ref={fluidCanvas} className="hero-fluid-canvas" aria-hidden="true"></canvas>
 
-            <header id="header" style={{ opacity: headerOpacity }}>
+            {isPrivateBarOpen && <button className="private-bar-backdrop" type="button" aria-label="关闭 Private Bar" onClick={() => setIsPrivateBarOpen(false)} />}
+            <header id="header" className={isPrivateBarOpen ? 'is-private-open' : ''} style={{ opacity: headerOpacity }}>
                 <div className="site-header-inner">
                     <div className="site-brand">Chen.のhomepage</div>
+                    <button className={`private-dock-toggle ${isPrivateBarOpen ? 'is-active' : ''}`} type="button" aria-expanded={isPrivateBarOpen} aria-controls="private-bar-panel" onClick={() => setIsPrivateBarOpen(open => !open)}>
+                        <span>{isPrivateBarOpen ? 'Private Bar' : 'Private Dock'}</span><span aria-hidden="true">{isPrivateBarOpen ? '×' : '⌄'}</span>
+                    </button>
                     <nav className="site-nav" aria-label="主导航">
                         <button className={`nav-btn nav-btn-button ${isSearchOpen ? 'is-active' : ''}`} type="button" onClick={openSearch}>Agent</button>
                         <a href="gallery.html" className="nav-btn" onClick={event => navigateWithTransition(event, 'gallery.html')}>光影留痕</a>
                         <a href={CHANGELOG_DOC_URL} className="nav-btn" onClick={event => navigateWithTransition(event, CHANGELOG_DOC_URL)}>更新日志</a>
                         <a href="https://Bamb0oChen.github.io/notes/" className="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
                     </nav>
+                </div>
+                <div id="private-bar-panel" className="private-bar-panel" aria-hidden={!isPrivateBarOpen}>
+                    <div className="private-bar-heading">
+                        <div><p className="section-kicker">Homelab</p><h2>Private Bar</h2></div>
+                        <p>服务入口由运行时配置接管，不在页面暴露内部地址。</p>
+                    </div>
+                    <div className="server-service-grid">
+                        {SERVER_SERVICES.map(service => {
+                            const serviceHref = getServiceHref(service);
+                            return (
+                                <a key={service.id} className={`server-service-card server-service-card--${service.illustration} ${serviceHref ? '' : 'is-disabled'}`} href={serviceHref || undefined} target={serviceHref ? '_blank' : undefined} rel={serviceHref ? 'noopener noreferrer' : undefined} aria-disabled={!serviceHref} tabIndex={isPrivateBarOpen && serviceHref ? 0 : -1} onClick={event => !serviceHref && event.preventDefault()}>
+                                    <div className="server-card-topline"><span>{service.label}</span><span>{service.status}</span></div>
+                                    <div className="server-illustration" aria-hidden="true"><span className="server-ill-main"></span><span className="server-ill-accent"></span><span className="server-ill-dot"></span></div>
+                                    <div className="server-card-content"><h3>{service.title}</h3><p>{service.description}</p><span className="server-card-link">{serviceHref ? 'Open private route' : 'Configure route'}</span></div>
+                                </a>
+                            );
+                        })}
+                    </div>
                 </div>
             </header>
 
@@ -1069,40 +1101,6 @@ export default function IndexPage() {
                                 <a href="https://Bamb0oChen.github.io/notes/" target="_blank" rel="noopener noreferrer">打开笔记 <span aria-hidden="true">→</span></a>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="content compact-section server-nav-section" aria-labelledby="server-nav-title">
-                <div className="server-nav-shell">
-                    <div className="server-nav-copy">
-                        <p className="section-kicker">Homelab</p>
-                        <h2 id="server-nav-title">Private Dock</h2>
-                        <p className="server-private-note">服务入口由运行时配置接管，页面不暴露节点地址、端口或内部路径。</p>
-                        <p className="server-legacy-note" aria-hidden="true"></p>
-                    </div>
-                    <div className="server-service-grid">
-                        {SERVER_SERVICES.map(service => {
-                            const serviceHref = getServiceHref(service);
-                            return (
-                            <a key={service.id} className={`server-service-card server-service-card--${service.illustration} ${serviceHref ? '' : 'is-disabled'}`} href={serviceHref || undefined} target={serviceHref ? '_blank' : undefined} rel={serviceHref ? 'noopener noreferrer' : undefined} aria-disabled={!serviceHref} onClick={event => !serviceHref && event.preventDefault()}>
-                                <div className="server-card-topline">
-                                    <span>{service.label}</span>
-                                    <span>{service.status}</span>
-                                </div>
-                                <div className="server-illustration" aria-hidden="true">
-                                    <span className="server-ill-main"></span>
-                                    <span className="server-ill-accent"></span>
-                                    <span className="server-ill-dot"></span>
-                                </div>
-                                <div className="server-card-content">
-                                    <h3>{service.title}</h3>
-                                    <p>{service.description}</p>
-                                    <span className="server-card-link">{serviceHref ? 'Open private route' : 'Configure route'}</span>
-                                </div>
-                            </a>
-                            );
-                        })}
                     </div>
                 </div>
             </section>
