@@ -77,7 +77,7 @@ function ProjectRow({ project, index, reducedMotion, pageVisible }) {
             <figure className="ps-figure" aria-label={`${project.name}：${project.caption}`}>
                 <div className={`ps-preview ps-${project.id} ${playing ? 'ps-playing' : ''}`} data-step={reducedMotion ? 3 : step} aria-hidden="true"><ProjectPreview kind={project.id} step={reducedMotion ? 3 : step} /></div>
             </figure>
-            <div className="ps-copy"><p className="ps-category"><span>{String(index + 1).padStart(2, '0')}</span>{project.category}</p><h3 id={`project-${project.id}`}><a href={project.url} target="_blank" rel="noopener noreferrer">{project.name}</a></h3><p className="ps-description">{project.description}</p><ul className="ps-tags">{project.tags.map(tag => <li key={tag}>{tag}</li>)}</ul></div>
+            <div className="ps-copy"><p className="ps-category"><span>{String(index + 1).padStart(2, '0')}</span>{project.category}</p><h3 id={`project-${project.id}`}><a href={project.url} target="_blank" rel="noopener noreferrer">{project.name}</a></h3><ul className="ps-tags">{project.tags.map(tag => <li key={tag}>{tag}</li>)}</ul></div>
         </article>
     );
 }
