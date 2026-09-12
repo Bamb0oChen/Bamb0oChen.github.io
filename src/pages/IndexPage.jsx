@@ -1059,9 +1059,7 @@ export default function IndexPage() {
                     <div className="hero-shell">
                         <div className="hero-photo" aria-hidden="true"></div>
                         <div className="hero-content">
-                            <p className="greeting">欢迎来到 Chen.のhomepage</p>
-                            <h1 className="hero-title">技术、写作与生活</h1>
-                            <p className="hero-subtitle">一些持续发生的记录</p>
+                            <h1 className="hero-title">欢迎来到 Chen.のhomepage</h1>
                             <div className="typed-wrapper" aria-label={typedText}>
                                 <span className="typed-text">{typedText}</span>
                                 <span className="cursor" aria-hidden="true"></span>
