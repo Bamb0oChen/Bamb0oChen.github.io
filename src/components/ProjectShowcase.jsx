@@ -97,5 +97,5 @@ export default function ProjectShowcase() {
         document.addEventListener('visibilitychange', updateVisibility);
         return () => { media.removeEventListener('change', updateMotion); document.removeEventListener('visibilitychange', updateVisibility); };
     }, []);
-    return <section id="projects" className="ps-section" aria-labelledby="projects-title"><div className="ps-heading"><div><p>SELECTED PROJECTS</p><h2 id="projects-title">精选项目</h2></div><span>代码里的想法，慢慢成为作品。</span></div>{featuredProjects.map((project, index) => <ProjectRow key={project.id} project={project} index={index} reducedMotion={reducedMotion} pageVisible={pageVisible} />)}</section>;
+    return <section id="projects" className="ps-section" aria-labelledby="projects-title"><div className="ps-heading"><div><p>SELECTED PROJECTS</p><h2 id="projects-title">精选项目</h2></div><span>代码里的想法，慢慢成为作品。</span></div><div className="ps-grid">{featuredProjects.map((project, index) => <ProjectRow key={project.id} project={project} index={index} reducedMotion={reducedMotion} pageVisible={pageVisible} />)}</div></section>;
 }
