@@ -25,11 +25,19 @@
     z-index: 999;
     border: 0;
     background: rgba(3, 8, 15, 0.36);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
     cursor: default;
 }
 
+.private-bar-backdrop.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 #header {
-    transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s, border-color 0.3s, opacity 0.3s, box-shadow 0.3s;
+    transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s, border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s, background 0.3s, border-color 0.3s, opacity 0.3s, box-shadow 0.3s;
 }
 
 #header.is-private-open {
@@ -37,6 +45,7 @@
     border-radius: 30px;
     background: rgba(13, 22, 34, 0.9);
     box-shadow: 0 32px 100px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.19);
+    transition-delay: 0s;
 }
 
 #header > .site-header-inner {
@@ -86,7 +95,7 @@
     visibility: hidden;
     transform: translateY(-14px);
     pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.45s;
+    transition: opacity 0.18s ease, transform 0.22s ease, visibility 0s linear 0.22s;
 }
 
 #header.is-private-open > .private-bar-panel {
@@ -94,6 +103,7 @@
     visibility: visible;
     transform: translateY(0);
     pointer-events: auto;
+    transition: opacity 0.22s ease 0.3s, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1) 0.3s, visibility 0s;
 }
 
 .private-bar-heading {
@@ -1764,7 +1774,8 @@
 @media (prefers-reduced-motion: reduce) {
     #header,
     #header > .private-bar-panel,
-    .private-dock-toggle {
+    .private-dock-toggle,
+    .private-bar-backdrop {
         transition: none !important;
     }
 

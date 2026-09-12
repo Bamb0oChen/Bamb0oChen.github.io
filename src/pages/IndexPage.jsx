@@ -1052,7 +1052,7 @@ export default function IndexPage() {
             <canvas ref={starfieldCanvas} id="starfield" className="starfield-canvas" aria-hidden="true"></canvas>
             <canvas ref={fluidCanvas} className="hero-fluid-canvas" aria-hidden="true"></canvas>
 
-            {isPrivateBarOpen && <button className="private-bar-backdrop" type="button" aria-label="关闭 Private Bar" onClick={() => setIsPrivateBarOpen(false)} />}
+            <button className={`private-bar-backdrop ${isPrivateBarOpen ? 'is-visible' : ''}`} type="button" aria-label="关闭 Private Bar" tabIndex={isPrivateBarOpen ? 0 : -1} onClick={() => setIsPrivateBarOpen(false)} />
             <header id="header" className={isPrivateBarOpen ? 'is-private-open' : ''} style={{ opacity: headerOpacity }}>
                 <div className="site-header-inner">
                     <div className="site-brand">Chen.のhomepage</div>
