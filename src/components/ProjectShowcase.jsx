@@ -56,7 +56,6 @@ function ProjectRow({ project, index, reducedMotion, pageVisible }) {
     const ref = useRef(null);
     const [visible, setVisible] = useState(false);
     const [seen, setSeen] = useState(false);
-    const [paused, setPaused] = useState(false);
     const [step, setStep] = useState(0);
     useEffect(() => {
         if (!('IntersectionObserver' in window)) { setVisible(true); setSeen(true); return; }
@@ -67,7 +66,7 @@ function ProjectRow({ project, index, reducedMotion, pageVisible }) {
         observer.observe(ref.current);
         return () => observer.disconnect();
     }, []);
-    const playing = visible && pageVisible && !paused && !reducedMotion;
+    const playing = visible && pageVisible && !reducedMotion;
     useEffect(() => {
         if (!playing) return;
         const timer = window.setInterval(() => setStep(current => (current + 1) % project.steps.length), 2200);
@@ -75,13 +74,10 @@ function ProjectRow({ project, index, reducedMotion, pageVisible }) {
     }, [playing, project.steps.length]);
     return (
         <article ref={ref} className={`ps-row ${seen ? 'ps-seen' : ''}`} style={{ '--ps-accent': project.color }} aria-labelledby={`project-${project.id}`}>
-            <figure className="ps-figure">
-                <div className={`ps-preview ps-${project.id} ${playing ? 'ps-playing' : ''}`} data-step={step} aria-hidden="true"><ProjectPreview kind={project.id} step={step} /></div>
-                <figcaption><span>{project.caption}</span><div className="ps-controls"><button type="button" onClick={() => reducedMotion ? setStep(current => (current + 1) % project.steps.length) : setPaused(value => !value)} aria-label={`${project.name}：${reducedMotion ? '下一步' : paused ? '播放动画' : '暂停动画'}`}>{reducedMotion ? '下一步' : paused ? '播放' : '暂停'}</button><button type="button" onClick={() => { setStep(0); setPaused(false); }} aria-label={`重播 ${project.name} 演示`}>重播</button></div></figcaption>
-                <div className="ps-progress" aria-hidden="true">{project.steps.map((label, i) => <i key={label} className={i <= step ? 'active' : ''} />)}</div>
-                <p className="ps-step"><span>0{step + 1} / 04</span>{project.steps[step]}</p>
+            <figure className="ps-figure" aria-label={`${project.name}：${project.caption}`}>
+                <div className={`ps-preview ps-${project.id} ${playing ? 'ps-playing' : ''}`} data-step={reducedMotion ? 3 : step} aria-hidden="true"><ProjectPreview kind={project.id} step={reducedMotion ? 3 : step} /></div>
             </figure>
-            <div className="ps-copy"><p className="ps-category"><span>{String(index + 1).padStart(2, '0')}</span>{project.category}</p><h3 id={`project-${project.id}`}>{project.name}</h3>{project.status && <span className="ps-status">{project.status}</span>}<p className="ps-description">{project.description}</p><ul className="ps-tags">{project.tags.map(tag => <li key={tag}>{tag}</li>)}</ul><div className="ps-links"><a href={project.url} target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>{project.liveUrl && <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">阅读笔记 <span aria-hidden="true">↗</span></a>}</div></div>
+            <div className="ps-copy"><p className="ps-category"><span>{String(index + 1).padStart(2, '0')}</span>{project.category}</p><h3 id={`project-${project.id}`}><a href={project.url} target="_blank" rel="noopener noreferrer">{project.name}</a></h3><p className="ps-description">{project.description}</p><ul className="ps-tags">{project.tags.map(tag => <li key={tag}>{tag}</li>)}</ul></div>
         </article>
     );
 }
@@ -97,5 +93,5 @@ export default function ProjectShowcase() {
         document.addEventListener('visibilitychange', updateVisibility);
         return () => { media.removeEventListener('change', updateMotion); document.removeEventListener('visibilitychange', updateVisibility); };
     }, []);
-    return <section id="projects" className="ps-section" aria-labelledby="projects-title"><div className="ps-heading"><div><p>SELECTED PROJECTS</p><h2 id="projects-title">精选项目</h2></div><span>代码里的想法，慢慢成为作品。</span></div><div className="ps-grid">{featuredProjects.map((project, index) => <ProjectRow key={project.id} project={project} index={index} reducedMotion={reducedMotion} pageVisible={pageVisible} />)}</div></section>;
+    return <section id="projects" className="ps-section" aria-labelledby="projects-title"><div className="ps-heading"><div><p>SELECTED PROJECTS</p><h2 id="projects-title">精选项目</h2></div></div><div className="ps-grid">{featuredProjects.map((project, index) => <ProjectRow key={project.id} project={project} index={index} reducedMotion={reducedMotion} pageVisible={pageVisible} />)}</div></section>;
 }
