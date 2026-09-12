@@ -835,7 +835,8 @@ export default function IndexPage() {
         const rect = currentTarget.getBoundingClientRect();
         const viewportX = Math.max(0, Math.min(1, (event.clientX - rect.left) / (rect.width || 1)));
         const viewportY = Math.max(0, Math.min(1, (event.clientY - rect.top) / (rect.height || 1)));
-        const maxTilt = 6;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const maxTilt = 3;
         heroTarget.current = {
             y: Math.max(-maxTilt, Math.min(maxTilt, (viewportX - 0.5) * 2 * maxTilt)),
             x: Math.max(-maxTilt, Math.min(maxTilt, -(viewportY - 0.5) * 2 * maxTilt))
@@ -866,19 +867,22 @@ export default function IndexPage() {
         const initialVideos = buildFocusVideos();
         updateHeaderHeroOpacity();
 
-        const cleanupStarfield = startStarfield(starfieldCanvas.current, 'star');
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const cleanupStarfield = reducedMotion ? null : startStarfield(starfieldCanvas.current, 'star');
         let cleanupHeroFluid = null;
         let mounted = true;
-        import('../utils/fluidHero')
-            .then(({ startHeroFluid }) => {
-                if (!mounted) return;
-                cleanupHeroFluid = startHeroFluid(fluidCanvas.current, {
-                    getOpacity: () => Math.max(0, 1 - heroScrollProgressRef.current * 1.35)
+        if (!reducedMotion) {
+            import('../utils/fluidHero')
+                .then(({ startHeroFluid }) => {
+                    if (!mounted) return;
+                    cleanupHeroFluid = startHeroFluid(fluidCanvas.current, {
+                        getOpacity: () => Math.max(0, 1 - heroScrollProgressRef.current * 1.35)
+                    });
+                })
+                .catch(() => {
+                    cleanupHeroFluid = null;
                 });
-            })
-            .catch(() => {
-                cleanupHeroFluid = null;
-            });
+        }
 
         let typedTimer = null;
         const phrases = ['Bamb0oChen の空间', 'ZJUer / CS Learner', 'Counter-Strike & CS', 'Coffee & Pingpong', 'Koala@ZJU / X-Lab@ZJU'];
@@ -905,7 +909,11 @@ export default function IndexPage() {
             }
             typedTimer = window.setTimeout(tickTyping, deleting ? 50 : 90);
         };
-        typedTimer = window.setTimeout(tickTyping, 400);
+        if (reducedMotion) {
+            setTypedText(phrases[0]);
+        } else {
+            typedTimer = window.setTimeout(tickTyping, 400);
+        }
 
         let resizeTimer = null;
         let scrollRaf = null;
@@ -1049,11 +1057,18 @@ export default function IndexPage() {
             <section className="hero" style={heroDepthStyle}>
                 <div className="hero-tilt" style={heroTiltStyle} onMouseMove={handleHeroTilt} onMouseLeave={resetHeroTilt}>
                     <div className="hero-shell">
+                        <div className="hero-photo" aria-hidden="true"></div>
                         <div className="hero-content">
-                            <h1 className="greeting">欢迎来到 Chen.のhomepage</h1>
-                            <div className="typed-wrapper">
+                            <p className="greeting">欢迎来到 Chen.のhomepage</p>
+                            <h1 className="hero-title">技术、写作与生活</h1>
+                            <p className="hero-subtitle">一些持续发生的记录</p>
+                            <div className="typed-wrapper" aria-label={typedText}>
                                 <span className="typed-text">{typedText}</span>
                                 <span className="cursor" aria-hidden="true"></span>
+                            </div>
+                            <div className="hero-actions">
+                                <a href="#writing">读我的文章 <span aria-hidden="true">→</span></a>
+                                <a href="https://Bamb0oChen.github.io/notes/" target="_blank" rel="noopener noreferrer">打开笔记 <span aria-hidden="true">→</span></a>
                             </div>
                         </div>
                     </div>
@@ -1117,7 +1132,7 @@ export default function IndexPage() {
                 </div>
             </section>
 
-            <section className="content">
+            <section className="content" id="writing">
                 <div className="section-heading"><p className="section-kicker">Writing</p><h2>妙笔生花</h2></div>
                 <div className="filter-row" aria-label="文章分类筛选">
                     {articleTags.map(tag => (

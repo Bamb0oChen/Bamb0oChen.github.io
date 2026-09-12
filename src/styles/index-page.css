@@ -102,15 +102,14 @@
 .hero-tilt {
     display: inline-block;
     padding: 1px;
-    border-radius: 36px;
+    border-radius: 30px;
     background:
         linear-gradient(135deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.05) 44%, rgba(255, 255, 255, 0.16) 100%),
         rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.14);
     box-shadow:
-        0 32px 90px rgba(0, 0, 0, 0.48),
-        0 12px 34px rgba(32, 95, 160, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.32);
+        0 26px 75px rgba(0, 0, 0, 0.42),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
     transition: transform 0.2s ease;
     transform-style: preserve-3d;
     will-change: transform;
@@ -118,13 +117,12 @@
 
 .hero-shell {
     width: min(1100px, 92vw);
-    height: min(560px, 70vh);
-    border-radius: 35px;
+    height: min(540px, 68vh);
+    border-radius: 29px;
     overflow: hidden;
-    background: url("/static/hero.jpg") center/cover no-repeat;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         inset 0 -70px 110px rgba(0, 0, 0, 0.26),
@@ -132,20 +130,26 @@
     position: relative;
 }
 
+.hero-photo {
+    position: absolute;
+    inset: 0;
+    background: url("/static/hero.jpg") center/cover no-repeat;
+}
+
 .hero-shell::before {
     content: '';
     position: absolute;
     inset: 0;
-    background:
-        radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.08), transparent 34%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(0, 22, 45, 0.24));
+    background: linear-gradient(90deg, rgba(9, 13, 20, 0.86) 0%, rgba(9, 13, 20, 0.56) 37%, rgba(9, 13, 20, 0.08) 68%, transparent 100%);
+    z-index: 1;
+    pointer-events: none;
 }
 
 .hero-shell::after {
     content: '';
     position: absolute;
     inset: 1px;
-    border-radius: 34px;
+    border-radius: 28px;
     pointer-events: none;
     box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.09),
@@ -162,65 +166,60 @@
 
 .hero-tilt .hero-content {
     transform: translateZ(0);
-    backdrop-filter: saturate(165%) blur(22px);
-    -webkit-backdrop-filter: saturate(165%) blur(22px);
-    background:
-        radial-gradient(circle at 22% 0%, rgba(255, 255, 255, 0.12), transparent 34%),
-        linear-gradient(180deg, rgba(13, 23, 34, 0.54), rgba(8, 16, 26, 0.32));
-    border-radius: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: none;
+    border-radius: 0;
+    border: 0;
     position: relative;
-    z-index: 1;
-    max-width: min(760px, 82vw);
-    box-shadow:
-        0 22px 64px rgba(0, 0, 0, 0.34),
-        0 8px 24px rgba(28, 75, 125, 0.09),
-        inset 0 1px 0 rgba(255, 255, 255, 0.28),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.05);
-    overflow: hidden;
-}
-
-.hero-tilt .hero-content::before {
-    content: '';
-    position: absolute;
-    inset: 1px;
-    border-radius: 27px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 42%);
-    pointer-events: none;
-}
-
-.hero-tilt .hero-content::after {
-    content: '';
-    position: absolute;
-    left: 12%;
-    right: 12%;
-    top: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.42), transparent);
-    pointer-events: none;
+    z-index: 2;
+    width: min(46%, 500px);
+    max-width: none;
+    padding: 48px 0 48px clamp(38px, 5vw, 74px);
+    box-shadow: none;
+    overflow: visible;
+    text-align: left;
 }
 
 .hero .greeting {
-    font-size: clamp(17px, 2vw, 25px);
+    margin: 0 0 18px;
+    font-size: clamp(14px, 1.5vw, 17px);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.84);
+}
+
+.hero-title {
+    margin: 0;
+    font-size: clamp(34px, 4vw, 54px);
     font-weight: 650;
-    letter-spacing: 0.01em;
-    color: rgba(255, 255, 255, 0.9);
-    position: relative;
-    z-index: 1;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.hero-subtitle {
+    margin: 16px 0 0;
+    font-size: clamp(16px, 1.6vw, 20px);
+    color: rgba(255, 255, 255, 0.83);
 }
 
 .typed-wrapper {
-    display: flex;
+    display: inline-flex;
     width: 100%;
     min-width: 0;
     max-width: 100%;
-    justify-content: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
     white-space: normal;
-    font-size: clamp(34px, 4.8vw, 58px);
-    line-height: 1.18;
+    min-height: 28px;
+    margin-top: 24px;
+    font-size: clamp(14px, 1.5vw, 18px);
+    line-height: 1.45;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
-    font-weight: 700;
+    font-weight: 450;
+    color: rgba(255, 255, 255, 0.72);
     position: relative;
     z-index: 1;
 }
@@ -232,10 +231,42 @@
     overflow-wrap: anywhere;
     word-break: break-word;
     white-space: normal;
+    color: inherit;
+    -webkit-text-stroke: 0;
 }
 
 .cursor {
     flex: 0 0 2px;
+    height: 1.2em;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    margin-top: 34px;
+}
+
+.hero-actions a {
+    display: inline-flex;
+    gap: 12px;
+    align-items: center;
+    padding: 0 0 7px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.68);
+    color: #fff;
+    font-size: 16px;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.hero-actions a:hover,
+.hero-actions a:focus-visible {
+    color: #ffd9b7;
+    border-color: #ffd9b7;
+}
+
+#writing {
+    scroll-margin-top: 110px;
 }
 
 .section-heading {
@@ -1655,6 +1686,22 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .hero-tilt,
+    .hero,
+    .hero-actions a {
+        transition: none !important;
+    }
+
+    .hero-fluid-canvas,
+    .starfield-canvas {
+        display: none;
+    }
+
+    .cursor {
+        animation: none;
+        opacity: 0;
+    }
+
     .agent-overlay,
     .agent-panel,
     .agent-sidebar,
@@ -1688,6 +1735,10 @@
 }
 
 @media (max-width: 900px) {
+    .hero-title {
+        font-size: clamp(31px, 4.5vw, 44px);
+    }
+
     .status-panel,
     .search-results {
         grid-template-columns: 1fr;
@@ -1772,28 +1823,56 @@ body {
     }
     .hero-tilt {
         transform: none !important;
-        width: calc(100vw - 18px);
+        width: min(560px, calc(100vw - 28px));
         box-sizing: border-box;
-        padding: 6px;
+        padding: 1px;
     }
     .hero-shell {
         width: 100%;
-        height: min(560px, 62vh);
+        height: auto;
+        display: flex;
+        flex-direction: column;
         box-sizing: border-box;
     }
     .hero {
-        padding-top: 96px;
+        min-height: 100vh;
+        height: auto;
+        padding: 140px 0 64px;
+        box-sizing: border-box;
+        align-items: flex-start;
+    }
+    .hero-photo {
+        position: relative;
+        inset: auto;
+        width: 100%;
+        height: clamp(230px, 44vh, 360px);
+        background-position: center 42%;
+    }
+    .hero-shell::before {
+        display: none;
     }
     .hero-tilt .hero-content {
-        max-width: calc(100% - 28px);
-        padding: 24px 14px;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 28px 24px 32px;
+        background: #151b23;
     }
     .typed-wrapper {
-        font-size: clamp(18px, 5.8vw, 24px);
-        gap: 4px;
+        font-size: 15px;
     }
     .hero .greeting {
-        font-size: 18px;
+        font-size: 14px;
+    }
+    .hero-title {
+        font-size: clamp(28px, 7vw, 38px);
+        white-space: normal;
+    }
+    .hero-subtitle {
+        font-size: 16px;
+    }
+    .hero-actions {
+        gap: 24px;
+        margin-top: 28px;
     }
     .photo-strip {
         flex-wrap: nowrap;
