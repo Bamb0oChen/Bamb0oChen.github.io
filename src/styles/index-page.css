@@ -37,6 +37,7 @@
 }
 
 #header {
+    border-radius: 33px;
     transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, background 0.3s, border-color 0.3s, opacity 0.3s, box-shadow 0.3s;
 }
 
