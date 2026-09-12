@@ -58,6 +58,19 @@ export const LIGHTTRACE_AUTO = {
     }
 };
 
+// 2026-09-12 挑选的原图；网页版本经过缩放和转码，不携带原图 EXIF。
+const LIGHTTRACE_FAVOR_20260912 = [
+    '0004', '0022', '0028', '0056', '0093', '0109', '0118', '0140',
+    '0149', '0156', '0161', '0163', '0190', '0203', '0207', '0212',
+    '0217', '9801', '9877', '9911', '9913', '9914', '9917', '9920',
+    '9921', '9937', '9984', '9988', '9990'
+].map(number => ({
+    id: `favor-${number}`,
+    src: `photos/lighttrace/favor-20260912/img_${number}.webp`,
+    title: `IMG_${number}`,
+    featured: true
+}));
+
 export function buildAutoLibrary(config) {
     if (!config || !config.count || config.count < 1) return [];
     const featuredSet = new Set(config.featuredIds || []);
@@ -84,7 +97,7 @@ export function getLighttraceLibrary() {
     if (Array.isArray(LIGHTTRACE_LIBRARY) && LIGHTTRACE_LIBRARY.length > 0) {
         return LIGHTTRACE_LIBRARY;
     }
-    return buildAutoLibrary(LIGHTTRACE_AUTO);
+    return [...LIGHTTRACE_FAVOR_20260912, ...buildAutoLibrary(LIGHTTRACE_AUTO)];
 }
 
 export const FEATURED_LIGHTTRACE = getLighttraceLibrary().filter(item => item && item.featured);
