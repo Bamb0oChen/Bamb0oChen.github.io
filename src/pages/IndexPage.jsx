@@ -12,6 +12,7 @@ import DomeGallery from '../components/DomeGallery';
 import CardSwap, { Card } from '../components/CardSwap';
 import ChromaGrid from '../components/ChromaGrid';
 import BorderGlow from '../components/BorderGlow';
+import ProjectShowcase from '../components/ProjectShowcase';
 import '../styles/index-page.css';
 
 const NOTES_BASE_URL = 'https://bamb0ochen.github.io/notes/';
@@ -1104,6 +1105,8 @@ export default function IndexPage() {
                     </div>
                 </div>
             </section>
+
+            <ProjectShowcase />
 
             <section className="content" ref={featuredContainer}>
                 <div className="section-heading"><p className="section-kicker">Lighttrace</p><h2>精选光影</h2></div>

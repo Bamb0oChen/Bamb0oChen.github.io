@@ -1,0 +1,45 @@
+export const featuredProjects = [
+    {
+        id: 'infohub', name: 'InfoHub', repository: 'awesome-Mac-reminder',
+        category: 'INFORMATION / macOS', status: '第一阶段原型', color: '#8ebeff',
+        description: '在个人 Mac 上采集信息，按来源整理到邮箱，并计划将明确的校园时间同步到 Apple 日历。',
+        tags: ['Python', 'RSS', 'macOS'], caption: '规划流程示意 · 示例信息',
+        steps: ['采集公开通知与 RSS', '按来源整理信息', '预览邮件摘要', '明确时间映射到日历'],
+    },
+    {
+        id: 'xiaxi', name: '夏隙百日', repository: 'xiaxi-bairi',
+        category: 'STORY / VISUAL NOVEL', status: '开发中', color: '#f3bb96',
+        description: '以高考倒计时一百天为时间轴的校园群像视觉小说，让人物、日常对话和选择共同推进故事。',
+        tags: ['Ren’Py', '视觉小说', '校园故事'], caption: '叙事流程示意',
+        steps: ['翻开故事', '进入校园日常', '在岔路口作出选择', '让故事继续'],
+    },
+    {
+        id: 'colorpal', name: 'ColorPal', repository: 'ColorPal',
+        category: 'COLOR / COMPANION', color: '#d1b5ff',
+        description: '从照片里收集颜色，把色彩能量喂给小彩，让一次次拍摄成为伙伴的成长和自己的彩色足迹。',
+        tags: ['Vue', 'FastAPI', '色彩分析'], caption: '功能流程示意',
+        steps: ['记录一张照片', '分析画面色彩', '收集颜色能量', '陪伴小彩成长'],
+    },
+    {
+        id: 'claude', name: 'Learn Claude Code', repository: 'learn-claude-code',
+        category: 'LEARNING / AGENT HARNESS', color: '#efa790',
+        description: '从一个工具调用循环出发，学习 Agent 周围的工具、上下文、任务系统与协作机制。',
+        tags: ['Python', 'Agent', '学习实践'], caption: 'Agent 循环示意',
+        steps: ['接收任务', '模型选择工具', '执行并返回结果', '携带结果进入下一轮'],
+    },
+    {
+        id: 'study', name: 'Agent4Study', repository: 'Agent4Study',
+        category: 'KNOWLEDGE / AI', color: '#85d9c6',
+        description: '把多本教材连接成可探索的知识图谱，通过检索与 Agent 工作流回答问题，并回到原文查证。',
+        tags: ['知识图谱', 'RAG', '多 Agent'], caption: '功能流程示意 · 示例教材',
+        steps: ['导入教材', '连接章节与知识点', '检索相关知识', '带着引用回答问题'],
+    },
+    {
+        id: 'notes', name: 'Notes', repository: 'notes',
+        category: 'NOTES / CONTINUOUS LEARNING', color: '#9abaff',
+        description: '计算机科学、数学和语言学习的个人笔记，把课程、实验和自己的理解慢慢积累在一起。',
+        tags: ['MkDocs', 'Markdown', '学习笔记'], caption: '阅读流程示意',
+        liveUrl: 'https://bamb0ochen.github.io/notes/',
+        steps: ['从目录出发', '进入一个知识点', '读代码与公式', '把理解记录下来'],
+    },
+].map(project => ({ ...project, url: `https://github.com/Bamb0oChen/${project.repository}` }));
