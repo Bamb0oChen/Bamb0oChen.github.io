@@ -55,6 +55,8 @@
     right: 0;
     width: auto;
     height: 66px;
+    box-sizing: border-box;
+    z-index: 3;
 }
 
 .private-dock-toggle {
@@ -143,6 +145,8 @@
 .private-bar-panel .server-service-card { min-height: 245px; }
 
 .site-brand {
+    flex: 0 0 auto;
+    white-space: nowrap;
     font-weight: 700;
     font-size: 18px;
     letter-spacing: 0;
