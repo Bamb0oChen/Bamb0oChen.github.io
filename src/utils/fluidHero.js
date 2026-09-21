@@ -76,33 +76,34 @@ void main() {
 
     float t = uTime * 0.045;
     vec3 light = vec3(0.0);
-    // Folded curtains: a soft luminous lower edge and fading vertical rays.
-    for (int i = 0; i < 3; i++) {
+    // Bend the entire curtain coordinate system, including its fine rays.
+    for (int i = 0; i < 2; i++) {
         float layer = float(i);
-        float x = q.x + layer * 0.31;
+        float x = q.x + layer * 0.23
+            + sin(q.y * 4.5 + t * 0.65 + layer) * 0.22;
         float fold = fbm(vec2(x * 1.65 + t * 0.3, layer * 3.7 + t * 0.16));
-        float arc = -0.22 + layer * 0.15
-            + sin(x * 2.2 + t + layer * 1.8) * 0.12
-            + (fold - 0.5) * 0.24
-            + sin(x * 5.0 + fold * 3.0 - t * 0.4) * 0.035;
+        float arc = -0.12 + layer * 0.17
+            + sin(x * 3.8 + t * 0.7 + layer * 1.4) * 0.29
+            + (fold - 0.5) * 0.12
+            + sin(x * 7.0 - t * 0.4) * 0.045;
         float h = q.y - arc;
-        float rayHeight = 0.18 + fold * 0.30;
-        float curtain = smoothstep(-0.055, 0.035, h)
-            * exp(-max(h, 0.0) / rayHeight * 3.0);
-        float edge = exp(-pow(h / 0.04, 2.0));
-        float rayX = x * 72.0 + fold * 15.0 + h * (4.0 + layer * 2.0);
-        float rays = 0.25 + 0.75 * noise(vec2(rayX - t * 0.5, layer * 7.0 + t * 0.1));
-        float detail = 0.65 + 0.35 * noise(vec2(rayX * 2.6, h * 1.5 + t * 0.12));
+        float rayHeight = 0.26 + fold * 0.30;
+        float curtain = smoothstep(-0.075, 0.04, h)
+            * exp(-max(h, 0.0) / rayHeight * 3.5);
+        float edge = exp(-pow(h / 0.035, 2.0));
+        float rayX = x * 110.0 + fold * 12.0 + sin(h * 5.0 + t) * 9.0;
+        float rays = 0.62 + 0.38 * noise(vec2(rayX - t * 0.5, layer * 7.0 + t * 0.1));
+        float detail = 0.85 + 0.15 * noise(vec2(rayX * 2.6, h * 2.5 + t * 0.12));
         float spread = exp(-pow(h / 0.22, 2.0)) * 0.12;
-        vec3 green = vec3(0.16, 0.88, 0.40);
+        vec3 green = vec3(0.16, 0.76, 0.49);
         vec3 teal = vec3(0.10, 0.57, 0.72);
         vec3 violet = vec3(0.38, 0.23, 0.65);
         vec3 base = mix(green, teal, layer * 0.28);
         vec3 tint = mix(base, violet, smoothstep(0.08, 0.38, h) * 0.65);
         float curtainVariation = 0.35 + 0.65 * smoothstep(0.2, 0.75,
             noise(vec2(x * 2.0 + layer * 4.0, t * 0.25)));
-        light += (tint * (curtain * rays * detail * 0.85 + spread)
-            + mix(base, vec3(0.65, 0.95, 0.79), 0.4) * edge * rays * 0.22)
+        light += (tint * (curtain * rays * detail * 0.70 + spread)
+            + mix(base, vec3(0.65, 0.95, 0.79), 0.4) * edge * 0.30)
             * curtainVariation * (1.0 - layer * 0.18);
     }
     float edgeFade = smoothstep(0.0, 0.16, uv.x) * (1.0 - smoothstep(0.84, 1.0, uv.x));
