@@ -10,9 +10,10 @@
 .ps-figure { margin: 0; min-width: 0; width: 100%; container-type: inline-size; }
 .ps-preview { height: auto; aspect-ratio: 4 / 3; position: relative; overflow: hidden; border-radius: 18px; border: 1px solid #ffffff1c; background: radial-gradient(ellipse at 15% 0, color-mix(in srgb, var(--ps-accent) 15%, transparent), transparent 70%), #111a25; font-size: 12px; }
 .ps-screenshots { background: #091224; }
-.ps-screenshot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 1.2s ease-in-out; }
+.ps-screenshot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 1.2s ease-in-out; }
 .ps-screenshot.is-active { opacity: 1; }
-.ps-preview--study .ps-screenshot:first-child { background: #f5f7fb; padding: 8%; box-sizing: border-box; }
+.ps-preview--colorpal .ps-screenshot:first-child { object-position: center 34%; }
+.ps-preview--study .ps-screenshot:first-child { object-fit: contain; background: #f5f7fb; padding: 8%; box-sizing: border-box; }
 @media (prefers-reduced-motion: reduce) { .ps-screenshot { transition: none; } }
 .ps-section :focus-visible { outline: 2px solid var(--ps-accent, #9abaff); outline-offset: 4px; }
 .ps-category { display: flex; gap: 15px; align-items: center; font-size: 10px; letter-spacing: .13em; color: var(--ps-accent); margin: 0 0 18px; }
