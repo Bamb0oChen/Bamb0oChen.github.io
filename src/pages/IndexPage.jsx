@@ -883,7 +883,7 @@ export default function IndexPage() {
         let cleanupHeroFluid = null;
         let mounted = true;
         if (!reducedMotion) {
-            import('../utils/fluidHero')
+            import('../utils/vendor/homepageFluid')
                 .then(({ startHeroFluid }) => {
                     if (!mounted) return;
                     cleanupHeroFluid = startHeroFluid(fluidCanvas.current, {
