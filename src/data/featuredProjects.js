@@ -37,7 +37,13 @@ export const featuredProjects = [
         id: 'study', name: 'Agent4Study', repository: 'Agent4Study',
         category: 'KNOWLEDGE / AI', color: '#85d9c6',
         description: '把多本教材连接成可探索的知识图谱，通过检索与 Agent 工作流回答问题，并回到原文查证。',
-        tags: ['知识图谱', 'RAG', '多 Agent'], caption: '功能流程示意 · 示例教材',
+        tags: ['知识图谱', 'RAG', '多 Agent'], caption: '项目标识、知识图谱界面、项目报告与代码仓库',
+        screenshots: [
+            'images/projects/agent4study/01-logo.png',
+            'images/projects/agent4study/02-graph.png',
+            'images/projects/agent4study/03-report.png',
+            'images/projects/agent4study/04-repository.png',
+        ],
         steps: ['导入教材', '连接章节与知识点', '检索相关知识', '带着引用回答问题'],
     },
     {

@@ -12,6 +12,7 @@
 .ps-screenshots { background: #091224; }
 .ps-screenshot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 1.2s ease-in-out; }
 .ps-screenshot.is-active { opacity: 1; }
+.ps-preview--study .ps-screenshot:first-child { background: #f5f7fb; padding: 8%; box-sizing: border-box; }
 @media (prefers-reduced-motion: reduce) { .ps-screenshot { transition: none; } }
 .ps-section :focus-visible { outline: 2px solid var(--ps-accent, #9abaff); outline-offset: 4px; }
 .ps-category { display: flex; gap: 15px; align-items: center; font-size: 10px; letter-spacing: .13em; color: var(--ps-accent); margin: 0 0 18px; }
