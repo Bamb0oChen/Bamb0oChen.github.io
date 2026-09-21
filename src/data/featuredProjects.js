@@ -3,7 +3,13 @@ export const featuredProjects = [
         id: 'infohub', name: 'InfoHub', repository: 'awesome-Mac-reminder',
         category: 'INFORMATION / macOS', status: '第一阶段原型', color: '#8ebeff',
         description: '在个人 Mac 上采集信息，按来源整理到邮箱，并计划将明确的校园时间同步到 Apple 日历。',
-        tags: ['Python', 'RSS', 'macOS'], caption: '规划流程示意 · 示例信息',
+        tags: ['Python', 'RSS', 'macOS'], caption: '服务监控、校园通知简报、技术资讯简报与日历界面',
+        screenshots: [
+            'images/projects/infohub/01-monitoring.png',
+            'images/projects/infohub/02-campus-digest.png',
+            'images/projects/infohub/03-tech-digest.png',
+            'images/projects/infohub/04-calendar.png',
+        ],
         steps: ['采集公开通知与 RSS', '按来源整理信息', '预览邮件摘要', '明确时间映射到日历'],
     },
     {
