@@ -76,37 +76,37 @@ void main() {
 
     float t = uTime * 0.045;
     vec3 light = vec3(0.0);
-    // An open elliptical crown, with flowing folds in radial coordinates.
-    // The lower opening avoids a neon-ring silhouette around the hero.
-    vec2 crown = vec2(q.x / max(uAspect * 0.43, 0.36), (q.y + 0.03) / 0.38);
-    crown.x += 0.07 * sin(crown.y * 2.4 + t * 0.7);
-    crown.y += 0.06 * sin(crown.x * 2.8 - t * 0.5);
-    float angle = atan(crown.y, crown.x);
-    float radius = length(crown);
-    float opening = smoothstep(-0.88, -0.28, sin(angle));
-    for (int i = 0; i < 2; i++) {
-        float layer = float(i);
+    // Integrate light above a folded emitting edge, never radially outwards.
+    // Positive UV y is up. Sampling below each pixel creates rising curtains.
+    for (int i = 0; i < 18; i++) {
+        float rise = float(i) / 17.0;
+        vec2 source = q - vec2(0.0, rise * 0.34);
+        source.x -= rise * 0.045 * sin(q.y * 5.0 + t * 0.5);
+        vec2 crown = vec2(source.x / max(uAspect * 0.43, 0.36), (source.y + 0.11) / 0.34);
+        crown.x += 0.10 * sin(crown.y * 2.4 + t * 0.7);
+        crown.y += 0.07 * sin(crown.x * 2.8 - t * 0.5);
+        float angle = atan(crown.y, crown.x);
+        float radius = length(crown);
+        float opening = smoothstep(-0.92, -0.38, sin(angle));
         vec2 angular = vec2(cos(angle), sin(angle));
-        float fold = fbm(angular * 2.5 + vec2(t * 0.25, layer * 4.2));
-        float rim = 0.91 - layer * 0.18
-            + sin(angle * 3.0 + t * 0.6 + layer) * 0.10
+        float fold = noise(angular * 4.5 + vec2(t * 0.25, t * 0.1));
+        float rim = 0.91
+            + sin(angle * 3.0 + t * 0.6) * 0.13
             + sin(angle * 5.0 - t * 0.4) * 0.035
-            + (fold - 0.5) * 0.16;
+            + sin(angle * 13.0 + fold * 4.0 + t) * 0.025
+            + (fold - 0.5) * 0.12;
         float distanceToRim = radius - rim;
-        float width = 0.06 + fold * 0.07;
+        float width = 0.025 + rise * 0.055;
         float edge = exp(-pow(distanceToRim / width, 2.0));
-        float veil = smoothstep(-0.05, 0.06, distanceToRim)
-            * exp(-max(distanceToRim, 0.0) * 6.0);
-        float glow = exp(-pow(distanceToRim / 0.27, 2.0));
-        float bentAngle = angle + distanceToRim * 0.6 + fold * 0.10;
-        float silk = noise(vec2(cos(bentAngle), sin(bentAngle)) * 65.0 + t * 0.3);
-        float modulation = 0.70 + silk * 0.30;
-        float intensity = 0.60 + 0.40 * sin(angle * 2.0 + t * 0.45 + layer);
-        vec3 green = vec3(0.27, 0.78, 0.36);
-        vec3 pale = vec3(0.62, 0.94, 0.57);
-        vec3 outer = vec3(0.08, 0.32, 0.24);
-        light += (pale * edge * 0.48 + green * veil * modulation * 0.38
-            + outer * glow * 0.32) * intensity * opening * (1.0 - layer * 0.55);
+        float glow = exp(-pow(distanceToRim / 0.16, 2.0));
+        float silk = noise(angular * 105.0 + t * 0.18);
+        float fineSilk = noise(angular * 235.0 - t * 0.12);
+        float modulation = 0.25 + silk * 0.55 + fineSilk * 0.20;
+        float upwardFlow = 0.8 + 0.2 * sin(rise * 15.0 - t * 3.5 + fold * 6.0);
+        float intensity = (0.60 + 0.40 * sin(angle * 2.0 + t * 0.45)) * exp(-rise * 3.8);
+        vec3 tint = mix(vec3(0.43, 0.90, 0.48), vec3(0.13, 0.47, 0.42), rise);
+        light += (tint * edge * modulation * upwardFlow * 0.34
+            + vec3(0.08, 0.28, 0.16) * glow * 0.035) * intensity * opening;
     }
     float edgeFade = smoothstep(0.0, 0.07, uv.x) * (1.0 - smoothstep(0.93, 1.0, uv.x));
     float verticalFade = smoothstep(0.0, 0.10, uv.y) * (1.0 - smoothstep(0.93, 1.0, uv.y));
