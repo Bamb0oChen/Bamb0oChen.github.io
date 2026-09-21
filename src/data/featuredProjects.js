@@ -17,7 +17,13 @@ export const featuredProjects = [
         id: 'colorpal', name: 'ColorPal', repository: 'ColorPal',
         category: 'COLOR / COMPANION', color: '#d1b5ff',
         description: '从照片里收集颜色，把色彩能量喂给小彩，让一次次拍摄成为伙伴的成长和自己的彩色足迹。',
-        tags: ['Vue', 'FastAPI', '色彩分析'], caption: '功能流程示意',
+        tags: ['Vue', 'FastAPI', '色彩分析'], caption: '项目海报与真实界面',
+        screenshots: [
+            'images/projects/colorpal/01-poster.png',
+            'images/projects/colorpal/02-home.png',
+            'images/projects/colorpal/03-map.png',
+            'images/projects/colorpal/04-community.png',
+        ],
         steps: ['记录一张照片', '分析画面色彩', '收集颜色能量', '陪伴小彩成长'],
     },
     {
