@@ -42,7 +42,13 @@ export const featuredProjects = [
         id: 'claude', name: 'Learn Claude Code', repository: 'learn-claude-code',
         category: 'LEARNING / AGENT HARNESS', color: '#efa790',
         description: '从一个工具调用循环出发，学习 Agent 周围的工具、上下文、任务系统与协作机制。',
-        tags: ['Python', 'Agent', '学习实践'], caption: 'Agent 循环示意',
+        tags: ['Python', 'Agent', '学习实践'], caption: 'Agent 循环、工具使用、Claude 配图与任务隔离笔记',
+        screenshots: [
+            'images/projects/learn-claude-code/01-agent-loop.png',
+            'images/projects/learn-claude-code/02-tool-use.png',
+            'images/projects/learn-claude-code/03-claude.png',
+            'images/projects/learn-claude-code/04-worktree.png',
+        ],
         steps: ['接收任务', '模型选择工具', '执行并返回结果', '携带结果进入下一轮'],
     },
     {
