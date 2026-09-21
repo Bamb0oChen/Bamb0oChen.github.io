@@ -67,15 +67,20 @@ function ProjectRow({ project, index, reducedMotion, pageVisible }) {
         return () => observer.disconnect();
     }, []);
     const playing = visible && pageVisible && !reducedMotion;
+    const frameCount = project.screenshots?.length || project.steps.length;
     useEffect(() => {
         if (!playing) return;
-        const timer = window.setInterval(() => setStep(current => (current + 1) % project.steps.length), 2200);
+        const timer = window.setInterval(() => setStep(current => (current + 1) % frameCount), project.screenshots ? 5000 : 2200);
         return () => window.clearInterval(timer);
-    }, [playing, project.steps.length]);
+    }, [playing, frameCount, project.screenshots]);
     return (
         <article ref={ref} className={`ps-row ${seen ? 'ps-seen' : ''}`} style={{ '--ps-accent': project.color }} aria-labelledby={`project-${project.id}`}>
             <figure className="ps-figure" aria-label={`${project.name}：${project.caption}`}>
-                <div className={`ps-preview ps-preview--${project.id} ${playing ? 'ps-playing' : ''}`} data-step={reducedMotion ? 3 : step} aria-hidden="true"><ProjectPreview kind={project.id} step={reducedMotion ? 3 : step} /></div>
+                <div className={`ps-preview ps-preview--${project.id} ${project.screenshots ? 'ps-screenshots' : ''} ${playing ? 'ps-playing' : ''}`} data-step={reducedMotion ? 3 : step} aria-hidden="true">
+                    {project.screenshots ? project.screenshots.map((src, imageIndex) => (
+                        <img key={src} src={src} alt="" loading="lazy" decoding="async" className={`ps-screenshot ${imageIndex === (reducedMotion ? 0 : step) ? 'is-active' : ''}`} />
+                    )) : <ProjectPreview kind={project.id} step={reducedMotion ? 3 : step} />}
+                </div>
             </figure>
             <div className="ps-copy"><p className="ps-category"><span>{String(index + 1).padStart(2, '0')}</span>{project.category}</p><h3 id={`project-${project.id}`}><a href={project.url} target="_blank" rel="noopener noreferrer">{project.name}</a></h3><ul className="ps-tags">{project.tags.map(tag => <li key={tag}>{tag}</li>)}</ul></div>
         </article>
