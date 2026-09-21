@@ -10,7 +10,13 @@ export const featuredProjects = [
         id: 'xiaxi', name: '夏隙百日', repository: 'xiaxi-bairi',
         category: 'STORY / VISUAL NOVEL', status: '开发中', color: '#f3bb96',
         description: '以高考倒计时一百天为时间轴的校园群像视觉小说，让人物、日常对话和选择共同推进故事。',
-        tags: ['Ren’Py', '视觉小说', '校园故事'], caption: '叙事流程示意',
+        tags: ['Ren’Py', '视觉小说', '校园故事'], caption: '游戏主菜单、CG 鉴赏、剧情对话与分支选择',
+        screenshots: [
+            'images/projects/xiaxi/01-menu.png',
+            'images/projects/xiaxi/02-gallery.png',
+            'images/projects/xiaxi/03-dialogue.png',
+            'images/projects/xiaxi/04-choices.png',
+        ],
         steps: ['翻开故事', '进入校园日常', '在岔路口作出选择', '让故事继续'],
     },
     {
