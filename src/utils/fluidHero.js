@@ -99,11 +99,11 @@ void main() {
         vec3 violet = vec3(0.38, 0.23, 0.65);
         vec3 base = mix(green, teal, layer * 0.28);
         vec3 tint = mix(base, violet, smoothstep(0.08, 0.38, h) * 0.65);
-        float patch = 0.35 + 0.65 * smoothstep(0.2, 0.75,
+        float curtainVariation = 0.35 + 0.65 * smoothstep(0.2, 0.75,
             noise(vec2(x * 2.0 + layer * 4.0, t * 0.25)));
         light += (tint * (curtain * rays * detail * 0.85 + spread)
             + mix(base, vec3(0.65, 0.95, 0.79), 0.4) * edge * rays * 0.22)
-            * patch * (1.0 - layer * 0.18);
+            * curtainVariation * (1.0 - layer * 0.18);
     }
     float edgeFade = smoothstep(0.0, 0.16, uv.x) * (1.0 - smoothstep(0.84, 1.0, uv.x));
     float verticalFade = smoothstep(0.0, 0.18, uv.y) * (1.0 - smoothstep(0.80, 1.0, uv.y));
