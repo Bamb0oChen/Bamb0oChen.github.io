@@ -76,38 +76,40 @@ void main() {
 
     float t = uTime * 0.045;
     vec3 light = vec3(0.0);
-    // Bend the entire curtain coordinate system, including its fine rays.
+    // An open elliptical crown, with flowing folds in radial coordinates.
+    // The lower opening avoids a neon-ring silhouette around the hero.
+    vec2 crown = vec2(q.x / max(uAspect * 0.43, 0.36), (q.y + 0.03) / 0.38);
+    crown.x += 0.07 * sin(crown.y * 2.4 + t * 0.7);
+    crown.y += 0.06 * sin(crown.x * 2.8 - t * 0.5);
+    float angle = atan(crown.y, crown.x);
+    float radius = length(crown);
+    float opening = smoothstep(-0.88, -0.28, sin(angle));
     for (int i = 0; i < 2; i++) {
         float layer = float(i);
-        float x = q.x + layer * 0.23
-            + sin(q.y * 4.5 + t * 0.65 + layer) * 0.22;
-        float fold = fbm(vec2(x * 1.65 + t * 0.3, layer * 3.7 + t * 0.16));
-        float arc = -0.12 + layer * 0.17
-            + sin(x * 3.8 + t * 0.7 + layer * 1.4) * 0.29
-            + (fold - 0.5) * 0.12
-            + sin(x * 7.0 - t * 0.4) * 0.045;
-        float h = q.y - arc;
-        float rayHeight = 0.26 + fold * 0.30;
-        float curtain = smoothstep(-0.075, 0.04, h)
-            * exp(-max(h, 0.0) / rayHeight * 3.5);
-        float edge = exp(-pow(h / 0.035, 2.0));
-        float rayX = x * 110.0 + fold * 12.0 + sin(h * 5.0 + t) * 9.0;
-        float rays = 0.62 + 0.38 * noise(vec2(rayX - t * 0.5, layer * 7.0 + t * 0.1));
-        float detail = 0.85 + 0.15 * noise(vec2(rayX * 2.6, h * 2.5 + t * 0.12));
-        float spread = exp(-pow(h / 0.22, 2.0)) * 0.12;
-        vec3 green = vec3(0.16, 0.76, 0.49);
-        vec3 teal = vec3(0.10, 0.57, 0.72);
-        vec3 violet = vec3(0.38, 0.23, 0.65);
-        vec3 base = mix(green, teal, layer * 0.28);
-        vec3 tint = mix(base, violet, smoothstep(0.08, 0.38, h) * 0.65);
-        float curtainVariation = 0.35 + 0.65 * smoothstep(0.2, 0.75,
-            noise(vec2(x * 2.0 + layer * 4.0, t * 0.25)));
-        light += (tint * (curtain * rays * detail * 0.70 + spread)
-            + mix(base, vec3(0.65, 0.95, 0.79), 0.4) * edge * 0.30)
-            * curtainVariation * (1.0 - layer * 0.18);
+        vec2 angular = vec2(cos(angle), sin(angle));
+        float fold = fbm(angular * 2.5 + vec2(t * 0.25, layer * 4.2));
+        float rim = 0.91 - layer * 0.18
+            + sin(angle * 3.0 + t * 0.6 + layer) * 0.10
+            + sin(angle * 5.0 - t * 0.4) * 0.035
+            + (fold - 0.5) * 0.16;
+        float distanceToRim = radius - rim;
+        float width = 0.06 + fold * 0.07;
+        float edge = exp(-pow(distanceToRim / width, 2.0));
+        float veil = smoothstep(-0.05, 0.06, distanceToRim)
+            * exp(-max(distanceToRim, 0.0) * 6.0);
+        float glow = exp(-pow(distanceToRim / 0.27, 2.0));
+        float bentAngle = angle + distanceToRim * 0.6 + fold * 0.10;
+        float silk = noise(vec2(cos(bentAngle), sin(bentAngle)) * 65.0 + t * 0.3);
+        float modulation = 0.70 + silk * 0.30;
+        float intensity = 0.60 + 0.40 * sin(angle * 2.0 + t * 0.45 + layer);
+        vec3 green = vec3(0.27, 0.78, 0.36);
+        vec3 pale = vec3(0.62, 0.94, 0.57);
+        vec3 outer = vec3(0.08, 0.32, 0.24);
+        light += (pale * edge * 0.48 + green * veil * modulation * 0.38
+            + outer * glow * 0.32) * intensity * opening * (1.0 - layer * 0.55);
     }
-    float edgeFade = smoothstep(0.0, 0.16, uv.x) * (1.0 - smoothstep(0.84, 1.0, uv.x));
-    float verticalFade = smoothstep(0.0, 0.18, uv.y) * (1.0 - smoothstep(0.80, 1.0, uv.y));
+    float edgeFade = smoothstep(0.0, 0.07, uv.x) * (1.0 - smoothstep(0.93, 1.0, uv.x));
+    float verticalFade = smoothstep(0.0, 0.10, uv.y) * (1.0 - smoothstep(0.93, 1.0, uv.y));
     gl_FragColor = vec4(light, edgeFade * verticalFade * uOpacity * 0.85);
 }
 `;
