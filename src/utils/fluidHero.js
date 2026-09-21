@@ -70,37 +70,44 @@ void main() {
     float speed = clamp(length(uVelocity) * 7.0, 0.0, 1.0);
     float strength = uPointerStrength * (0.38 + speed * 0.62);
 
-    p = swirl(p, pointer, 5.8 * strength);
+    p = swirl(p, pointer, 0.35 * strength);
     vec2 q = p - 0.5;
     q.x *= uAspect;
 
-    float t = uTime * 0.08;
-    float fieldA = fbm(q * 2.1 + vec2(t * 1.2, -t * 0.65));
-    float fieldB = fbm(q * 3.7 - vec2(t * 0.8, t * 1.05) + fieldA);
-    float ribbons = sin((q.x + fieldB * 0.78) * 8.8 + t * 10.5) * 0.5 + 0.5;
-    float curtains = pow(smoothstep(0.18, 0.9, sin((q.x * 3.2 + fieldA * 2.8 + t * 3.6)) * 0.5 + 0.5), 1.7);
-    float veil = pow(smoothstep(0.62, 1.0, sin(q.x * 14.0 + fieldB * 5.0 - t * 7.4) * 0.5 + 0.5), 3.2);
-    float wave = smoothstep(0.18, 0.9, fieldA * 0.76 + fieldB * 0.48 + ribbons * 0.38 + curtains * 0.34);
-
-    vec2 pd = uv - pointer;
-    pd.x *= uAspect;
-    float wake = exp(-dot(pd, pd) * 18.0) * strength;
-    float caustic = smoothstep(0.08, 0.84, wave + veil * 0.36 + wake * 1.25);
-
-    vec3 ink = vec3(0.015, 0.07, 0.12);
-    vec3 cyan = vec3(0.08, 0.82, 0.74);
-    vec3 blue = vec3(0.10, 0.34, 0.78);
-    vec3 violet = vec3(0.38, 0.22, 0.74);
-    vec3 amber = vec3(0.96, 0.48, 0.18);
-    vec3 color = mix(ink, blue, caustic * 0.62);
-    color = mix(color, cyan, smoothstep(0.46, 1.0, fieldB + curtains * 0.55 + veil * 0.4) * 0.82);
-    color = mix(color, violet, smoothstep(0.62, 1.0, fieldA + ribbons * 0.42) * 0.32);
-    color = mix(color, amber, wake * 0.48 + smoothstep(0.9, 1.0, ribbons) * 0.18);
-
-    float verticalGlow = smoothstep(0.78, 0.08, abs(q.y + 0.06));
-    float vignette = smoothstep(1.05, 0.18, length(q));
-    float alpha = (0.16 + caustic * 0.62 + curtains * 0.2 + veil * 0.34 + wake * 0.54) * verticalGlow * vignette * uOpacity;
-    gl_FragColor = vec4(color, alpha);
+    float t = uTime * 0.045;
+    vec3 light = vec3(0.0);
+    // Folded curtains: a soft luminous lower edge and fading vertical rays.
+    for (int i = 0; i < 3; i++) {
+        float layer = float(i);
+        float x = q.x + layer * 0.31;
+        float fold = fbm(vec2(x * 1.65 + t * 0.3, layer * 3.7 + t * 0.16));
+        float arc = -0.22 + layer * 0.15
+            + sin(x * 2.2 + t + layer * 1.8) * 0.12
+            + (fold - 0.5) * 0.24
+            + sin(x * 5.0 + fold * 3.0 - t * 0.4) * 0.035;
+        float h = q.y - arc;
+        float rayHeight = 0.18 + fold * 0.30;
+        float curtain = smoothstep(-0.055, 0.035, h)
+            * exp(-max(h, 0.0) / rayHeight * 3.0);
+        float edge = exp(-pow(h / 0.04, 2.0));
+        float rayX = x * 72.0 + fold * 15.0 + h * (4.0 + layer * 2.0);
+        float rays = 0.25 + 0.75 * noise(vec2(rayX - t * 0.5, layer * 7.0 + t * 0.1));
+        float detail = 0.65 + 0.35 * noise(vec2(rayX * 2.6, h * 1.5 + t * 0.12));
+        float spread = exp(-pow(h / 0.22, 2.0)) * 0.12;
+        vec3 green = vec3(0.16, 0.88, 0.40);
+        vec3 teal = vec3(0.10, 0.57, 0.72);
+        vec3 violet = vec3(0.38, 0.23, 0.65);
+        vec3 base = mix(green, teal, layer * 0.28);
+        vec3 tint = mix(base, violet, smoothstep(0.08, 0.38, h) * 0.65);
+        float patch = 0.35 + 0.65 * smoothstep(0.2, 0.75,
+            noise(vec2(x * 2.0 + layer * 4.0, t * 0.25)));
+        light += (tint * (curtain * rays * detail * 0.85 + spread)
+            + mix(base, vec3(0.65, 0.95, 0.79), 0.4) * edge * rays * 0.22)
+            * patch * (1.0 - layer * 0.18);
+    }
+    float edgeFade = smoothstep(0.0, 0.16, uv.x) * (1.0 - smoothstep(0.84, 1.0, uv.x));
+    float verticalFade = smoothstep(0.0, 0.18, uv.y) * (1.0 - smoothstep(0.80, 1.0, uv.y));
+    gl_FragColor = vec4(light, edgeFade * verticalFade * uOpacity * 0.85);
 }
 `;
 
