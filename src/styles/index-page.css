@@ -2117,3 +2117,16 @@ body {
         min-height: 44px;
     }
 }
+.music-model-unavailable {
+    min-height: clamp(500px, 48vw, 620px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 24px;
+    text-align: center;
+    color: rgba(255, 255, 255, .7);
+}
+
+.music-model-unavailable strong { color: rgba(255, 255, 255, .9); }

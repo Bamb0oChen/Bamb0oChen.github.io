@@ -13,6 +13,7 @@ import CardSwap, { Card } from '../components/CardSwap';
 import ChromaGrid from '../components/ChromaGrid';
 import BorderGlow from '../components/BorderGlow';
 import ProjectShowcase from '../components/ProjectShowcase';
+import ModelErrorBoundary from '../components/ModelErrorBoundary';
 import '../styles/index-page.css';
 
 const NOTES_BASE_URL = 'https://bamb0ochen.github.io/notes/';
@@ -1255,6 +1256,15 @@ export default function IndexPage() {
                         </div>
                     </BorderGlow>
                     <div className="music-model-card" aria-label="可旋转留声机模型">
+                        <ModelErrorBoundary
+                            label="Model viewer"
+                            fallback={
+                                <div className="music-model-unavailable" role="status">
+                                    <strong>留声机暂时无法显示</strong>
+                                    <span>你仍然可以听歌，或继续浏览主页。</span>
+                                </div>
+                            }
+                        >
                         <Suspense fallback={<div className="model-viewer model-viewer-placeholder">Preparing model</div>}>
                             <ModelViewer
                                 url="models/gramophone/Gramophone.fbx"
@@ -1268,9 +1278,9 @@ export default function IndexPage() {
                                 autoRotate
                                 autoRotateSpeed={0.55}
                                 enableManualZoom={false}
-                                environmentPreset="warehouse"
                             />
                         </Suspense>
+                        </ModelErrorBoundary>
                     </div>
                 </div>
             </section>

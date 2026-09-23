@@ -1,10 +1,39 @@
 /* eslint-disable react/no-unknown-property */
-import { Suspense, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { Center, ContactShadows, Environment, Html, OrbitControls, useFBX, useGLTF } from '@react-three/drei';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js';
 import * as THREE from 'three';
+import ModelErrorBoundary from './ModelErrorBoundary';
 import './ModelViewer.css';
+
+function LocalEnvironment({ url }) {
+    const [texture, setTexture] = useState(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        let ownedTexture;
+        // Optional lighting must not throw a rejected asset promise into the render tree.
+        new HDRLoader().loadAsync(url).then(result => {
+            ownedTexture = result;
+            if (cancelled) {
+                result.dispose();
+                return;
+            }
+            result.mapping = THREE.EquirectangularReflectionMapping;
+            setTexture(result);
+        }).catch(error => {
+            if (!cancelled) console.warn('[ModelViewer] Environment unavailable; using base lighting.', error);
+        });
+        return () => {
+            cancelled = true;
+            ownedTexture?.dispose();
+        };
+    }, [url]);
+
+    return texture ? <Environment map={texture} background={false} /> : null;
+}
 
 function Loader() {
     return (
@@ -232,15 +261,13 @@ export default function ModelViewer({
     keyLightIntensity = 2.1,
     fillLightIntensity = 0.95,
     rimLightIntensity = 1.25,
-    environmentPreset = 'city',
+    environmentUrl = `${import.meta.env.BASE_URL}models/environment/empty_warehouse_01_1k.hdr`,
     autoRotate = true,
     autoRotateSpeed = 0.32,
     enableManualRotation = true,
     enableManualZoom = false,
     className = ''
 }) {
-    const [loaded, setLoaded] = useState(false);
-
     return (
         <div className={`model-viewer ${className}`} style={{ width, height }}>
             <Canvas
@@ -253,20 +280,30 @@ export default function ModelViewer({
                     gl.outputColorSpace = THREE.SRGBColorSpace;
                 }}
             >
-                {environmentPreset !== 'none' && <Environment preset={environmentPreset} background={false} />}
+                {/* Environment is optional: neither loading nor failure hides the model. */}
+                {environmentUrl && (
+                    <ModelErrorBoundary key={environmentUrl} label="Environment">
+                        <LocalEnvironment url={environmentUrl} />
+                    </ModelErrorBoundary>
+                )}
                 <ambientLight intensity={ambientIntensity} />
                 <directionalLight position={[4, 5, 5]} intensity={keyLightIntensity} castShadow />
                 <directionalLight position={[-4, 1.8, 3]} intensity={fillLightIntensity} />
                 <directionalLight position={[0, 4, -4]} intensity={rimLightIntensity} />
-                <Suspense fallback={<Loader />}>
+                <ModelErrorBoundary
+                    key={url}
+                    label="Model asset"
+                    fallback={<GramophoneFallback autoRotateSpeed={autoRotate ? autoRotateSpeed : 0} />}
+                >
+                  <Suspense fallback={<Loader />}>
                     <Center
-                        onCentered={() => setLoaded(true)}
                         position={[modelXOffset, modelYOffset, 0]}
                         rotation={[THREE.MathUtils.degToRad(defaultRotationX), THREE.MathUtils.degToRad(defaultRotationY), 0]}
                     >
                         <ModelContent url={url} autoRotateSpeed={autoRotate ? autoRotateSpeed : 0} modelScale={modelScale} />
                     </Center>
-                </Suspense>
+                  </Suspense>
+                </ModelErrorBoundary>
                 <ContactShadows position={[0, -1.02, 0]} opacity={0.42} scale={5.5} blur={2.6} far={3.2} />
                 <OrbitControls
                     makeDefault
