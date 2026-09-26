@@ -78,5 +78,20 @@
 @keyframes ps-enter { from { opacity: .3; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 1050px) { .ps-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .ps-grid { grid-template-columns: minmax(0, 1fr); }.ps-section { padding-top: 45px; }.ps-heading { align-items: start; flex-direction: column; gap: 12px; margin-bottom: 22px; }.ps-description { margin-top: 12px; }.ps-tags { margin-bottom: 18px; } }
+@media (max-width: 768px) {
+    .ps-section { width: calc(100% - 32px); padding: 36px 0 24px; }
+    .ps-heading { margin-bottom: 20px; }
+    .ps-heading h2 { font-size: 28px; }
+    .ps-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .ps-row { position: relative; display: block; padding: 0; overflow: hidden; border-radius: 18px; }
+    .ps-preview { height: clamp(200px, 48vw, 280px); aspect-ratio: auto; border: 0; border-radius: 0; }
+    .ps-copy { position: absolute; inset: 0; justify-content: flex-end; padding: 18px; background: linear-gradient(180deg, transparent 15%, rgba(0, 0, 0, .25) 35%, rgba(0, 0, 0, .83) 70%, rgba(0, 0, 0, .94)); }
+    .ps-category { font-size: 9px; letter-spacing: .08em; gap: 10px; margin: 0 0 4px; color: #dae2ec; }
+    .ps-category > span { font-size: 10px; color: #c1cbd8; }
+    .ps-copy h3 { font-size: 23px; margin: 0 0 6px; }
+    .ps-copy h3 a { display: inline-flex; align-items: center; min-height: 44px; }
+    .ps-tags { margin: 0; gap: 6px; }
+    .ps-tags li { font-size: 10px; color: #e1e7ee; padding: 3px 6px; background: #ffffff12; }
+}
 @container (max-width: 360px) { .ps-hub { padding: 16px; gap: 7px; }.ps-mail { padding: 10px; }.ps-color { gap: 12px; padding: 18px; }.ps-notebook { grid-template-columns: 80px 1fr; }.ps-notebook aside { padding-inline: 7px; }.ps-note-page { padding: 30px 12px; }.ps-loop { gap: 14px; }.ps-terminal { padding: 17px; }.ps-figure figcaption { flex-wrap: wrap; }.ps-controls { margin-left: auto; } }
 @media (prefers-reduced-motion: reduce) { .ps-section *, .ps-row.ps-seen { animation: none !important; transition: none !important; } }

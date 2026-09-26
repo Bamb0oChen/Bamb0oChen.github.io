@@ -234,6 +234,14 @@ function withIdKeys(photos) {
 }
 
 export default function IndexPage() {
+    const [isCompactScreen, setIsCompactScreen] = useState(() => window.matchMedia('(max-width: 768px)').matches);
+    useEffect(() => {
+        const query = window.matchMedia('(max-width: 768px)');
+        const update = () => setIsCompactScreen(query.matches);
+        update();
+        query.addEventListener('change', update);
+        return () => query.removeEventListener('change', update);
+    }, []);
     const featuredContainer = useRef(null);
     const photoStripRef = useRef(null);
     const photoRefs = useRef([]);
@@ -1093,7 +1101,7 @@ export default function IndexPage() {
                     <div className="hero-shell">
                         <div className="hero-photo" aria-hidden="true"></div>
                         <div className="hero-content">
-                            <h1 className="hero-title">欢迎来到 Chen.のhomepage</h1>
+                            <h1 className="hero-title"><span className="hero-greeting">欢迎来到</span>{' '}<span className="hero-name">Chen.のhomepage</span></h1>
                             <div className="typed-wrapper" aria-label={typedText}>
                                 <span className="typed-text">{typedText}</span>
                                 <span className="cursor" aria-hidden="true"></span>
@@ -1109,7 +1117,7 @@ export default function IndexPage() {
 
             <ProjectShowcase />
 
-            <section className="content" ref={featuredContainer}>
+            <section className="content lighttrace-section" ref={featuredContainer}>
                 <div className="section-heading"><p className="section-kicker">Lighttrace</p><h2>精选光影</h2></div>
                 <div className="photo-container">
                     {featuredPhotos.length === 0 ? (
@@ -1121,7 +1129,12 @@ export default function IndexPage() {
                                     src: photo.data,
                                     alt: photo.title || photo.fileName || '光影留痕'
                                 }))}
-                                minRadius={650}
+                                minRadius={isCompactScreen ? 300 : 650}
+                                maxRadius={isCompactScreen ? 450 : Infinity}
+                                fit={isCompactScreen ? 0.8 : 0.5}
+                                padFactor={isCompactScreen ? 0.1 : 0.25}
+                                openedImageWidth={isCompactScreen ? 'min(250px, 70vw)' : '250px'}
+                                openedImageHeight={isCompactScreen ? 'min(300px, 65vw)' : '350px'}
                                 maxVerticalRotationDeg={20}
                                 segments={26}
                                 dragDampening={2.6}
@@ -1162,15 +1175,33 @@ export default function IndexPage() {
                     <div className="video-copy">
                         <p className="section-kicker">Video</p>
                         <h2>用心做视频</h2>
-                        <p>把旅行、城市与片刻情绪剪成可以回访的时间切片。右侧卡组会自动轮换，点击任意一张直接打开 B 站。</p>
+                        <p>把旅行、城市与片刻情绪剪成可以回访的时间切片。{isCompactScreen ? '左右滑动查看视频，点开卡片前往 B 站。' : '右侧卡组会自动轮换，点击任意一张直接打开 B 站。'}</p>
                         <div className="video-actions">
                             <a href={focusVideos[0]?.openUrl || 'https://www.bilibili.com/'} target="_blank" rel="noopener noreferrer">打开最新视频</a>
                             <a href="https://space.bilibili.com/" target="_blank" rel="noopener noreferrer">Bilibili</a>
                         </div>
                     </div>
-                    <div className="video-swap-stage">
+                    <div className={isCompactScreen ? 'video-mobile-stage' : 'video-swap-stage'}>
                         {focusVideos.length === 0 ? (
                             <div className="empty-state">暂无视频，请在 src/data/siteData.js 的 FOCUS_VIDEO_LIBRARY 中添加 B 站 link/bvid 条目。</div>
+                        ) : isCompactScreen ? (
+                            <div className="video-mobile-list" aria-label="视频列表，可左右滑动">
+                                {focusVideos.map(video => (
+                                    <a key={video.id} className="video-mobile-card" href={video.openUrl} target="_blank" rel="noopener noreferrer">
+                                        <div className="video-swap-cover">
+                                            <div className="video-swap-cover-fallback" aria-hidden="true">▶</div>
+                                            {video.coverUrl && <img src={video.coverUrl} alt="" loading="lazy" referrerPolicy="no-referrer" onError={event => { event.currentTarget.hidden = true; }} />}
+                                            <span>Bilibili</span>
+                                        </div>
+                                        <div className="video-swap-body">
+                                            <div className="tag-line"><span>{video.comment || '视频'}</span></div>
+                                            <h3>{video.title || '未命名视频'}</h3>
+                                            <p>{video.description || '专注记录'}</p>
+                                            <div className="article-comment">前往 B 站观看 ↗</div>
+                                        </div>
+                                    </a>
+                                ))}
+                            </div>
                         ) : (
                             <CardSwap
                                 width={560}
@@ -1252,8 +1283,9 @@ export default function IndexPage() {
                     >
                         <p className="music-board-desc">嵌入 Apple Music 收藏歌单，歌单内容更新后这里会自动同步。</p>
                         <div className="music-embed">
-                            <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameBorder="0" width="100%" height="450" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" loading="lazy"></iframe>
+                            <iframe title="Apple Music 收藏歌单" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameBorder="0" width="100%" height="450" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" loading="lazy"></iframe>
                         </div>
+                        <p className="music-open-link"><a href="https://music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" target="_blank" rel="noopener noreferrer">在 Apple Music 打开 ↗</a><span>播放器未显示时可直接打开歌单</span></p>
                     </BorderGlow>
                     <div className="music-model-card" aria-label="可旋转留声机模型">
                         <ModelErrorBoundary
@@ -1268,10 +1300,10 @@ export default function IndexPage() {
                         <Suspense fallback={<div className="model-viewer model-viewer-placeholder">Preparing model</div>}>
                             <ModelViewer
                                 url="models/gramophone/Gramophone.fbx"
-                                height="clamp(500px, 48vw, 620px)"
-                                defaultZoom={3.86}
-                                modelScale={3.02}
-                                modelXOffset={0.12}
+                                height={isCompactScreen ? 'clamp(280px, 80vw, 360px)' : 'clamp(500px, 48vw, 620px)'}
+                                defaultZoom={isCompactScreen ? 4.4 : 3.86}
+                                modelScale={isCompactScreen ? 2.35 : 3.02}
+                                modelXOffset={isCompactScreen ? 0 : 0.12}
                                 modelYOffset={-0.04}
                                 minZoomDistance={2.8}
                                 maxZoomDistance={6}
