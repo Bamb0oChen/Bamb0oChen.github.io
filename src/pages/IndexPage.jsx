@@ -1281,7 +1281,6 @@ export default function IndexPage() {
                         colors={['#5cd5c4', '#8ec5ff', '#f4a261']}
                         fillOpacity={0.32}
                     >
-                        <p className="music-board-desc">嵌入 Apple Music 收藏歌单，歌单内容更新后这里会自动同步。</p>
                         <div className="music-embed">
                             <iframe title="Apple Music 收藏歌单" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameBorder="0" width="100%" height="450" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" loading="lazy"></iframe>
                         </div>
@@ -1328,7 +1327,7 @@ export default function IndexPage() {
                             </div>
                         </a>
                     ))}
-                    <a className="article-card friend-card apply-card" href="#guestbook"><div className="article-content"><h3>友链申请</h3><p>在留言区留下站点名、链接、头像和一句介绍。</p><div className="article-comment">欢迎来串门</div></div></a>
+                    <a className="article-card friend-card apply-card" href="https://github.com/Bamb0oChen/Bamb0oChen.github.io/issues/new?template=friend-link.md" target="_blank" rel="noopener noreferrer"><div className="article-content"><h3>友链申请 ↗</h3><p>通过 GitHub Issue 提交站点名、链接、头像和一句介绍；补充备注可选。</p><div className="article-comment">按模板填写，提交后由我审核添加</div></div></a>
                 </div>
             </section>
 
