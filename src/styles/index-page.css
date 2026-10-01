@@ -162,6 +162,25 @@
     justify-content: flex-end;
 }
 
+#header .site-nav .nav-icon-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    padding: 9px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#header .site-nav .nav-icon-btn svg,
+#header .site-nav .nav-icon-btn img {
+    display: block;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
 .nav-btn-button {
     font: inherit;
 }
@@ -361,6 +380,7 @@
     margin-top: 34px;
 }
 
+
 .hero-actions a {
     display: inline-flex;
     gap: 12px;
@@ -377,6 +397,22 @@
 .hero-actions a:focus-visible {
     color: #ffd9b7;
     border-color: #ffd9b7;
+}
+
+.hero-actions .hero-notes-link {
+    padding: 10px 16px;
+    border: 1px solid rgba(255, 255, 255, .65);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .16);
+    font-weight: 650;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.hero-actions .hero-notes-link:hover,
+.hero-actions .hero-notes-link:focus-visible {
+    background: rgba(255, 255, 255, .26);
+    border-color: #fff;
 }
 
 #writing {
@@ -1077,6 +1113,35 @@
     min-height: calc(var(--writing-rows, 3) * 420px);
     margin: 0 auto;
     position: relative;
+}
+
+#writing .chroma-more-card {
+    color: #fff;
+    text-decoration: none;
+    background: linear-gradient(145deg, rgba(126, 166, 205, .22), #05070a 72%);
+}
+
+#writing .chroma-more-card::before { display: none; }
+
+#writing .chroma-more-card__image {
+    display: grid;
+    place-items: center;
+    margin: 10px;
+    padding: 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .045);
+}
+
+#writing .chroma-more-card__image img {
+    width: min(58%, 170px);
+    height: min(58%, 170px);
+    min-height: 0;
+    object-fit: contain;
+}
+
+#writing .chroma-more-card:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
 }
 
 .tag-line {
@@ -2010,6 +2075,7 @@ body {
         font-size: 12px;
         text-align: center;
     }
+    #header .site-nav .nav-icon-btn { width: 100%; min-width: 0; }
     .hero-tilt {
         transform: none !important;
         width: min(460px, calc(100vw - 40px));

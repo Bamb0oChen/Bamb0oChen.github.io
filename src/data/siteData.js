@@ -250,6 +250,24 @@ export const SITE_STATUS = {
 
 export const FRIEND_LINKS = [
     {
+        id: 'r1n-blog',
+        name: '陵长镜',
+        url: 'https://r1n.top',
+        avatar: 'https://r1n.top/avatar_nr.jpg',
+        description: 'Everything collapses, but you rise.',
+        note: 'r1n.top',
+        siteshot: 'https://r1n.top/siteshot.jpg',
+        rss: 'https://r1n.top/atom.xml'
+    },
+    {
+        id: 'smallbamboo-notes',
+        name: '小竹の笔记本',
+        url: 'https://notes.smallbamboo.cn',
+        avatar: 'https://notes.smallbamboo.cn/wp-content/uploads/2026/08/20260816215731190-icon_autumn.png',
+        description: '我没有特别的天赋，我只是热切地充满好奇。',
+        note: 'notes.smallbamboo.cn'
+    },
+    {
         id: 'hubery-notebook',
         name: "hubery's notebook",
         url: 'https://hubery258.github.io/notebook/',

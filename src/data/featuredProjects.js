@@ -75,7 +75,7 @@ export const featuredProjects = [
             'images/projects/notes/03-architecture.png',
             'images/projects/notes/04-ethernet.png',
         ],
-        liveUrl: 'https://bamb0ochen.github.io/notes/',
+        liveUrl: 'https://bamb0ochen.com/notes/',
         steps: ['从目录出发', '进入一个知识点', '读代码与公式', '把理解记录下来'],
     },
 ].map(project => ({ ...project, url: `https://github.com/Bamb0oChen/${project.repository}` }));

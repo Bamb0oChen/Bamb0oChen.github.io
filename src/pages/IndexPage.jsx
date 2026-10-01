@@ -17,6 +17,7 @@ import ModelErrorBoundary from '../components/ModelErrorBoundary';
 import '../styles/index-page.css';
 
 const NOTES_BASE_URL = 'https://bamb0ochen.github.io/notes/';
+const NOTES_NAV_ICON = 'https://bamb0ochen.com/notes/assets/images/patchouli-coding-white-outline.png';
 const NOTES_SEARCH_INDEX_URL = `${NOTES_BASE_URL}search/search_index.json`;
 const SEARCH_LIMIT = 20;
 const AGENT_CONTEXT_LIMIT = 8;
@@ -1070,10 +1071,18 @@ export default function IndexPage() {
                         <span>{isPrivateBarOpen ? 'Private Bar' : 'Private Dock'}</span><span aria-hidden="true">{isPrivateBarOpen ? '×' : '⌄'}</span>
                     </button>
                     <nav className="site-nav" aria-label="主导航">
-                        <button className={`nav-btn nav-btn-button ${isSearchOpen ? 'is-active' : ''}`} type="button" onClick={openSearch}>Agent</button>
-                        <a href="gallery.html" className="nav-btn" onClick={event => navigateWithTransition(event, 'gallery.html')}>光影留痕</a>
-                        <a href={CHANGELOG_DOC_URL} className="nav-btn" onClick={event => navigateWithTransition(event, CHANGELOG_DOC_URL)}>更新日志</a>
-                        <a href="https://Bamb0oChen.github.io/notes/" className="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
+                        <button className={`nav-btn nav-btn-button nav-icon-btn ${isSearchOpen ? 'is-active' : ''}`} type="button" aria-label="Agent" title="Agent" onClick={openSearch}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4" y="6" width="16" height="14" rx="3"/><path d="M12 3v3M9 3h6M8 13h.01M16 13h.01M9 17h6"/></svg>
+                        </button>
+                        <a href="gallery.html" className="nav-btn nav-icon-btn" aria-label="光影留痕" title="光影留痕" onClick={event => navigateWithTransition(event, 'gallery.html')}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 7h4l2-2h4l2 2h4v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+                        </a>
+                        <a href={CHANGELOG_DOC_URL} className="nav-btn nav-icon-btn" aria-label="更新日志" title="更新日志" onClick={event => navigateWithTransition(event, CHANGELOG_DOC_URL)}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM15 3v5h4M9 12h7M9 16h7"/></svg>
+                        </a>
+                        <a href="https://bamb0ochen.com/notes/" className="nav-btn nav-icon-btn" target="_blank" rel="noopener noreferrer" aria-label="大图书馆" title="大图书馆">
+                            <img src={NOTES_NAV_ICON} alt="" aria-hidden="true" />
+                        </a>
                     </nav>
                 </div>
                 <div id="private-bar-panel" className="private-bar-panel" aria-hidden={!isPrivateBarOpen}>
@@ -1107,8 +1116,7 @@ export default function IndexPage() {
                                 <span className="cursor" aria-hidden="true"></span>
                             </div>
                             <div className="hero-actions">
-                                <a href="#writing">读我的文章 <span aria-hidden="true">→</span></a>
-                                <a href="https://Bamb0oChen.github.io/notes/" target="_blank" rel="noopener noreferrer">打开笔记 <span aria-hidden="true">→</span></a>
+                                <a className="hero-notes-link" href="https://bamb0ochen.com/notes/" target="_blank" rel="noopener noreferrer">进入大图书馆 <span aria-hidden="true">↗</span></a>
                             </div>
                         </div>
                     </div>
@@ -1156,10 +1164,11 @@ export default function IndexPage() {
                 </div>
                 <div
                     className="writing-chroma-wrap"
-                    style={{ '--writing-rows': Math.max(1, Math.ceil(chromaArticleItems.length / 3)) }}
+                    style={{ '--writing-rows': Math.max(1, Math.ceil((chromaArticleItems.length + 1) / 3)) }}
                 >
                     <ChromaGrid
                         items={chromaArticleItems}
+                        trailingCard={{ label: '更多笔记，请移步大图书馆前言', image: NOTES_NAV_ICON, url: 'https://bamb0ochen.com/notes/' }}
                         radius={300}
                         columns={3}
                         rows={2}

@@ -5,6 +5,7 @@ import './ChromaGrid.css';
 export default function ChromaGrid({
     items,
     className = '',
+    trailingCard = null,
     radius = 300,
     columns = 3,
     rows = 2,
@@ -107,6 +108,19 @@ export default function ChromaGrid({
                     </footer>
                 </article>
             ))}
+            {trailingCard && (
+                <a className="chroma-card chroma-more-card" href={trailingCard.url} target="_blank" rel="noopener noreferrer" aria-label={trailingCard.label}>
+                    <div className="chroma-img-wrapper chroma-more-card__image">
+                        <img src={trailingCard.image} alt="" loading="lazy" decoding="async" />
+                    </div>
+                    <div className="chroma-info">
+                        <h3 className="name">更多笔记</h3>
+                        <span className="handle" aria-hidden="true">↗</span>
+                        <p className="role">请移步大图书馆</p>
+                        <span className="location">大图书馆 / 前言</span>
+                    </div>
+                </a>
+            )}
             <div className="chroma-overlay" />
             <div ref={fadeRef} className="chroma-fade" />
         </div>
