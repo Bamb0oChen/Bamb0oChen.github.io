@@ -269,11 +269,11 @@ export const FRIEND_LINKS = [
     },
     {
         id: 'hubery-notebook',
-        name: "hubery's notebook",
-        url: 'https://hubery258.github.io/notebook/',
+        name: 'dreamland',
+        url: 'https://blog.ramenboy.cc',
         avatar: 'https://s41.ax1x.com/2026/03/14/peEfnTx.jpg',
-        description: "C'est la vie",
-        note: 'https://hubery258.github.io/dreamland-hubery/'
+        description: '每一个冬天的句号都是春暖花开',
+        note: ''
     }
 ];
 
