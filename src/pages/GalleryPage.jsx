@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getLighttraceLibrary } from '../data/siteData';
 import LighttraceMap from '../components/LighttraceMap';
+import SiteHeader from '../components/SiteHeader';
 import { startStarfield } from '../utils/starfield';
 
 const GALLERY_KEY = 'gallery_images_v1';
 const MAX_IMAGES = 25;
-const PAGE_SIZE = 25;
-const CHANGELOG_DOC_URL = 'docs/changelog.html';
+const PAGE_SIZE = 24;
 
 function navigateWithTransition(event, href) {
     if (!href) return;
@@ -26,10 +26,11 @@ const localLibraryHint = useLocalLibrary
 
 function normalizeImage(item) {
     const src = item.src || item.file || item.data;
+    const generatedTitle = /^\d{4}-\d{2}-\d{2} · 光影$/.test(item.title || '');
     return {
         id: item.id || src,
         data: src,
-        title: item.title || item.fileName || item.id || src,
+        title: generatedTitle ? '' : (item.title || ''),
         comment: item.comment || '',
         createdAt: item.createdAt || item.date || '',
         date: item.date || item.createdAt || '',
@@ -78,6 +79,7 @@ export default function GalleryPage() {
     const [modalImage, setModalImage] = useState(null);
 
     const galleryImages = publishedImages?.length ? publishedImages : images;
+    const shouldPaginate = useLocalLibrary || Boolean(publishedImages?.length);
     const hasPublishedMap = Boolean(publishedImages?.some(image => image.latitude !== null && image.longitude !== null));
     const mapImages = useMemo(() => galleryImages.filter(image => image.latitude !== null && image.longitude !== null), [galleryImages]);
 
@@ -99,16 +101,16 @@ export default function GalleryPage() {
     }, []);
 
     const totalPages = useMemo(() => {
-        if (!useLocalLibrary) return 1;
+        if (!shouldPaginate) return 1;
         return Math.max(1, Math.ceil(galleryImages.length / PAGE_SIZE));
-    }, [galleryImages.length]);
+    }, [galleryImages.length, shouldPaginate]);
 
     const pagedImages = useMemo(() => {
-        if (!useLocalLibrary) return galleryImages;
+        if (!shouldPaginate) return galleryImages;
         const page = Math.min(currentPage, totalPages);
         const start = (page - 1) * PAGE_SIZE;
         return galleryImages.slice(start, start + PAGE_SIZE);
-    }, [currentPage, galleryImages, totalPages]);
+    }, [currentPage, galleryImages, shouldPaginate, totalPages]);
 
     const modalImageIndex = useMemo(() => {
         if (!modalImage) return -1;
@@ -118,7 +120,7 @@ export default function GalleryPage() {
     const previousImage = modalImageIndex <= 0 ? null : galleryImages[modalImageIndex - 1];
     const nextImage = modalImageIndex < 0 || modalImageIndex >= galleryImages.length - 1 ? null : galleryImages[modalImageIndex + 1];
     const showEmpty = pagedImages.length === 0;
-    const showPagination = useLocalLibrary && totalPages > 1;
+    const showPagination = shouldPaginate && totalPages > 1;
 
     useEffect(() => {
         const cleanupStarfield = startStarfield(starfieldCanvas.current, 'star');
@@ -179,7 +181,7 @@ export default function GalleryPage() {
 
     const displayCells = useMemo(() => {
         const cells = [];
-        const cellCount = useLocalLibrary ? pagedImages.length : MAX_IMAGES;
+        const cellCount = shouldPaginate ? pagedImages.length : MAX_IMAGES;
         for (let i = 0; i < cellCount; i += 1) {
             if (i < pagedImages.length) {
                 const img = pagedImages[i];
@@ -189,7 +191,7 @@ export default function GalleryPage() {
             }
         }
         return cells;
-    }, [pagedImages]);
+    }, [pagedImages, shouldPaginate]);
 
     function deleteImage() {
         if (!modalImage) return;
@@ -218,24 +220,11 @@ export default function GalleryPage() {
     return (
         <div className="gallery-page-shell">
             <canvas ref={starfieldCanvas} id="starfield" className="starfield-canvas" aria-hidden="true"></canvas>
-            <header id="header" style={{ opacity: 1 }}>
-                <div className="site-header-inner">
-                    <div className="site-brand">
-                        <a href="index.html">Chen.のhomepage</a>
-                    </div>
-                    <div className="site-nav">
-                        <a href="index.html" className="nav-btn" onClick={event => navigateWithTransition(event, 'index.html')}>主页</a>
-                        <a href="gallery.html" className="nav-btn is-active">光影留痕</a>
-                        <a href={CHANGELOG_DOC_URL} className="nav-btn" onClick={event => navigateWithTransition(event, CHANGELOG_DOC_URL)}>更新日志</a>
-                        <a href="https://Bamb0oChen.github.io/notes/" className="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
-                    </div>
-                </div>
-            </header>
+            <SiteHeader activePage="gallery" onNavigate={navigateWithTransition} />
 
             <div className="gallery-container">
                 <div className="gallery-header">
                     <h1>光影留痕</h1>
-                    <p>记录生活中的精彩瞬间</p>
                 </div>
                 <div className="gallery-view-switch" role="group" aria-label="光影留痕浏览方式">
                     <button type="button" className={view === 'map' ? 'is-active' : ''} onClick={() => setView('map')}>地图</button>
@@ -245,7 +234,6 @@ export default function GalleryPage() {
                     hasPublishedMap ? (
                         <div className="lighttrace-map-wrap">
                             <LighttraceMap images={mapImages} onSelect={openModal} />
-                            <p>按拍摄时间连接 {mapImages.length} 张有 GPS 的 Immich 收藏照片；虚线代表时间或距离跨度较大的两站。连线不等于实际行驶路线。其他照片请切换到“全部照片”。</p>
                         </div>
                     ) : <div className="gallery-empty"><p>地图还没有公开照片。请先从 NAS 导出带 GPS 的 Immich 收藏照片。</p></div>
                 ) : <>
@@ -257,9 +245,9 @@ export default function GalleryPage() {
                             {cell.type === 'image' ? (
                                 <>
                                     <img src={cell.data} alt={cell.title || cell.fileName} className="gallery-image" loading="lazy" decoding="async" />
-                                    {(cell.title || cell.comment) && (
+                                    {(cell.title || cell.comment || cell.date) && (
                                         <div className="gallery-comment" title={cell.comment || cell.title}>
-                                            {cell.title || cell.comment}
+                                            {cell.title || cell.comment || cell.date}
                                         </div>
                                     )}
                                 </>

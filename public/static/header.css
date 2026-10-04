@@ -8,24 +8,25 @@
     height: 66px;
     transform: translateX(-50%);
     background:
-        radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.22), transparent 28%),
-        radial-gradient(circle at 88% 18%, rgba(88, 210, 205, 0.13), transparent 34%),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.055) 42%, rgba(255, 255, 255, 0.09));
-    backdrop-filter: saturate(185%) blur(26px);
-    -webkit-backdrop-filter: saturate(185%) blur(26px);
+        radial-gradient(ellipse at 10% -35%, rgba(255, 255, 255, 0.33), transparent 36%),
+        radial-gradient(ellipse at 88% 135%, rgba(126, 219, 225, 0.15), transparent 42%),
+        linear-gradient(105deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.045) 39%, rgba(255, 255, 255, 0.11) 70%, rgba(255, 255, 255, 0.055));
+    backdrop-filter: saturate(165%) blur(22px) brightness(1.08);
+    -webkit-backdrop-filter: saturate(165%) blur(22px) brightness(1.08);
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
     transition: background 0.3s, border-color 0.3s, opacity 0.3s, transform 0.3s, box-shadow 0.3s;
     z-index: 1000;
-    border: 1px solid rgba(255, 255, 255, 0.19);
+    border: 1px solid rgba(255, 255, 255, 0.27);
     border-radius: 999px;
     box-shadow:
-        0 24px 70px rgba(0, 0, 0, 0.34),
+        0 22px 64px rgba(0, 0, 0, 0.34),
         0 8px 24px rgba(31, 126, 164, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.32),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+        inset 0 1px 0 rgba(255, 255, 255, 0.48),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.16),
+        inset 1px 0 0 rgba(255, 255, 255, 0.12);
     isolation: isolate;
     overflow: hidden;
 }
@@ -36,8 +37,8 @@
     inset: 1px;
     border-radius: inherit;
     background:
-        linear-gradient(115deg, rgba(255, 255, 255, 0.18), transparent 34%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 52%);
+        linear-gradient(118deg, rgba(255, 255, 255, 0.22), transparent 24%, rgba(255, 255, 255, 0.05) 47%, transparent 66%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 42%, rgba(255, 255, 255, 0.035) 88%);
     pointer-events: none;
     z-index: -1;
 }
@@ -45,12 +46,12 @@
 #header::after {
     content: '';
     position: absolute;
-    left: 7%;
-    right: 7%;
+    left: 3%;
+    right: 3%;
     top: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.58), transparent);
-    opacity: 0.78;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38) 12%, rgba(255, 255, 255, 0.72) 38%, rgba(255, 255, 255, 0.3) 72%, transparent);
+    opacity: 0.9;
     pointer-events: none;
 }
 

@@ -21,7 +21,7 @@ export default function LighttraceMap({ images, onSelect }) {
             zoom: 3,
             minZoom: 2,
             worldCopyJump: true,
-            scrollWheelZoom: false
+            scrollWheelZoom: true
         });
         L.tileLayer(TILE_URL, {
             maxZoom: 19,

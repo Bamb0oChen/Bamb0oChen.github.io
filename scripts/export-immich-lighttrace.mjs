@@ -76,7 +76,7 @@ for (const asset of assets) {
     photos.push({
         id: asset.id,
         src: `photos/lighttrace-published/${filename}`,
-        title: asset.description?.trim().slice(0, 80) || (date ? `${date} · 光影` : '未命名光影'),
+        title: asset.description?.trim().slice(0, 80) || '',
         date,
         capturedAt,
         takenAt,

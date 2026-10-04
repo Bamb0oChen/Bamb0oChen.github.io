@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { getRecord, requestAIPlanSuggestions, saveRecordData } from '../data/siteData';
+import SiteHeader from '../components/SiteHeader';
 import '../styles/records-page.css';
 
 function getDateString(date) {
@@ -161,15 +162,7 @@ export default function RecordsPage() {
 
     return (
         <div>
-            <header id="header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', maxWidth: 1100, justifyContent: 'space-between' }}>
-                    <div style={{ fontWeight: 'bold', fontSize: 18 }}>Chen.のhomepage</div>
-                    <div>
-                        <a href="index.html" className="nav-btn">返回首页</a>
-                        <a href="https://Bamb0oChen.github.io/notes/" className="nav-btn" target="_blank" rel="noopener noreferrer">笔记</a>
-                    </div>
-                </div>
-            </header>
+            <SiteHeader activePage="records" />
 
             <section className="records-hero">
                 <h1>📝 每日记录（独立页面）</h1>

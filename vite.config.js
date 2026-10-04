@@ -12,7 +12,8 @@ export default defineConfig({
             input: {
                 main: 'index.html',
                 gallery: 'gallery.html',
-                records: 'records.html'
+                records: 'records.html',
+                changelog: 'docs/changelog.html'
             }
         }
     }

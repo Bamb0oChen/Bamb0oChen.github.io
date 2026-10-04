@@ -9,7 +9,8 @@
         "preview": "vite preview",
         "export:lighttrace": "node scripts/export-immich-lighttrace.mjs",
         "export:lighttrace:local": "node --env-file=.env.local scripts/export-immich-lighttrace.mjs",
-        "test:lighttrace": "node --test src/utils/lighttraceRoute.test.js scripts/export-immich-lighttrace.test.mjs"
+        "test:lighttrace": "node --test src/utils/lighttraceRoute.test.js scripts/export-immich-lighttrace.test.mjs",
+        "test:terminal": "node --test src/utils/virtualTerminal.test.js"
     },
     "dependencies": {
         "@react-three/drei": "^10.7.7",

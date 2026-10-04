@@ -1,0 +1,119 @@
+.site-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 1240px;
+    justify-content: space-between;
+    padding: 0 30px;
+}
+
+#header {
+    border-radius: 33px;
+    transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, background 0.3s, border-color 0.3s, opacity 0.3s, box-shadow 0.3s;
+}
+
+#header > .site-header-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: 66px;
+    box-sizing: border-box;
+    z-index: 3;
+}
+
+.site-brand {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.site-brand a { color: inherit; text-decoration: none; }
+
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+#header .site-nav .nav-icon-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    padding: 9px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    isolation: auto;
+}
+
+#header .site-nav .nav-icon-btn svg,
+#header .site-nav .nav-icon-btn img {
+    display: block;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    mix-blend-mode: difference;
+}
+
+#header .site-nav .nav-icon-btn svg { color: #fff; }
+
+.nav-btn-button { font: inherit; cursor: pointer; }
+
+#header .site-nav .nav-btn.is-active {
+    color: rgba(255, 255, 255, 0.96);
+    background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.18), transparent 62%), rgba(255, 255, 255, 0.09);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 10px 32px rgba(92, 213, 196, 0.12);
+}
+
+@media (max-width: 900px) {
+    .site-brand { font-size: 15px; }
+}
+
+@media (max-width: 768px) {
+    #header {
+        top: max(10px, env(safe-area-inset-top));
+        height: 104px;
+        padding: 0;
+        border-radius: 22px;
+    }
+    #header > .site-header-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: 44px 44px;
+        gap: 4px 8px;
+        height: 104px;
+        padding: 6px 12px;
+    }
+    #header > .site-header-inner > .site-brand {
+        display: block;
+        width: auto;
+        font-size: 14px;
+    }
+    #header .site-nav {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        width: 100%;
+        gap: 2px;
+    }
+    #header .site-nav .nav-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 44px;
+        box-sizing: border-box;
+        padding: 8px 2px;
+        font-size: 12px;
+        text-align: center;
+    }
+    #header .site-nav .nav-icon-btn { width: 100%; min-width: 0; }
+}

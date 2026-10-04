@@ -9,16 +9,6 @@
     mix-blend-mode: screen;
 }
 
-.site-header-inner {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-    max-width: 1240px;
-    justify-content: space-between;
-    padding: 0 30px;
-}
-
 .private-bar-backdrop {
     position: fixed;
     inset: 0;
@@ -36,28 +26,12 @@
     pointer-events: auto;
 }
 
-#header {
-    border-radius: 33px;
-    transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, background 0.3s, border-color 0.3s, opacity 0.3s, box-shadow 0.3s;
-}
-
 #header.is-private-open {
     height: 430px;
     border-radius: 30px;
     background: rgba(13, 22, 34, 0.9);
     box-shadow: 0 32px 100px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.19);
     transition-delay: 0s;
-}
-
-#header > .site-header-inner {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: auto;
-    height: 66px;
-    box-sizing: border-box;
-    z-index: 3;
 }
 
 .private-dock-toggle {
@@ -144,56 +118,6 @@
 .private-bar-heading h2 { margin: 0; font-size: 25px; }
 .private-bar-heading > p { margin: 0; color: rgba(255, 255, 255, 0.55); font-size: 13px; }
 .private-bar-panel .server-service-card { min-height: 245px; }
-
-.site-brand {
-    flex: 0 0 auto;
-    white-space: nowrap;
-    font-weight: 700;
-    font-size: 18px;
-    letter-spacing: 0;
-    color: rgba(255, 255, 255, 0.92);
-}
-
-.site-nav {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-#header .site-nav .nav-icon-btn {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    padding: 9px;
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#header .site-nav .nav-icon-btn svg,
-#header .site-nav .nav-icon-btn img {
-    display: block;
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-}
-
-.nav-btn-button {
-    font: inherit;
-}
-
-.nav-btn-button.is-active {
-    color: rgba(255, 255, 255, 0.96);
-    background:
-        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.18), transparent 62%),
-        rgba(255, 255, 255, 0.09);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.16),
-        0 10px 32px rgba(92, 213, 196, 0.12);
-}
 
 .page-transition-overlay {
     position: fixed;
@@ -1934,7 +1858,6 @@
 
 @media (max-width: 900px) {
     .private-dock-toggle { left: 47%; }
-    .site-brand { font-size: 15px; }
     .private-bar-panel .server-service-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .private-bar-panel .server-service-card { min-height: 245px; }
 
@@ -2004,28 +1927,9 @@ body {
     overflow-x: hidden;
 }
 
-    #header {
-        top: max(10px, env(safe-area-inset-top));
-        height: 104px;
-        padding: 0;
-        border-radius: 22px;
-    }
     #header.is-private-open {
         height: min(650px, calc(100dvh - 20px));
         border-radius: 26px;
-    }
-    #header > .site-header-inner {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        grid-template-rows: 44px 44px;
-        gap: 4px 8px;
-        height: 104px;
-        padding: 6px 12px;
-    }
-    #header > .site-header-inner > .site-brand {
-        display: block;
-        width: auto;
-        font-size: 14px;
     }
     .private-dock-toggle {
         position: static;
@@ -2053,29 +1957,6 @@ body {
         opacity: 0.72;
     }
 
-    .site-header-inner {
-        flex-wrap: wrap;
-        padding: 0 16px;
-        gap: 10px;
-    }
-    #header .site-nav {
-        grid-column: 1 / -1;
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        width: 100%;
-        gap: 2px;
-    }
-    #header .site-nav .nav-btn {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 44px;
-        box-sizing: border-box;
-        padding: 8px 2px;
-        font-size: 12px;
-        text-align: center;
-    }
-    #header .site-nav .nav-icon-btn { width: 100%; min-width: 0; }
     .hero-tilt {
         transform: none !important;
         width: min(460px, calc(100vw - 40px));

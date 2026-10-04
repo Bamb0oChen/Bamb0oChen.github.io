@@ -14,10 +14,10 @@ import ChromaGrid from '../components/ChromaGrid';
 import BorderGlow from '../components/BorderGlow';
 import ProjectShowcase from '../components/ProjectShowcase';
 import ModelErrorBoundary from '../components/ModelErrorBoundary';
+import SiteHeader, { NOTES_NAV_ICON } from '../components/SiteHeader';
 import '../styles/index-page.css';
 
 const NOTES_BASE_URL = 'https://bamb0ochen.github.io/notes/';
-const NOTES_NAV_ICON = 'https://bamb0ochen.com/notes/assets/images/patchouli-coding-white-outline.png';
 const NOTES_SEARCH_INDEX_URL = `${NOTES_BASE_URL}search/search_index.json`;
 const SEARCH_LIMIT = 20;
 const AGENT_CONTEXT_LIMIT = 8;
@@ -637,6 +637,12 @@ export default function IndexPage() {
         setIsSearchOpen(true);
     }
 
+    useEffect(() => {
+        if (window.location.hash !== '#agent') return;
+        openSearch();
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }, []);
+
     function closeSearch() {
         setIsAgentClosing(true);
         window.setTimeout(() => {
@@ -1064,27 +1070,11 @@ export default function IndexPage() {
             <canvas ref={fluidCanvas} className="hero-fluid-canvas" aria-hidden="true"></canvas>
 
             <button className={`private-bar-backdrop ${isPrivateBarOpen ? 'is-visible' : ''}`} type="button" aria-label="关闭 Private Bar" tabIndex={isPrivateBarOpen ? 0 : -1} onClick={() => setIsPrivateBarOpen(false)} />
-            <header id="header" className={isPrivateBarOpen ? 'is-private-open' : ''} style={{ opacity: headerOpacity }}>
-                <div className="site-header-inner">
-                    <div className="site-brand">Chen.のhomepage</div>
-                    <button className={`private-dock-toggle ${isPrivateBarOpen ? 'is-active' : ''}`} type="button" aria-expanded={isPrivateBarOpen} aria-controls="private-bar-panel" onClick={() => setIsPrivateBarOpen(open => !open)}>
-                        <span>{isPrivateBarOpen ? 'Private Bar' : 'Private Dock'}</span><span aria-hidden="true">{isPrivateBarOpen ? '×' : '⌄'}</span>
-                    </button>
-                    <nav className="site-nav" aria-label="主导航">
-                        <button className={`nav-btn nav-btn-button nav-icon-btn ${isSearchOpen ? 'is-active' : ''}`} type="button" aria-label="Agent" title="Agent" onClick={openSearch}>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4" y="6" width="16" height="14" rx="3"/><path d="M12 3v3M9 3h6M8 13h.01M16 13h.01M9 17h6"/></svg>
-                        </button>
-                        <a href="gallery.html" className="nav-btn nav-icon-btn" aria-label="光影留痕" title="光影留痕" onClick={event => navigateWithTransition(event, 'gallery.html')}>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 7h4l2-2h4l2 2h4v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
-                        </a>
-                        <a href={CHANGELOG_DOC_URL} className="nav-btn nav-icon-btn" aria-label="更新日志" title="更新日志" onClick={event => navigateWithTransition(event, CHANGELOG_DOC_URL)}>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM15 3v5h4M9 12h7M9 16h7"/></svg>
-                        </a>
-                        <a href="https://bamb0ochen.com/notes/" className="nav-btn nav-icon-btn" target="_blank" rel="noopener noreferrer" aria-label="大图书馆" title="大图书馆">
-                            <img src={NOTES_NAV_ICON} alt="" aria-hidden="true" />
-                        </a>
-                    </nav>
-                </div>
+            <SiteHeader className={isPrivateBarOpen ? 'is-private-open' : ''} opacity={headerOpacity} onAgentClick={openSearch} agentActive={isSearchOpen} onNavigate={navigateWithTransition} dockToggle={
+                <button className={`private-dock-toggle ${isPrivateBarOpen ? 'is-active' : ''}`} type="button" aria-expanded={isPrivateBarOpen} aria-controls="private-bar-panel" onClick={() => setIsPrivateBarOpen(open => !open)}>
+                    <span>{isPrivateBarOpen ? 'Private Bar' : 'Private Dock'}</span><span aria-hidden="true">{isPrivateBarOpen ? '×' : '⌄'}</span>
+                </button>
+            }>
                 <div id="private-bar-panel" className="private-bar-panel" aria-hidden={!isPrivateBarOpen}>
                     <div className="private-bar-heading">
                         <div><p className="section-kicker">Homelab</p><h2>Private Bar</h2></div>
@@ -1103,7 +1093,7 @@ export default function IndexPage() {
                         })}
                     </div>
                 </div>
-            </header>
+            </SiteHeader>
 
             <section className="hero" style={heroDepthStyle}>
                 <div className="hero-tilt" style={heroTiltStyle} onMouseMove={handleHeroTilt} onMouseLeave={resetHeroTilt}>
@@ -1364,7 +1354,6 @@ export default function IndexPage() {
                                 <div>
                                     <p className="section-kicker">Agent</p>
                                     <h2>Notes Copilot</h2>
-                                    <p>以主页内容和 notes 搜索索引为上下文。API 端点从运行时配置读取，不写入仓库。</p>
                                 </div>
                                 <div className="agent-source-stack">
                                     <span>{remoteLoading ? 'Index loading' : remoteError ? 'Notes fallback' : 'Notes ready'}</span>

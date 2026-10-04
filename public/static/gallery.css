@@ -891,23 +891,6 @@ html.is-page-transitioning::after {
 }
 
 @media (max-width: 768px) {
-    #header .site-header-inner {
-        flex-wrap: wrap;
-        padding: 0 16px;
-        gap: 10px;
-    }
-
-    #header .site-brand,
-    #header .site-nav {
-        width: 100%;
-    }
-
-    #header .site-nav {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
-    }
-
     .gallery-container {
         padding: 126px 14px 64px;
     }
