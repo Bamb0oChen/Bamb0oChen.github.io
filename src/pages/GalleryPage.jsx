@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getLighttraceLibrary } from '../data/siteData';
+import LighttraceMap from '../components/LighttraceMap';
 import { startStarfield } from '../utils/starfield';
 
 const GALLERY_KEY = 'gallery_images_v1';
@@ -32,7 +33,11 @@ function normalizeImage(item) {
         comment: item.comment || '',
         createdAt: item.createdAt || item.date || '',
         date: item.date || item.createdAt || '',
+        capturedAt: item.capturedAt || '',
+        takenAt: item.takenAt || '',
         location: item.location || '',
+        latitude: item.latitude ?? null,
+        longitude: item.longitude ?? null,
         device: item.device || '',
         tags: item.tags || [],
         fileName: item.fileName || item.id || src
@@ -66,29 +71,52 @@ function saveImages(images) {
 export default function GalleryPage() {
     const starfieldCanvas = useRef(null);
     const [images, setImages] = useState(() => (useLocalLibrary ? loadLocalLibrary() : loadImages()));
+    const [publishedImages, setPublishedImages] = useState(null);
+    const [view, setView] = useState('grid');
     const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalImage, setModalImage] = useState(null);
 
+    const galleryImages = publishedImages?.length ? publishedImages : images;
+    const hasPublishedMap = Boolean(publishedImages?.some(image => image.latitude !== null && image.longitude !== null));
+    const mapImages = useMemo(() => galleryImages.filter(image => image.latitude !== null && image.longitude !== null), [galleryImages]);
+
+    useEffect(() => {
+        let active = true;
+        fetch(new URL('photos/lighttrace-published/manifest.json', window.location.href))
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(manifest => {
+                if (!active || !Array.isArray(manifest.photos)) return;
+                const photos = manifest.photos.map(normalizeImage);
+                setPublishedImages(photos);
+                if (photos.some(image => image.latitude !== null && image.longitude !== null)) setView('map');
+            })
+            .catch(error => console.warn('Published Lighttrace album is unavailable:', error));
+        return () => { active = false; };
+    }, []);
+
     const totalPages = useMemo(() => {
         if (!useLocalLibrary) return 1;
-        return Math.max(1, Math.ceil(images.length / PAGE_SIZE));
-    }, [images.length]);
+        return Math.max(1, Math.ceil(galleryImages.length / PAGE_SIZE));
+    }, [galleryImages.length]);
 
     const pagedImages = useMemo(() => {
-        if (!useLocalLibrary) return images;
+        if (!useLocalLibrary) return galleryImages;
         const page = Math.min(currentPage, totalPages);
         const start = (page - 1) * PAGE_SIZE;
-        return images.slice(start, start + PAGE_SIZE);
-    }, [currentPage, images, totalPages]);
+        return galleryImages.slice(start, start + PAGE_SIZE);
+    }, [currentPage, galleryImages, totalPages]);
 
     const modalImageIndex = useMemo(() => {
         if (!modalImage) return -1;
-        return images.findIndex(img => img.id === modalImage.id);
-    }, [images, modalImage]);
+        return galleryImages.findIndex(img => img.id === modalImage.id);
+    }, [galleryImages, modalImage]);
 
-    const previousImage = modalImageIndex <= 0 ? null : images[modalImageIndex - 1];
-    const nextImage = modalImageIndex < 0 || modalImageIndex >= images.length - 1 ? null : images[modalImageIndex + 1];
+    const previousImage = modalImageIndex <= 0 ? null : galleryImages[modalImageIndex - 1];
+    const nextImage = modalImageIndex < 0 || modalImageIndex >= galleryImages.length - 1 ? null : galleryImages[modalImageIndex + 1];
     const showEmpty = pagedImages.length === 0;
     const showPagination = useLocalLibrary && totalPages > 1;
 
@@ -123,11 +151,11 @@ export default function GalleryPage() {
         const params = new URLSearchParams(location.hash.replace(/^#/, ''));
         const targetId = params.get('photo');
         if (!targetId) return;
-        const targetIndex = images.findIndex(img => img.id === targetId || img.fileName === targetId);
+        const targetIndex = galleryImages.findIndex(img => img.id === targetId || img.fileName === targetId);
         if (targetIndex < 0) return;
         setCurrentPage(Math.floor(targetIndex / PAGE_SIZE) + 1);
-        openModal(images[targetIndex], true);
-    }, [images, openModal]);
+        openModal(galleryImages[targetIndex], true);
+    }, [galleryImages, openModal]);
 
     useEffect(() => {
         openImageFromHash();
@@ -209,7 +237,19 @@ export default function GalleryPage() {
                     <h1>光影留痕</h1>
                     <p>记录生活中的精彩瞬间</p>
                 </div>
-                <div id="localLibraryHint" className="gallery-hint">{localLibraryHint}</div>
+                <div className="gallery-view-switch" role="group" aria-label="光影留痕浏览方式">
+                    <button type="button" className={view === 'map' ? 'is-active' : ''} onClick={() => setView('map')}>地图</button>
+                    <button type="button" className={view === 'grid' ? 'is-active' : ''} onClick={() => setView('grid')}>全部照片</button>
+                </div>
+                {view === 'map' ? (
+                    hasPublishedMap ? (
+                        <div className="lighttrace-map-wrap">
+                            <LighttraceMap images={mapImages} onSelect={openModal} />
+                            <p>按拍摄时间连接 {mapImages.length} 张有 GPS 的 Immich 收藏照片；虚线代表时间或距离跨度较大的两站。连线不等于实际行驶路线。其他照片请切换到“全部照片”。</p>
+                        </div>
+                    ) : <div className="gallery-empty"><p>地图还没有公开照片。请先从 NAS 导出带 GPS 的 Immich 收藏照片。</p></div>
+                ) : <>
+                {!publishedImages?.length && <div id="localLibraryHint" className="gallery-hint">{localLibraryHint}</div>}
 
                 <div className="gallery-grid">
                     {displayCells.map(cell => (
@@ -239,6 +279,7 @@ export default function GalleryPage() {
                         <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage >= totalPages}>下一页</button>
                     </div>
                 )}
+                </>}
             </div>
 
             {isModalOpen && (
@@ -254,7 +295,7 @@ export default function GalleryPage() {
                                     <div className="detail-kicker">Lighttrace</div>
                                     <h2 className="detail-title">{modalImage?.title || modalImage?.fileName || '未命名光影'}</h2>
                                     <div className="detail-meta">
-                                        {modalImage?.date && <span>{modalImage.date}</span>}
+                                        {(modalImage?.takenAt || modalImage?.date) && <span>{modalImage.takenAt ? modalImage.takenAt.slice(0, 16).replace('T', ' ') : modalImage.date}</span>}
                                         {modalImage?.location && <span>{modalImage.location}</span>}
                                         {modalImage?.device && <span>{modalImage.device}</span>}
                                     </div>

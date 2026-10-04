@@ -39,6 +39,8 @@ records/  # Flask 数据存储目录
 # 其他
 *.log
 .env
+.env.local
 public/agent-config.json
+public/photos/lighttrace-published/.staging-*/
 .pytest_cache/
 node_modules/

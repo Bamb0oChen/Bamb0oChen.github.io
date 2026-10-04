@@ -716,6 +716,74 @@ html.is-page-transitioning::after {
     color: rgba(255, 255, 255, 0.5);
 }
 
+.gallery-view-switch {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 auto 20px;
+}
+
+.gallery-view-switch button {
+    padding: 10px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+}
+
+.gallery-view-switch button.is-active {
+    color: #fff;
+    border-color: rgba(92, 213, 196, 0.6);
+    background: rgba(92, 213, 196, 0.2);
+}
+
+.lighttrace-map-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1320px;
+    margin: 0 auto;
+}
+
+.lighttrace-map {
+    width: 100%;
+    height: min(74vh, 750px);
+    min-height: 420px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 22px;
+    overflow: hidden;
+    background: #13222a;
+}
+
+.lighttrace-map-wrap > p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    text-align: center;
+}
+
+.lighttrace-map-popup {
+    display: grid;
+    gap: 8px;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    color: #16252a;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+}
+
+.lighttrace-map-popup img {
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.lighttrace-map-popup span { font-size: 13px; font-weight: 600; }
+
 .gallery-grid {
     position: relative;
     z-index: 1;
@@ -848,4 +916,6 @@ html.is-page-transitioning::after {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
     }
+
+    .lighttrace-map { min-height: 60vh; border-radius: 14px; }
 }
