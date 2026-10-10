@@ -274,6 +274,14 @@ export const FRIEND_LINKS = [
         avatar: 'https://s41.ax1x.com/2026/03/14/peEfnTx.jpg',
         description: '每一个冬天的句号都是春暖花开',
         note: ''
+    },
+    {
+        id: 'shimoko',
+        name: 'Shimoko',
+        url: 'https://www.shimoko.com/',
+        avatar: 'https://img.shimoko.com/shimocat.jpg',
+        description: '轨迹改变角度交错，寂寞城市又在探戈',
+        note: ''
     }
 ];
 
