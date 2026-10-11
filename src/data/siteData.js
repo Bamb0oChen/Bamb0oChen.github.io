@@ -282,6 +282,14 @@ export const FRIEND_LINKS = [
         avatar: 'https://img.shimoko.com/shimocat.jpg',
         description: '轨迹改变角度交错，寂寞城市又在探戈',
         note: ''
+    },
+    {
+        id: 'sunmaple',
+        name: 'SunMaple',
+        url: 'https://renly.cn/',
+        avatar: 'https://renly.cn/avatar.webp',
+        description: '一位普通的学生',
+        note: ''
     }
 ];
 
