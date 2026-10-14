@@ -1315,7 +1315,7 @@ export default function IndexPage() {
                 </div>
             </section>
 
-            <section className="content">
+            <section className="content" id="friends">
                 <div className="section-heading"><p className="section-kicker">Friends</p><h2>缘分天空</h2></div>
                 <div className="articles-grid friend-grid" aria-label="友链列表">
                     {FRIEND_LINKS.map(friend => (

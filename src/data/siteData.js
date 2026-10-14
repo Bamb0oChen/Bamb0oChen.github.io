@@ -257,7 +257,7 @@ export const FRIEND_LINKS = [
         description: 'Everything collapses, but you rise.',
         note: 'r1n.top',
         siteshot: 'https://r1n.top/siteshot.jpg',
-        rss: 'https://r1n.top/atom.xml'
+        rss: '玩二次元的都是好人喵'
     },
     {
         id: 'smallbamboo-notes',
@@ -265,7 +265,7 @@ export const FRIEND_LINKS = [
         url: 'https://notes.smallbamboo.cn',
         avatar: 'https://notes.smallbamboo.cn/wp-content/uploads/2026/08/20260816215731190-icon_autumn.png',
         description: '我没有特别的天赋，我只是热切地充满好奇。',
-        note: 'notes.smallbamboo.cn'
+        note: '小竹老师tql'
     },
     {
         id: 'hubery-notebook',
@@ -273,7 +273,7 @@ export const FRIEND_LINKS = [
         url: 'https://blog.ramenboy.cc',
         avatar: 'https://s41.ax1x.com/2026/03/14/peEfnTx.jpg',
         description: '每一个冬天的句号都是春暖花开',
-        note: ''
+        note: '神秘拉面男'
     },
     {
         id: 'shimoko',
@@ -281,7 +281,7 @@ export const FRIEND_LINKS = [
         url: 'https://www.shimoko.com/',
         avatar: 'https://img.shimoko.com/shimocat.jpg',
         description: '轨迹改变角度交错，寂寞城市又在探戈',
-        note: ''
+        note: '很酷的博客~'
     },
     {
         id: 'sunmaple',
@@ -289,7 +289,7 @@ export const FRIEND_LINKS = [
         url: 'https://renly.cn/',
         avatar: 'https://renly.cn/avatar.webp',
         description: '一位普通的学生',
-        note: ''
+        note: 'sunmaple老师~'
     }
 ];
 

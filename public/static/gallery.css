@@ -607,12 +607,6 @@
     justify-content: flex-end;
 }
 
-#header .nav-btn.is-active {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.18);
-}
-
 html.is-page-transitioning::before {
     content: "";
     position: fixed;
