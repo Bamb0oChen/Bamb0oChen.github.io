@@ -250,6 +250,13 @@ export const SITE_STATUS = {
 
 export const FRIEND_LINKS = [
     {
+        id: 'youyeyejie-blog',
+        name: 'YYYJ’s Blog',
+        url: 'https://youyeyejie.github.io/',
+        avatar: 'https://youyeyejie.github.io/img/avatar/avatar2.webp',
+        description: '有野野芥的白日梦陈列馆'
+    },
+    {
         id: 'r1n-blog',
         name: '陵长镜',
         url: 'https://r1n.top',
