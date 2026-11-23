@@ -2,6 +2,9 @@
     --ps-top: 96px;
     --ps-gutter: clamp(14px, 3vw, 48px);
     --ps-stage-height: calc(100svh - var(--ps-top) - 14px);
+    --ps-corner-shade: rgb(0 0 0 / 0.85) 0%, rgb(0 0 0 / 0.81) 22%,
+        rgb(0 0 0 / 0.71) 43%, rgb(0 0 0 / 0.57) 58%, rgb(0 0 0 / 0.34) 72%,
+        rgb(0 0 0 / 0.12) 86%, rgb(0 0 0 / 0.025) 95%, transparent 100%;
     position: relative;
     z-index: 1;
     margin: 0 0 36px;
@@ -16,19 +19,45 @@
     position: sticky;
     top: var(--ps-top);
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
-    gap: clamp(12px, 2.2svh, 24px);
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
     height: var(--ps-stage-height);
-    padding: 14px 0 12px;
 }
 
 .ps-heading {
+    grid-area: 1 / 1;
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
+    align-self: start;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding-inline: var(--ps-gutter);
+    padding: clamp(8px, 1.7vw, 24px) var(--ps-gutter) 0;
+    pointer-events: none;
+}
+
+.ps-heading::before,
+.ps-heading::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.ps-heading::before {
+    inset: 0 auto auto 0;
+    width: min(520px, 65%);
+    height: clamp(96px, 12vw, 160px);
+    background: radial-gradient(ellipse 100% 100% at left top, var(--ps-corner-shade));
+}
+
+.ps-section:not(.ps-section--still) .ps-heading::after {
+    inset: 0 0 auto auto;
+    width: min(380px, 72%);
+    height: clamp(88px, 12vw, 144px);
+    background: radial-gradient(ellipse 100% 100% at right top,
+        rgb(0 0 0 / 0.74), rgb(0 0 0 / 0.56) 44%, rgb(0 0 0 / 0.27) 74%, transparent);
 }
 
 .ps-heading h2 {
@@ -36,6 +65,9 @@
     font-size: clamp(28px, 3.25vw, 46px);
     font-weight: 650;
     letter-spacing: -.035em;
+    color: white;
+    text-shadow: 0 1px 5px rgb(0 0 0 / 0.4);
+    pointer-events: auto;
 }
 
 .ps-pagination { display: flex; align-items: center; }
@@ -48,8 +80,9 @@
     border: 0;
     border-radius: 5px;
     background: transparent;
-    color: #7e8187;
+    color: rgb(255 255 255 / 65%);
     cursor: pointer;
+    pointer-events: auto;
 }
 
 .ps-pagination button::after {
@@ -58,14 +91,15 @@
     height: 5px;
     border-radius: 99px;
     background: currentColor;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 55%);
     transition: width 200ms ease, color 200ms ease;
 }
 
-.ps-pagination button:hover { color: #c4c6ca; }
+.ps-pagination button:hover { color: #fff; }
 .ps-pagination button[aria-current] { color: #f5f5f6; }
 .ps-pagination button[aria-current]::after { width: 17px; }
 
-.ps-window { min-width: 0; min-height: 0; overflow: clip; }
+.ps-window { grid-area: 1 / 1; min-width: 0; min-height: 0; overflow: clip; }
 .ps-track {
     display: flex;
     height: 100%;
@@ -138,17 +172,7 @@
     inset: auto auto 0 0;
     width: max(37rem, 59%);
     height: clamp(176px, 26%, 240px);
-    background: radial-gradient(
-        ellipse 100% 100% at left bottom,
-        rgb(0 0 0 / 0.85) 0%,
-        rgb(0 0 0 / 0.81) 22%,
-        rgb(0 0 0 / 0.71) 43%,
-        rgb(0 0 0 / 0.57) 58%,
-        rgb(0 0 0 / 0.34) 72%,
-        rgb(0 0 0 / 0.12) 86%,
-        rgb(0 0 0 / 0.025) 95%,
-        transparent 100%
-    );
+    background: radial-gradient(ellipse 100% 100% at left bottom, var(--ps-corner-shade));
     pointer-events: none;
 }
 
@@ -174,7 +198,6 @@
 
 @media (max-width: 768px) {
     .ps-section { --ps-top: 122px; }
-    .ps-stage { padding-top: 6px; }
     .ps-pagination button { width: 23px; }
     .ps-figure::after {
         width: 155%;
@@ -183,12 +206,10 @@
 }
 
 @media (max-width: 768px) and (orientation: portrait) {
-    .ps-section:not(.ps-section--still) .ps-row {
-        grid-template-rows: auto;
+    .ps-section:not(.ps-section--still) .ps-stage {
+        grid-template-rows: min(57vw, 47svh);
         align-content: center;
     }
-
-    .ps-section:not(.ps-section--still) .ps-preview { height: min(57vw, 47svh); }
 }
 
 .ps-line { height: 5px; border-radius: 8px; background: #ffffff20; margin: 10px 0; width: 90%; }

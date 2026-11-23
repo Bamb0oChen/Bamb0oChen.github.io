@@ -257,7 +257,6 @@ export default function IndexPage() {
     const [isHoveringPhotos, setIsHoveringPhotos] = useState(false);
     const [stripOffset, setStripOffset] = useState(0);
     const [stripTransition, setStripTransition] = useState(true);
-    const [selectedArticleTag, setSelectedArticleTag] = useState('全部');
     const [focusVideos, setFocusVideos] = useState([]);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isAgentClosing, setIsAgentClosing] = useState(false);
@@ -303,17 +302,6 @@ export default function IndexPage() {
     useEffect(() => {
         hoverRef.current = isHoveringPhotos;
     }, [isHoveringPhotos]);
-
-    const articleTags = useMemo(() => {
-        const tags = new Set(['全部']);
-        CONTENT_ARTICLES.forEach(article => (article.tags || []).forEach(tag => tags.add(tag)));
-        return Array.from(tags);
-    }, []);
-
-    const filteredArticles = useMemo(() => {
-        if (selectedArticleTag === '全部') return CONTENT_ARTICLES.filter(article => article.featured);
-        return CONTENT_ARTICLES.filter(article => article.featured && (article.tags || []).includes(selectedArticleTag));
-    }, [selectedArticleTag]);
 
     const recentFeed = useMemo(() => {
         const articleItems = CONTENT_ARTICLES.map(article => ({
@@ -366,7 +354,7 @@ export default function IndexPage() {
             { border: '#ff6b8a', gradient: 'linear-gradient(165deg, rgba(255, 107, 138, 0.38), #05070a 74%)' },
             { border: '#b8a1ff', gradient: 'linear-gradient(195deg, rgba(142, 123, 255, 0.42), #05070a 72%)' }
         ];
-        return filteredArticles.map((article, index) => {
+        return CONTENT_ARTICLES.filter(article => article.featured).map((article, index) => {
             const palette = palettes[index % palettes.length];
             return {
                 image: article.image,
@@ -379,7 +367,7 @@ export default function IndexPage() {
                 url: article.link
             };
         });
-    }, [filteredArticles]);
+    }, []);
 
     const localSearchIndex = useMemo(() => {
         const articleItems = CONTENT_ARTICLES.map(article => ({
@@ -991,13 +979,6 @@ export default function IndexPage() {
 
             <section className="content" id="writing">
                 <div className="section-heading"><p className="section-kicker">Writing</p><h2>妙笔生花</h2></div>
-                <div className="filter-row" aria-label="文章分类筛选">
-                    {articleTags.map(tag => (
-                        <button key={tag} type="button" className={`filter-chip ${selectedArticleTag === tag ? 'active' : ''}`} onClick={() => setSelectedArticleTag(tag)}>
-                            <span>{tag}</span>
-                        </button>
-                    ))}
-                </div>
                 <div
                     className="writing-chroma-wrap"
                     style={{ '--writing-rows': Math.max(1, Math.ceil((chromaArticleItems.length + 1) / 3)) }}
@@ -1020,7 +1001,6 @@ export default function IndexPage() {
                     <div className="video-copy">
                         <p className="section-kicker">Video</p>
                         <h2>用心做视频</h2>
-                        <p>把旅行、城市与片刻情绪剪成可以回访的时间切片。{isCompactScreen ? '左右滑动查看视频，点开卡片前往 B 站。' : '右侧卡组会自动轮换，点击任意一张直接打开 B 站。'}</p>
                         <div className="video-actions">
                             <a href={focusVideos[0]?.openUrl || 'https://www.bilibili.com/'} target="_blank" rel="noopener noreferrer">打开最新视频</a>
                             <a href="https://space.bilibili.com/" target="_blank" rel="noopener noreferrer">Bilibili</a>
@@ -1129,7 +1109,7 @@ export default function IndexPage() {
                         <div className="music-embed">
                             <iframe title="Apple Music 收藏歌单" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameBorder="0" width="100%" height="450" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" loading="lazy"></iframe>
                         </div>
-                        <p className="music-open-link"><a href="https://music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" target="_blank" rel="noopener noreferrer">在 Apple Music 打开 ↗</a><span>播放器未显示时可直接打开歌单</span></p>
+                        <p className="music-open-link"><a href="https://music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" target="_blank" rel="noopener noreferrer">在 Apple Music 打开 ↗</a></p>
                     </BorderGlow>
                     <div className="music-model-card" aria-label="可旋转留声机模型">
                         <ModelErrorBoundary
