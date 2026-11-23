@@ -23,6 +23,8 @@ SOFTWARE.
 */
 
 
+import { createGlassWordmark, glassWordmarkShader } from '../glassWordmark.js';
+
 export function startHeroFluid(canvas, options = {}) {
  if (!canvas || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
  let disposed = false, idleTimer = null, opacity = 1, fadeTime = performance.now();
@@ -81,6 +83,13 @@ let splatStack = [];
 pointers.push(new pointerPrototype());
 
 const { gl, ext } = getWebGLContext(canvas);
+const glass = createGlassWordmark(gl, canvas, options.glassHeading);
+listen(canvas, 'webglcontextlost', () => {
+    disposed = true;
+    canvas.style.opacity = '0';
+    glass?.hide();
+    options.onContextLost?.();
+});
 
 if (isMobile()) {
 	config.DYE_RESOLUTION = 512;
@@ -384,30 +393,27 @@ const displayShaderSource = `
     precision highp sampler2D;
 
     varying vec2 vUv;
-    varying vec2 vL;
-    varying vec2 vR;
-    varying vec2 vT;
-    varying vec2 vB;
     uniform sampler2D uTexture;
     uniform sampler2D uBloom;
     uniform sampler2D uSunrays;
     uniform sampler2D uDithering;
     uniform vec2 ditherScale;
     uniform vec2 texelSize;
+    uniform float uSceneOpacity;
 
     vec3 linearToGamma (vec3 color) {
         color = max(color, vec3(0));
         return max(1.055 * pow(color, vec3(0.416666667)) - 0.055, vec3(0));
     }
 
-    void main () {
-        vec3 c = texture2D(uTexture, vUv).rgb;
+    vec3 sceneColor (vec2 uv, float dither) {
+        vec3 c = texture2D(uTexture, uv).rgb;
 
     #ifdef SHADING
-        vec3 lc = texture2D(uTexture, vL).rgb;
-        vec3 rc = texture2D(uTexture, vR).rgb;
-        vec3 tc = texture2D(uTexture, vT).rgb;
-        vec3 bc = texture2D(uTexture, vB).rgb;
+        vec3 lc = texture2D(uTexture, uv - vec2(texelSize.x, 0.0)).rgb;
+        vec3 rc = texture2D(uTexture, uv + vec2(texelSize.x, 0.0)).rgb;
+        vec3 tc = texture2D(uTexture, uv + vec2(0.0, texelSize.y)).rgb;
+        vec3 bc = texture2D(uTexture, uv - vec2(0.0, texelSize.y)).rgb;
 
         float dx = length(rc) - length(lc);
         float dy = length(tc) - length(bc);
@@ -420,11 +426,11 @@ const displayShaderSource = `
     #endif
 
     #ifdef BLOOM
-        vec3 bloom = texture2D(uBloom, vUv).rgb;
+        vec3 bloom = texture2D(uBloom, uv).rgb;
     #endif
 
     #ifdef SUNRAYS
-        float sunrays = texture2D(uSunrays, vUv).r;
+        float sunrays = texture2D(uSunrays, uv).r;
         c *= sunrays;
     #ifdef BLOOM
         bloom *= sunrays;
@@ -432,13 +438,20 @@ const displayShaderSource = `
     #endif
 
     #ifdef BLOOM
-        float noise = texture2D(uDithering, vUv * ditherScale).r;
+        float noise = texture2D(uDithering, uv * ditherScale).r;
         noise = noise * 2.0 - 1.0;
-        bloom += noise / 255.0;
+        bloom += dither * noise / 255.0;
         bloom = linearToGamma(bloom);
         c += bloom;
     #endif
 
+        return c * uSceneOpacity;
+    }
+
+    ${glassWordmarkShader}
+
+    void main () {
+        vec3 c = glassWordmark(vUv, sceneColor(vUv, 1.0));
         float a = max(c.r, max(c.g, c.b));
         gl_FragColor = vec4(c, a);
     }
@@ -983,8 +996,10 @@ function update() {
     const fadeDelta = Math.min((performance.now() - fadeTime) / 1000, 0.25);
     fadeTime = performance.now();
     opacity += (targetOpacity - opacity) * (1 - Math.exp(-8 * fadeDelta));
-    canvas.style.opacity = String(opacity * baseOpacity);
-    if (document.hidden || opacity < 0.01) {
+    const visibleGlass = !document.hidden && glass?.update();
+    const backdropOpacity = opacity * baseOpacity;
+    canvas.style.opacity = visibleGlass ? '1' : String(backdropOpacity);
+    if (document.hidden || (opacity < 0.01 && !visibleGlass)) {
         lastUpdateTime = Date.now();
         idleTimer = setTimeout(() => { animationID = requestAnimationFrame(update); }, 200);
         return;
@@ -996,7 +1011,9 @@ function update() {
 	applyInputs();
 	if (!config.PAUSED)
 		step(dt);
-	render(null);
+	render(null, visibleGlass, visibleGlass ? backdropOpacity : 1);
+    if (!canvas.dataset.fluidRenderer) canvas.dataset.fluidRenderer = 'webgl';
+    if (visibleGlass) glass.show();
 	animationID = requestAnimationFrame(update);
 }
 
@@ -1009,8 +1026,13 @@ function calcDeltaTime() {
 }
 
 function resizeCanvas() {
-	let width = scaleByPixelRatio(canvas.clientWidth);
-	let height = scaleByPixelRatio(canvas.clientHeight);
+    const cssWidth = canvas.clientWidth;
+    const cssHeight = canvas.clientHeight;
+    // Increase presentation density without raising the fluid simulation resolution.
+    const pixelBudgetScale = Math.max(1, Math.sqrt(4500000 / Math.max(1, cssWidth * cssHeight)));
+    const scale = Math.min(Math.max(window.devicePixelRatio || 1, 1.25), 2, pixelBudgetScale);
+    const width = Math.max(1, Math.round(cssWidth * scale));
+    const height = Math.max(1, Math.round(cssHeight * scale));
 	if (canvas.width != width || canvas.height != height) {
 		canvas.width = width;
 		canvas.height = height;
@@ -1111,7 +1133,7 @@ function step(dt) {
 	dye.swap();
 }
 
-function render(target) {
+function render(target, visibleGlass, backdropOpacity) {
 	if (config.BLOOM)
 		applyBloom(dye.read, bloom);
 	if (config.SUNRAYS) {
@@ -1136,7 +1158,7 @@ function render(target) {
 		drawColor(fbo, normalizeColor(config.BACK_COLOR));
 	if (target == null && config.TRANSPARENT)
 		drawCheckerboard(fbo);
-	drawDisplay(fbo, width, height);
+	drawDisplay(fbo, width, height, visibleGlass, backdropOpacity);
 }
 
 function drawColor(fbo, color) {
@@ -1151,8 +1173,10 @@ function drawCheckerboard(fbo) {
 	blit(fbo);
 }
 
-function drawDisplay(fbo, width, height) {
+function drawDisplay(fbo, width, height, visibleGlass, backdropOpacity) {
 	displayMaterial.bind();
+    gl.uniform1f(displayMaterial.uniforms.uSceneOpacity, backdropOpacity);
+    glass?.bind(displayMaterial.uniforms, visibleGlass);
 	if (config.SHADING)
 		gl.uniform2f(displayMaterial.uniforms.texelSize, 1.0 / width, 1.0 / height);
 	gl.uniform1i(displayMaterial.uniforms.uTexture, dye.read.attach(0));
@@ -1395,11 +1419,6 @@ function getTextureScale(texture, width, height) {
 	};
 }
 
-function scaleByPixelRatio(input) {
-	let pixelRatio = Math.min(window.devicePixelRatio || 1, isMobile() ? 1 : 1.5);
-	return Math.floor(input * pixelRatio);
-}
-
 function hashCode(s) {
 	if (s.length == 0) return 0;
 	let hash = 0;
@@ -1414,8 +1433,9 @@ function hashCode(s) {
 function movePointer(event) {
  if ((options.getOpacity?.() ?? 1) < 0.03 || document.hidden) return;
  const rect = canvas.getBoundingClientRect();
- const x = scaleByPixelRatio(event.clientX - rect.left);
- const y = scaleByPixelRatio(event.clientY - rect.top);
+ if (!rect.width || !rect.height) return;
+ const x = (event.clientX - rect.left) * canvas.width / rect.width;
+ const y = (event.clientY - rect.top) * canvas.height / rect.height;
  const pointer = pointers[0];
  if (!pointer.down) updatePointerDownData(pointer, -1, x, y);
  else updatePointerMoveData(pointer, x, y);
@@ -1436,6 +1456,8 @@ return () => {
  removers.forEach(remove => remove());
  resources.forEach(release => release());
  resources.clear();
+ glass?.hide();
+ delete canvas.dataset.fluidRenderer;
  canvas.style.opacity = '';
 };
 }

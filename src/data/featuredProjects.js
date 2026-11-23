@@ -2,7 +2,6 @@ export const featuredProjects = [
     {
         id: 'infohub', name: 'InfoHub', repository: 'awesome-Mac-reminder',
         category: 'INFORMATION / macOS', status: '第一阶段原型', color: '#8ebeff',
-        description: '在个人 Mac 上采集信息，按来源整理到邮箱，并计划将明确的校园时间同步到 Apple 日历。',
         tags: ['Python', 'RSS', 'macOS'], caption: '服务监控、校园通知简报、技术资讯简报与日历界面',
         screenshots: [
             'images/projects/infohub/01-monitoring.png',
@@ -15,7 +14,6 @@ export const featuredProjects = [
     {
         id: 'xiaxi', name: '夏隙百日', repository: 'xiaxi-bairi',
         category: 'STORY / VISUAL NOVEL', status: '开发中', color: '#f3bb96',
-        description: '以高考倒计时一百天为时间轴的校园群像视觉小说，让人物、日常对话和选择共同推进故事。',
         tags: ['Ren’Py', '视觉小说', '校园故事'], caption: '游戏主菜单、CG 鉴赏、剧情对话与分支选择',
         screenshots: [
             'images/projects/xiaxi/01-menu.png',
@@ -28,7 +26,6 @@ export const featuredProjects = [
     {
         id: 'colorpal', name: 'ColorPal', repository: 'ColorPal',
         category: 'COLOR / COMPANION', color: '#d1b5ff',
-        description: '从照片里收集颜色，把色彩能量喂给小彩，让一次次拍摄成为伙伴的成长和自己的彩色足迹。',
         tags: ['Vue', 'FastAPI', '色彩分析'], caption: '项目海报与真实界面',
         screenshots: [
             'images/projects/colorpal/01-poster.png',
@@ -41,7 +38,6 @@ export const featuredProjects = [
     {
         id: 'claude', name: 'Learn Claude Code', repository: 'learn-claude-code',
         category: 'LEARNING / AGENT HARNESS', color: '#efa790',
-        description: '从一个工具调用循环出发，学习 Agent 周围的工具、上下文、任务系统与协作机制。',
         tags: ['Python', 'Agent', '学习实践'], caption: 'Agent 循环、工具使用、Claude 配图与任务隔离笔记',
         screenshots: [
             'images/projects/learn-claude-code/01-agent-loop.png',
@@ -54,10 +50,8 @@ export const featuredProjects = [
     {
         id: 'study', name: 'Agent4Study', repository: 'Agent4Study',
         category: 'KNOWLEDGE / AI', color: '#85d9c6',
-        description: '把多本教材连接成可探索的知识图谱，通过检索与 Agent 工作流回答问题，并回到原文查证。',
-        tags: ['知识图谱', 'RAG', '多 Agent'], caption: '项目标识、知识图谱界面、项目报告与代码仓库',
+        tags: ['知识图谱', 'RAG', '多 Agent'], caption: '知识图谱界面、项目报告与代码仓库',
         screenshots: [
-            'images/projects/agent4study/01-logo.png',
             'images/projects/agent4study/02-graph.png',
             'images/projects/agent4study/03-report.png',
             'images/projects/agent4study/04-repository.png',
@@ -67,7 +61,6 @@ export const featuredProjects = [
     {
         id: 'notes', name: 'Notes', repository: 'notes',
         category: 'NOTES / CONTINUOUS LEARNING', color: '#9abaff',
-        description: '计算机科学、数学和语言学习的个人笔记，把课程、实验和自己的理解慢慢积累在一起。',
         tags: ['MkDocs', 'Markdown', '学习笔记'], caption: '真实笔记页面截图',
         screenshots: [
             'images/projects/notes/01-introduction.png',

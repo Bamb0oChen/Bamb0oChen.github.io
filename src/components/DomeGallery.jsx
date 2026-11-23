@@ -12,39 +12,33 @@ const wrapAngleSigned = deg => {
     return angle - 180;
 };
 
-function buildItems(pool, segments) {
-    const xCols = Array.from({ length: segments }, (_, i) => -37 + i * 2);
-    const evenYs = [-4, -2, 0, 2, 4];
-    const oddYs = [-3, -1, 1, 3, 5];
-    const coords = xCols.flatMap((x, c) => {
-        const ys = c % 2 === 0 ? evenYs : oddYs;
-        return ys.map(y => ({ x, y, sizeX: 2, sizeY: 2 }));
+function buildLayout(pool, segments) {
+    const seen = new Set();
+    const photos = (pool.length ? pool : DEFAULT_IMAGES).flatMap(image => {
+        const photo = typeof image === 'string' ? { src: image, alt: '' } : image;
+        if (!photo?.src || seen.has(photo.src)) return [];
+        seen.add(photo.src);
+        return [{ src: photo.src, alt: photo.alt || '' }];
     });
 
-    const normalizedImages = (pool.length ? pool : DEFAULT_IMAGES).map(image => {
-        if (typeof image === 'string') return { src: image, alt: '' };
-        return { src: image.src || '', alt: image.alt || '' };
+    // A shallow band gives the sphere room to rotate even with fewer photos.
+    const rows = clamp(Math.round(Math.sqrt(photos.length / 5)), 1, 5);
+    const columns = Math.max(1, Math.min(segments, Math.ceil(photos.length / rows)));
+    const tileSegments = Math.max(12, columns);
+    const columnStep = tileSegments * 2 / columns;
+    const items = photos.slice(0, columns * rows).map((photo, index) => {
+        const column = index % columns;
+        const row = Math.floor(index / columns);
+        return {
+            ...photo,
+            x: (column - (columns - 1) / 2) * columnStep - 0.5,
+            y: row * 2 - (rows - 1) + column % 2,
+            sizeX: 2,
+            sizeY: 2
+        };
     });
 
-    const usedImages = Array.from({ length: coords.length }, (_, index) => normalizedImages[index % normalizedImages.length]);
-    for (let i = 1; i < usedImages.length; i += 1) {
-        if (usedImages[i].src === usedImages[i - 1].src) {
-            for (let j = i + 1; j < usedImages.length; j += 1) {
-                if (usedImages[j].src !== usedImages[i].src) {
-                    const temp = usedImages[i];
-                    usedImages[i] = usedImages[j];
-                    usedImages[j] = temp;
-                    break;
-                }
-            }
-        }
-    }
-
-    return coords.map((coord, index) => ({
-        ...coord,
-        src: usedImages[index].src,
-        alt: usedImages[index].alt
-    }));
+    return { items, tileSegments };
 }
 
 export default function DomeGallery({
@@ -74,7 +68,7 @@ export default function DomeGallery({
     const inertiaRef = useRef(null);
     const [openedImage, setOpenedImage] = useState(null);
 
-    const items = useMemo(() => buildItems(images, segments), [images, segments]);
+    const { items, tileSegments } = useMemo(() => buildLayout(images, segments), [images, segments]);
 
     const applyTransform = useCallback((xDeg, yDeg) => {
         const el = sphereRef.current;
@@ -204,8 +198,8 @@ export default function DomeGallery({
             ref={rootRef}
             className="dg-root"
             style={{
-                '--segments-x': segments,
-                '--segments-y': segments,
+                '--segments-x': tileSegments,
+                '--segments-y': tileSegments,
                 '--overlay-blur-color': overlayBlurColor,
                 '--tile-radius': imageBorderRadius,
                 '--enlarge-radius': openedImageBorderRadius,
