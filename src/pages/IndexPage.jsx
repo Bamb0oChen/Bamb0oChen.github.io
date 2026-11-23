@@ -211,7 +211,6 @@ function withIdKeys(photos) {
 }
 
 export default function IndexPage() {
-    const handwritingIntro = new URLSearchParams(window.location.search).get('intro') === 'handwriting';
     const [isCompactScreen, setIsCompactScreen] = useState(() => window.matchMedia('(max-width: 768px)').matches);
     useEffect(() => {
         const query = window.matchMedia('(max-width: 768px)');
@@ -223,7 +222,6 @@ export default function IndexPage() {
     const starfieldCanvas = useRef(null);
     const fluidCanvas = useRef(null);
     const compatibilityCanvas = useRef(null);
-    const glassHeading = useRef(null);
     const photoStripRef = useRef(null);
     const photoRefs = useRef([]);
     const videoSectionRef = useRef(null);
@@ -778,7 +776,6 @@ export default function IndexPage() {
         const stopStarfield = startStarfield(starfieldCanvas.current, 'star');
         const primaryCanvas = fluidCanvas.current;
         const options = {
-            glassHeading: glassHeading.current,
             getOpacity: () => Math.max(0, 1 - window.scrollY / (window.innerHeight * 0.5)),
         };
         let stopFluid;
@@ -924,7 +921,7 @@ export default function IndexPage() {
             <canvas ref={fluidCanvas} className="hero-fluid-canvas" aria-hidden="true" />
             <canvas ref={compatibilityCanvas} className="hero-fluid-canvas" aria-hidden="true" hidden />
             <section className="homepage-intro">
-                {handwritingIntro ? <HandwrittenWordmark /> : <h1 ref={glassHeading}>Bamb0oChen</h1>}
+                <HandwrittenWordmark />
             </section>
 
             <SiteHeader className="homepage-header" onAgentClick={openSearch} agentActive={isSearchOpen}

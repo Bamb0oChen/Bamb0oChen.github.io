@@ -38,22 +38,7 @@
     text-align: center;
 }
 
-.homepage-intro h1 {
-    margin: 0;
-    color: #eaf3fc;
-    font-family: "Times New Roman", Times, serif;
-    font-size: clamp(2.25rem, 10vw, 7rem);
-    font-weight: 400;
-    line-height: 1.05;
-    letter-spacing: -0.035em;
-    overflow-wrap: anywhere;
-}
-
-@media (forced-colors: none) {
-    .homepage-intro h1[data-liquid-glass] {
-        color: transparent;
-    }
-}
+.homepage-handwriting { margin: 0; }
 
 .homepage-handwriting-intro {
     position: relative;

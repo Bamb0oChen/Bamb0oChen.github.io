@@ -14,17 +14,19 @@ const { tmpdir } = require('node:os');
             await intro.getByRole('heading', { level: 1 }).waitFor();
             const firstScreen = await page.evaluate(() => {
                 const introSection = document.querySelector('.homepage-intro');
-                const text = introSection.querySelector('h1').getBoundingClientRect();
+                const wordmark = introSection.querySelector('.homepage-handwriting-art').getBoundingClientRect();
                 return {
-                    textOnly: introSection.children.length === 1,
-                    centered: Math.abs(text.left + text.width / 2 - innerWidth / 2) <= 1 &&
-                        Math.abs(text.top + text.height / 2 - innerHeight / 2) <= 1,
-                    singleLine: text.height <= parseFloat(getComputedStyle(introSection.querySelector('h1')).lineHeight) + 1,
+                    handwriting: introSection.querySelectorAll('.homepage-handwriting-art path').length > 0 &&
+                        Boolean(introSection.querySelector('.homepage-handwriting-poem')),
+                    centered: Math.abs(wordmark.left + wordmark.width / 2 - innerWidth / 2) <= 1 &&
+                        Math.abs(wordmark.top + wordmark.height / 2 - innerHeight / 2) <= 1,
+                    fits: wordmark.left >= 0 && wordmark.right <= innerWidth,
                     headerTop: document.querySelector('#header').getBoundingClientRect().top,
                     projectsTop: document.querySelector('#projects').getBoundingClientRect().top,
                 };
             });
-            assert.ok(firstScreen.textOnly && firstScreen.centered && firstScreen.singleLine, `${width}: expected one centered line`);
+            assert.ok(firstScreen.handwriting && firstScreen.centered && firstScreen.fits,
+                width + ': expected the centered handwritten wordmark on the homepage');
             assert.ok(firstScreen.headerTop >= height - 1, `${width}: navigation visible on first screen`);
             assert.ok(firstScreen.projectsTop >= height - 1, `${width}: projects visible on first screen`);
             await page.screenshot({ path: join(tmpdir(), `homepage-mobile-${width}.png`) });
