@@ -202,6 +202,7 @@
 
 #writing {
     scroll-margin-top: 110px;
+    padding-block-end: clamp(16px, 2vw, 30px);
 }
 
 .section-heading {
@@ -631,7 +632,6 @@
 
 .writing-chroma-wrap {
     width: min(100%, 1200px);
-    min-height: calc(var(--writing-rows, 3) * 420px);
     margin: 0 auto;
     position: relative;
 }
@@ -680,9 +680,12 @@
     font-size: 11px;
 }
 
+.content.video-section {
+    padding-block-start: clamp(16px, 2vw, 30px);
+}
+
 .video-showcase {
     max-width: 1240px;
-    min-height: 780px;
     margin: 0 auto;
     display: grid;
     grid-template-columns: minmax(280px, 0.76fr) minmax(560px, 1.24fr);
@@ -695,7 +698,8 @@
 .video-copy {
     position: relative;
     z-index: 2;
-    padding: 18px 0;
+    align-self: start;
+    padding: clamp(62px, 7vw, 95px) 0 18px;
 }
 
 .video-copy h2 {
@@ -732,7 +736,7 @@
 
 .video-swap-stage {
     position: relative;
-    min-height: 740px;
+    min-height: 550px;
     overflow: visible;
 }
 
@@ -1434,11 +1438,11 @@
 
     .video-showcase {
         grid-template-columns: 1fr;
-        min-height: 980px;
         gap: 12px;
     }
 
     .video-copy {
+        padding: 18px 0;
         text-align: center;
     }
 
@@ -1448,7 +1452,7 @@
     }
 
     .video-swap-stage {
-        min-height: 620px;
+        min-height: 440px;
     }
 
     .video-swap-stage .card-swap-container {
@@ -1472,7 +1476,6 @@ body {
         overflow: hidden;
         border-radius: 22px;
     }
-    #writing .writing-chroma-wrap { min-height: 0; }
     #writing .chroma-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         width: 100%;

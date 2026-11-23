@@ -979,10 +979,7 @@ export default function IndexPage() {
 
             <section className="content" id="writing">
                 <div className="section-heading"><p className="section-kicker">Writing</p><h2>妙笔生花</h2></div>
-                <div
-                    className="writing-chroma-wrap"
-                    style={{ '--writing-rows': Math.max(1, Math.ceil((chromaArticleItems.length + 1) / 3)) }}
-                >
+                <div className="writing-chroma-wrap">
                     <ChromaGrid
                         items={chromaArticleItems}
                         trailingCard={{ label: '更多笔记，请移步大图书馆前言', image: NOTES_NAV_ICON, url: 'https://bamb0ochen.com/notes/' }}
@@ -996,7 +993,7 @@ export default function IndexPage() {
                 </div>
             </section>
 
-            <section className="content" ref={videoSectionRef}>
+            <section className="content video-section" ref={videoSectionRef}>
                 <div className="video-showcase">
                     <div className="video-copy">
                         <p className="section-kicker">Video</p>
