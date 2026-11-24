@@ -7,11 +7,16 @@ import {
     FRIEND_LINKS,
     SITE_STATUS
 } from '../data/siteData';
+import { loadPublishedLighttrace } from '../utils/publishedLighttrace';
 import { startStarfield } from '../utils/starfield';
+import { startCanvasFluid } from '../utils/canvasFluid';
 import DomeGallery from '../components/DomeGallery';
+import HandwrittenWordmark from '../components/HandwrittenWordmark';
+import { fetchSiteConfig } from '../utils/siteRuntimeConfig';
 import CardSwap, { Card } from '../components/CardSwap';
 import ChromaGrid from '../components/ChromaGrid';
 import BorderGlow from '../components/BorderGlow';
+import PersonalProfile from '../components/PersonalProfile';
 import ProjectShowcase from '../components/ProjectShowcase';
 import ModelErrorBoundary from '../components/ModelErrorBoundary';
 import SiteHeader, { NOTES_NAV_ICON } from '../components/SiteHeader';
@@ -22,6 +27,8 @@ const NOTES_SEARCH_INDEX_URL = `${NOTES_BASE_URL}search/search_index.json`;
 const SEARCH_LIMIT = 20;
 const AGENT_CONTEXT_LIMIT = 8;
 const AGENT_CONFIG_URL = 'agent-config.json';
+const LIGHTTRACE_DOME_COLUMNS = 26;
+const LIGHTTRACE_DOME_PAGE_SIZE = LIGHTTRACE_DOME_COLUMNS * 5;
 const EDGE_COUNT = 2;
 const VISIBLE_COUNT = 6;
 const DEFAULT_VIDEO_FALLBACK_COVER = 'photos/optimized/photo3.webp';
@@ -31,36 +38,6 @@ const DEFAULT_AGENT_MESSAGE = {
     role: 'assistant',
     content: '你好，我是 Chen.のhomepage Agent。可以问我主页内容、光影、视频，也可以基于笔记库帮你找线索。'
 };
-const SERVER_SERVICES = [
-    {
-        id: 'qb',
-        configKey: 'qb',
-        label: 'Torrent',
-        title: 'qBittorrent',
-        description: '下载队列、种子任务与速度面板。',
-        status: 'Private',
-        illustration: 'qb'
-    },
-    {
-        id: 'immich',
-        configKey: 'immich',
-        label: 'Photos',
-        title: 'Immich',
-        description: '相册备份、人物时间线与照片回忆。',
-        status: 'Private',
-        illustration: 'immich'
-    },
-    {
-        id: 'nginx',
-        configKey: 'nginx',
-        label: 'Gateway',
-        title: 'Nginx',
-        description: '反向代理入口、服务主页与站点调度。',
-        status: 'Private',
-        illustration: 'nginx'
-    }
-];
-
 const biliCoverCache = new Map();
 const coverReachabilityCache = new Map();
 
@@ -193,11 +170,10 @@ function resolveFallbackCover(videoItem) {
     return '';
 }
 
-function getFeaturedPhotos(limit) {
-    const maxCount = limit || 10;
+function getFeaturedPhotos() {
     const featured = Array.isArray(FEATURED_LIGHTTRACE) ? FEATURED_LIGHTTRACE : [];
     if (featured.length > 0) {
-        return featured.slice(0, maxCount).map(item => ({
+        return featured.map(item => ({
             id: item.id || item.src,
             data: item.src,
             comment: item.comment || '',
@@ -210,7 +186,7 @@ function getFeaturedPhotos(limit) {
     try {
         const stored = localStorage.getItem('gallery_images_v1');
         const images = stored ? JSON.parse(stored) : [];
-        return images.slice(0, maxCount);
+        return Array.isArray(images) ? images : [];
     } catch (e) {
         return [];
     }
@@ -243,11 +219,11 @@ export default function IndexPage() {
         query.addEventListener('change', update);
         return () => query.removeEventListener('change', update);
     }, []);
-    const featuredContainer = useRef(null);
+    const starfieldCanvas = useRef(null);
+    const fluidCanvas = useRef(null);
+    const compatibilityCanvas = useRef(null);
     const photoStripRef = useRef(null);
     const photoRefs = useRef([]);
-    const fluidCanvas = useRef(null);
-    const starfieldCanvas = useRef(null);
     const videoSectionRef = useRef(null);
     const searchInput = useRef(null);
     const agentInputRef = useRef(null);
@@ -256,13 +232,22 @@ export default function IndexPage() {
     const activeIndexRef = useRef(-1);
     const stripStepRef = useRef(0);
     const hoverRef = useRef(false);
-    const heroScrollProgressRef = useRef(0);
-    const heroOpacityRef = useRef(1);
     const videoCoversLoadedRef = useRef(false);
     const remoteDocsPromiseRef = useRef(null);
     const runtimeConfigPromiseRef = useRef(null);
 
-    const [featuredPhotos, setFeaturedPhotos] = useState([]);
+    const [localFeaturedPhotos] = useState(getFeaturedPhotos);
+    const [publishedPhotos, setPublishedPhotos] = useState(null);
+    const featuredPhotos = publishedPhotos ?? localFeaturedPhotos;
+    const [lighttracePage, setLighttracePage] = useState(0);
+    const lighttracePageCount = Math.ceil(featuredPhotos.length / LIGHTTRACE_DOME_PAGE_SIZE);
+    const lighttraceImages = useMemo(() => {
+        const start = lighttracePage * LIGHTTRACE_DOME_PAGE_SIZE;
+        return featuredPhotos.slice(start, start + LIGHTTRACE_DOME_PAGE_SIZE).map(photo => ({
+            src: photo.src || photo.data,
+            alt: photo.title || photo.date || photo.fileName || '光影留痕'
+        }));
+    }, [featuredPhotos, lighttracePage]);
     const [displayPhotos, setDisplayPhotos] = useState([]);
     const [activeIndex, setActiveIndex] = useState(-1);
     const [photoMoveStyles, setPhotoMoveStyles] = useState([]);
@@ -270,14 +255,8 @@ export default function IndexPage() {
     const [isHoveringPhotos, setIsHoveringPhotos] = useState(false);
     const [stripOffset, setStripOffset] = useState(0);
     const [stripTransition, setStripTransition] = useState(true);
-    const [headerOpacity, setHeaderOpacity] = useState(1);
-    const [heroOpacity, setHeroOpacity] = useState(1);
-    const [heroScrollProgress, setHeroScrollProgress] = useState(0);
-    const [typedText, setTypedText] = useState('');
-    const [selectedArticleTag, setSelectedArticleTag] = useState('全部');
     const [focusVideos, setFocusVideos] = useState([]);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [isPrivateBarOpen, setIsPrivateBarOpen] = useState(false);
     const [isAgentClosing, setIsAgentClosing] = useState(false);
     const [isPageTransitioning, setIsPageTransitioning] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -291,21 +270,24 @@ export default function IndexPage() {
     const [remoteLoading, setRemoteLoading] = useState(false);
     const [remoteError, setRemoteError] = useState(false);
     const [giscusFailed, setGiscusFailed] = useState(false);
-    const [heroTiltX, setHeroTiltX] = useState(0);
-    const [heroTiltY, setHeroTiltY] = useState(0);
-
-    const heroTarget = useRef({ x: 0, y: 0 });
-    const heroTilt = useRef({ x: 0, y: 0 });
-    const heroTiltRafRef = useRef(null);
 
     useEffect(() => {
-        if (!isPrivateBarOpen) return undefined;
-        const closeOnEscape = event => {
-            if (event.key === 'Escape') setIsPrivateBarOpen(false);
-        };
-        window.addEventListener('keydown', closeOnEscape);
-        return () => window.removeEventListener('keydown', closeOnEscape);
-    }, [isPrivateBarOpen]);
+        if (window.location.hash !== '#lighttrace') return;
+        const frame = requestAnimationFrame(() => {
+            document.getElementById('lighttrace')?.scrollIntoView({ behavior: 'instant' });
+        });
+        return () => cancelAnimationFrame(frame);
+    }, []);
+
+    useEffect(() => {
+        const request = new AbortController();
+        loadPublishedLighttrace(request.signal)
+            .then(setPublishedPhotos)
+            .catch(error => {
+                if (error.name !== 'AbortError') console.warn('Published Lighttrace album is unavailable:', error);
+            });
+        return () => request.abort();
+    }, []);
 
     useEffect(() => {
         activeIndexRef.current = activeIndex;
@@ -318,38 +300,6 @@ export default function IndexPage() {
     useEffect(() => {
         hoverRef.current = isHoveringPhotos;
     }, [isHoveringPhotos]);
-
-    useEffect(() => {
-        heroScrollProgressRef.current = heroScrollProgress;
-    }, [heroScrollProgress]);
-
-    const heroDepthStyle = useMemo(() => {
-        const progress = heroScrollProgress;
-        const eased = 1 - Math.pow(1 - progress, 2.2);
-        const layoutLift = 1 - Math.pow(1 - progress, 1.25);
-        return {
-            opacity: heroOpacity,
-            transform: `perspective(1200px) translateY(${-eased * 120}px) translateZ(${-eased * 240}px) scale(${1 - eased * 0.18})`,
-            filter: `blur(${eased * 8}px) saturate(${1 - eased * 0.28}) brightness(${1 - eased * 0.22})`,
-            marginBottom: `-${(layoutLift * 48).toFixed(2)}vh`,
-            pointerEvents: progress > 0.82 ? 'none' : 'auto'
-        };
-    }, [heroOpacity, heroScrollProgress]);
-
-    const heroTiltStyle = useMemo(() => ({
-        transform: `perspective(900px) rotateX(${heroTiltX}deg) rotateY(${heroTiltY}deg)`
-    }), [heroTiltX, heroTiltY]);
-
-    const articleTags = useMemo(() => {
-        const tags = new Set(['全部']);
-        CONTENT_ARTICLES.forEach(article => (article.tags || []).forEach(tag => tags.add(tag)));
-        return Array.from(tags);
-    }, []);
-
-    const filteredArticles = useMemo(() => {
-        if (selectedArticleTag === '全部') return CONTENT_ARTICLES.filter(article => article.featured);
-        return CONTENT_ARTICLES.filter(article => article.featured && (article.tags || []).includes(selectedArticleTag));
-    }, [selectedArticleTag]);
 
     const recentFeed = useMemo(() => {
         const articleItems = CONTENT_ARTICLES.map(article => ({
@@ -370,10 +320,10 @@ export default function IndexPage() {
             link: video.link,
             external: true
         }));
-        const photoItems = FEATURED_LIGHTTRACE.slice(0, 6).map(photo => ({
+        const photoItems = featuredPhotos.slice(0, 6).map(photo => ({
             id: `photo-${photo.id}`,
             typeLabel: '光影',
-            title: photo.title || photo.id,
+            title: photo.title || photo.date || photo.id,
             description: photo.comment || '光影留痕中的一帧。',
             date: photo.date || '2026-02-13',
             link: `gallery.html#photo=${encodeURIComponent(photo.id || '')}`,
@@ -391,7 +341,7 @@ export default function IndexPage() {
         return [...articleItems, ...videoItems, ...photoItems, ...logItems]
             .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
             .slice(0, 8);
-    }, []);
+    }, [featuredPhotos]);
 
     const chromaArticleItems = useMemo(() => {
         const palettes = [
@@ -402,7 +352,7 @@ export default function IndexPage() {
             { border: '#ff6b8a', gradient: 'linear-gradient(165deg, rgba(255, 107, 138, 0.38), #05070a 74%)' },
             { border: '#b8a1ff', gradient: 'linear-gradient(195deg, rgba(142, 123, 255, 0.42), #05070a 72%)' }
         ];
-        return filteredArticles.map((article, index) => {
+        return CONTENT_ARTICLES.filter(article => article.featured).map((article, index) => {
             const palette = palettes[index % palettes.length];
             return {
                 image: article.image,
@@ -415,7 +365,7 @@ export default function IndexPage() {
                 url: article.link
             };
         });
-    }, [filteredArticles]);
+    }, []);
 
     const localSearchIndex = useMemo(() => {
         const articleItems = CONTENT_ARTICLES.map(article => ({
@@ -436,10 +386,10 @@ export default function IndexPage() {
             url: video.link,
             external: true
         }));
-        const photoItems = FEATURED_LIGHTTRACE.map(photo => ({
+        const photoItems = featuredPhotos.map(photo => ({
             id: `photo-${photo.id}`,
             type: '光影',
-            title: photo.title || photo.id,
+            title: photo.title || photo.date || photo.id,
             description: photo.comment || '',
             body: [photo.location, photo.device, ...(photo.tags || [])].join(' '),
             url: `gallery.html#photo=${encodeURIComponent(photo.id || '')}`,
@@ -479,7 +429,7 @@ export default function IndexPage() {
             external: false
         }));
         return [...articleItems, ...videoItems, ...photoItems, ...statusItems, ...friendItems, ...logItems];
-    }, []);
+    }, [featuredPhotos]);
 
     const localResults = useMemo(() => searchItems(localSearchIndex, searchQuery), [localSearchIndex, searchQuery]);
     const remoteResults = useMemo(() => searchItems(remoteDocs, searchQuery), [remoteDocs, searchQuery]);
@@ -533,15 +483,6 @@ export default function IndexPage() {
         stripStepRef.current = rect.width + gap;
     }, []);
 
-    const renderFeaturedPhotos = useCallback(() => {
-        const container = featuredContainer.current;
-        const width = container ? container.clientWidth : window.innerWidth;
-        const limit = width <= 400 ? 8 : width <= 700 ? 12 : width <= 900 ? 16 : 20;
-        const photos = getFeaturedPhotos(limit);
-        setFeaturedPhotos(photos);
-        setDisplayPhotos([]);
-    }, []);
-
     const isEdgePhoto = useCallback(index => index < EDGE_COUNT || index >= displayPhotos.length - EDGE_COUNT, [displayPhotos.length]);
 
     function refreshSidePhotos(centerIndex) {
@@ -586,9 +527,7 @@ export default function IndexPage() {
         if (runtimeConfigLoaded) return Promise.resolve(runtimeConfig);
         if (runtimeConfigPromiseRef.current) return runtimeConfigPromiseRef.current;
 
-        runtimeConfigPromiseRef.current = fetch(AGENT_CONFIG_URL, { cache: 'no-store' })
-            .then(response => response.ok ? response.json() : null)
-            .catch(() => null)
+        runtimeConfigPromiseRef.current = fetchSiteConfig(AGENT_CONFIG_URL)
             .then(config => {
                 setRuntimeConfig(config);
                 setRuntimeConfigLoaded(true);
@@ -600,11 +539,6 @@ export default function IndexPage() {
 
         return runtimeConfigPromiseRef.current;
     }, [runtimeConfig, runtimeConfigLoaded]);
-
-    function getServiceHref(service) {
-        const serviceLinks = runtimeConfig?.services || runtimeConfig?.homelab || {};
-        return String(serviceLinks[service.configKey] || '').trim();
-    }
 
     const loadRemoteSearchIndex = useCallback(() => {
         if (remoteDocs.length || remoteLoading) return;
@@ -824,58 +758,6 @@ export default function IndexPage() {
         setFocusVideos(items => items.map(item => item.id === video.id ? { ...item, isPreviewing: false } : item));
     }
 
-    function startHeroTiltLoop() {
-        if (heroTiltRafRef.current) return;
-        const tickTilt = () => {
-            const ease = 0.08;
-            const dx = heroTarget.current.x - heroTilt.current.x;
-            const dy = heroTarget.current.y - heroTilt.current.y;
-            const done = Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01;
-            heroTilt.current = {
-                x: done ? heroTarget.current.x : heroTilt.current.x + dx * ease,
-                y: done ? heroTarget.current.y : heroTilt.current.y + dy * ease
-            };
-            setHeroTiltX(current => Math.abs(current - heroTilt.current.x) > 0.01 ? heroTilt.current.x : current);
-            setHeroTiltY(current => Math.abs(current - heroTilt.current.y) > 0.01 ? heroTilt.current.y : current);
-            if (done) {
-                heroTiltRafRef.current = null;
-                return;
-            }
-            heroTiltRafRef.current = window.requestAnimationFrame(tickTilt);
-        };
-        heroTiltRafRef.current = window.requestAnimationFrame(tickTilt);
-    }
-
-    function updateHeaderHeroOpacity() {
-        const progress = Math.max(0, Math.min(1, window.scrollY / (window.innerHeight * 0.68)));
-        const eased = 1 - Math.pow(1 - progress, 1.8);
-        const nextOpacity = Math.max(0, 1 - eased);
-        heroScrollProgressRef.current = progress;
-        heroOpacityRef.current = nextOpacity;
-        setHeroScrollProgress(current => Math.abs(current - progress) > 0.004 ? progress : current);
-        setHeroOpacity(current => Math.abs(current - nextOpacity) > 0.004 ? nextOpacity : current);
-    }
-
-    function handleHeroTilt(event) {
-        const currentTarget = event.currentTarget;
-        if (!currentTarget || typeof currentTarget.getBoundingClientRect !== 'function') return;
-        const rect = currentTarget.getBoundingClientRect();
-        const viewportX = Math.max(0, Math.min(1, (event.clientX - rect.left) / (rect.width || 1)));
-        const viewportY = Math.max(0, Math.min(1, (event.clientY - rect.top) / (rect.height || 1)));
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        const maxTilt = 3;
-        heroTarget.current = {
-            y: Math.max(-maxTilt, Math.min(maxTilt, (viewportX - 0.5) * 2 * maxTilt)),
-            x: Math.max(-maxTilt, Math.min(maxTilt, -(viewportY - 0.5) * 2 * maxTilt))
-        };
-        startHeroTiltLoop();
-    }
-
-    function resetHeroTilt() {
-        heroTarget.current = { x: 0, y: 0 };
-        startHeroTiltLoop();
-    }
-
     useEffect(() => {
         document.body.style.overflow = isSearchOpen ? 'hidden' : '';
         if (isSearchOpen) {
@@ -889,78 +771,53 @@ export default function IndexPage() {
     }, [isSearchOpen, loadRemoteSearchIndex, loadRuntimeConfig]);
 
     useEffect(() => {
-        loadRuntimeConfig();
-        renderFeaturedPhotos();
-        const initialVideos = buildFocusVideos();
-        updateHeaderHeroOpacity();
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const cleanupStarfield = reducedMotion ? null : startStarfield(starfieldCanvas.current, 'star');
-        let cleanupHeroFluid = null;
-        let mounted = true;
-        if (!reducedMotion) {
-            import('../utils/vendor/homepageFluid')
-                .then(({ startHeroFluid }) => {
-                    if (!mounted) return;
-                    cleanupHeroFluid = startHeroFluid(fluidCanvas.current, {
-                        getOpacity: () => Math.max(0, 1 - heroScrollProgressRef.current * 1.35)
-                    });
-                })
-                .catch(() => {
-                    cleanupHeroFluid = null;
-                });
-        }
-
-        let typedTimer = null;
-        const phrases = ['Bamb0oChen の空间', 'ZJUer / CS Learner', 'Counter-Strike & CS', 'Coffee & Pingpong', 'Koala@ZJU / X-Lab@ZJU'];
-        let pi = 0;
-        let ci = 0;
-        let deleting = false;
-        const tickTyping = () => {
-            const full = phrases[pi];
-            if (!deleting) {
-                ci += 1;
-                setTypedText(full.slice(0, ci));
-                if (ci === full.length) {
-                    deleting = true;
-                    typedTimer = window.setTimeout(tickTyping, 1200);
-                    return;
-                }
-            } else {
-                ci -= 1;
-                setTypedText(full.slice(0, ci));
-                if (ci === 0) {
-                    deleting = false;
-                    pi = (pi + 1) % phrases.length;
-                }
-            }
-            typedTimer = window.setTimeout(tickTyping, deleting ? 50 : 90);
+        const stopStarfield = startStarfield(starfieldCanvas.current, 'star');
+        const primaryCanvas = fluidCanvas.current;
+        const options = {
+            getOpacity: () => Math.max(0, 1 - window.scrollY / (window.innerHeight * 0.5)),
         };
-        if (reducedMotion) {
-            setTypedText(phrases[0]);
-        } else {
-            typedTimer = window.setTimeout(tickTyping, 400);
+        let stopFluid;
+        let stopCompatibility;
+        let disposed = false;
+
+        function startCompatibility() {
+            if (disposed || stopCompatibility) return;
+            stopFluid?.();
+            stopFluid = undefined;
+            primaryCanvas.hidden = true;
+            stopCompatibility = startCanvasFluid(compatibilityCanvas.current, options);
         }
 
+        import('../utils/vendor/homepageFluid')
+            .then(({ startHeroFluid }) => {
+                if (disposed) return;
+                stopFluid = startHeroFluid(primaryCanvas, { ...options, onContextLost: startCompatibility });
+            })
+            .catch(startCompatibility);
+
+        return () => {
+            disposed = true;
+            stopStarfield?.();
+            stopFluid?.();
+            stopCompatibility?.();
+            primaryCanvas.hidden = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        loadRuntimeConfig();
+        const initialVideos = buildFocusVideos();
         let resizeTimer = null;
-        let scrollRaf = null;
         const resizeHandler = () => {
             window.clearTimeout(resizeTimer);
             resizeTimer = window.setTimeout(() => {
-                renderFeaturedPhotos();
                 updatePhotoStyles(activeIndexRef.current !== -1);
                 updateStripStep();
             }, 150);
         };
-        const scrollHandler = () => {
-            if (scrollRaf) return;
-            scrollRaf = window.requestAnimationFrame(() => {
-                scrollRaf = null;
-                updateHeaderHeroOpacity();
-            });
-        };
         window.addEventListener('resize', resizeHandler);
-        window.addEventListener('scroll', scrollHandler, { passive: true });
 
         let videoObserver = null;
         if ('IntersectionObserver' in window && videoSectionRef.current) {
@@ -1025,19 +882,13 @@ export default function IndexPage() {
         }
 
         return () => {
-            mounted = false;
-            window.clearTimeout(typedTimer);
             window.clearTimeout(resizeTimer);
             window.clearTimeout(giscusFailTimer);
             if (scrollRaf) window.cancelAnimationFrame(scrollRaf);
             if (videoObserver) videoObserver.disconnect();
             if (giscusObserver) giscusObserver.disconnect();
-            if (cleanupStarfield) cleanupStarfield();
-            if (cleanupHeroFluid) cleanupHeroFluid();
-            if (heroTiltRafRef.current) window.cancelAnimationFrame(heroTiltRafRef.current);
             document.body.style.overflow = '';
             window.removeEventListener('resize', resizeHandler);
-            window.removeEventListener('scroll', scrollHandler);
         };
     }, []);
 
@@ -1066,67 +917,47 @@ export default function IndexPage() {
 
     return (
         <div>
-            <canvas ref={starfieldCanvas} id="starfield" className="starfield-canvas" aria-hidden="true"></canvas>
-            <canvas ref={fluidCanvas} className="hero-fluid-canvas" aria-hidden="true"></canvas>
-
-            <button className={`private-bar-backdrop ${isPrivateBarOpen ? 'is-visible' : ''}`} type="button" aria-label="关闭 Private Bar" tabIndex={isPrivateBarOpen ? 0 : -1} onClick={() => setIsPrivateBarOpen(false)} />
-            <SiteHeader className={isPrivateBarOpen ? 'is-private-open' : ''} opacity={headerOpacity} onAgentClick={openSearch} agentActive={isSearchOpen} onNavigate={navigateWithTransition} dockToggle={
-                <button className={`private-dock-toggle ${isPrivateBarOpen ? 'is-active' : ''}`} type="button" aria-expanded={isPrivateBarOpen} aria-controls="private-bar-panel" onClick={() => setIsPrivateBarOpen(open => !open)}>
-                    <span>{isPrivateBarOpen ? 'Private Bar' : 'Private Dock'}</span><span aria-hidden="true">{isPrivateBarOpen ? '×' : '⌄'}</span>
-                </button>
-            }>
-                <div id="private-bar-panel" className="private-bar-panel" aria-hidden={!isPrivateBarOpen}>
-                    <div className="private-bar-heading">
-                        <div><p className="section-kicker">Homelab</p><h2>Private Bar</h2></div>
-                        <p>服务入口由运行时配置接管，不在页面暴露内部地址。</p>
-                    </div>
-                    <div className="server-service-grid">
-                        {SERVER_SERVICES.map(service => {
-                            const serviceHref = getServiceHref(service);
-                            return (
-                                <a key={service.id} className={`server-service-card server-service-card--${service.illustration} ${serviceHref ? '' : 'is-disabled'}`} href={serviceHref || undefined} target={serviceHref ? '_blank' : undefined} rel={serviceHref ? 'noopener noreferrer' : undefined} aria-disabled={!serviceHref} tabIndex={isPrivateBarOpen && serviceHref ? 0 : -1} onClick={event => !serviceHref && event.preventDefault()}>
-                                    <div className="server-card-topline"><span>{service.label}</span><span>{service.status}</span></div>
-                                    <div className="server-illustration" aria-hidden="true"><span className="server-ill-main"></span><span className="server-ill-accent"></span><span className="server-ill-dot"></span></div>
-                                    <div className="server-card-content"><h3>{service.title}</h3><p>{service.description}</p><span className="server-card-link">{serviceHref ? 'Open private route' : 'Configure route'}</span></div>
-                                </a>
-                            );
-                        })}
-                    </div>
-                </div>
-            </SiteHeader>
-
-            <section className="hero" style={heroDepthStyle}>
-                <div className="hero-tilt" style={heroTiltStyle} onMouseMove={handleHeroTilt} onMouseLeave={resetHeroTilt}>
-                    <div className="hero-shell">
-                        <div className="hero-photo" aria-hidden="true"></div>
-                        <div className="hero-content">
-                            <h1 className="hero-title"><span className="hero-greeting">欢迎来到</span>{' '}<span className="hero-name">Chen.のhomepage</span></h1>
-                            <div className="typed-wrapper" aria-label={typedText}>
-                                <span className="typed-text">{typedText}</span>
-                                <span className="cursor" aria-hidden="true"></span>
-                            </div>
-                            <div className="hero-actions">
-                                <a className="hero-notes-link" href="https://bamb0ochen.com/notes/" target="_blank" rel="noopener noreferrer">进入大图书馆 <span aria-hidden="true">↗</span></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <canvas ref={starfieldCanvas} className="starfield-canvas" aria-hidden="true" />
+            <canvas ref={fluidCanvas} className="hero-fluid-canvas" aria-hidden="true" />
+            <canvas ref={compatibilityCanvas} className="hero-fluid-canvas" aria-hidden="true" hidden />
+            <section className="homepage-intro">
+                <HandwrittenWordmark />
             </section>
+
+            <SiteHeader className="homepage-header" onAgentClick={openSearch} agentActive={isSearchOpen}
+                onNavigate={navigateWithTransition} runtimeConfig={runtimeConfig} />
+
+            <PersonalProfile />
 
             <ProjectShowcase />
 
-            <section className="content lighttrace-section" ref={featuredContainer}>
-                <div className="section-heading"><p className="section-kicker">Lighttrace</p><h2>精选光影</h2></div>
+            <section id="lighttrace" className="content lighttrace-section">
+                <div className="section-heading">
+                    <p className="section-kicker">Lighttrace</p>
+                    <h2>精选光影</h2>
+                    <div className="lighttrace-actions">
+                        {lighttracePageCount > 1 && (
+                            <div className="lighttrace-pages" role="group" aria-label="切换光影球照片">
+                                <button type="button" onClick={() => setLighttracePage(page => page - 1)}
+                                    disabled={lighttracePage === 0}>上一组</button>
+                                <span aria-live="polite">{lighttracePage + 1} / {lighttracePageCount}</span>
+                                <button type="button" onClick={() => setLighttracePage(page => page + 1)}
+                                    disabled={lighttracePage === lighttracePageCount - 1}>下一组</button>
+                            </div>
+                        )}
+                        <a className="lighttrace-library-link" href="gallery.html?view=grid">
+                            {publishedPhotos ? `查看全部 ${publishedPhotos.length} 张` : '查看全部照片'}
+                        </a>
+                    </div>
+                </div>
                 <div className="photo-container">
                     {featuredPhotos.length === 0 ? (
                         <div className="empty-state">暂无光影留痕，<a href="gallery.html">去上传</a></div>
                     ) : (
                         <div className="dome-gallery-wrap">
                             <DomeGallery
-                                images={featuredPhotos.map(photo => ({
-                                    src: photo.data,
-                                    alt: photo.title || photo.fileName || '光影留痕'
-                                }))}
+                                key={lighttracePage}
+                                images={lighttraceImages}
                                 minRadius={isCompactScreen ? 300 : 650}
                                 maxRadius={isCompactScreen ? 450 : Infinity}
                                 fit={isCompactScreen ? 0.8 : 0.5}
@@ -1134,7 +965,7 @@ export default function IndexPage() {
                                 openedImageWidth={isCompactScreen ? 'min(250px, 70vw)' : '250px'}
                                 openedImageHeight={isCompactScreen ? 'min(300px, 65vw)' : '350px'}
                                 maxVerticalRotationDeg={20}
-                                segments={26}
+                                segments={LIGHTTRACE_DOME_COLUMNS}
                                 dragDampening={2.6}
                                 grayscale={false}
                             />
@@ -1145,17 +976,7 @@ export default function IndexPage() {
 
             <section className="content" id="writing">
                 <div className="section-heading"><p className="section-kicker">Writing</p><h2>妙笔生花</h2></div>
-                <div className="filter-row" aria-label="文章分类筛选">
-                    {articleTags.map(tag => (
-                        <button key={tag} type="button" className={`filter-chip ${selectedArticleTag === tag ? 'active' : ''}`} onClick={() => setSelectedArticleTag(tag)}>
-                            <span>{tag}</span>
-                        </button>
-                    ))}
-                </div>
-                <div
-                    className="writing-chroma-wrap"
-                    style={{ '--writing-rows': Math.max(1, Math.ceil((chromaArticleItems.length + 1) / 3)) }}
-                >
+                <div className="writing-chroma-wrap">
                     <ChromaGrid
                         items={chromaArticleItems}
                         trailingCard={{ label: '更多笔记，请移步大图书馆前言', image: NOTES_NAV_ICON, url: 'https://bamb0ochen.com/notes/' }}
@@ -1169,12 +990,11 @@ export default function IndexPage() {
                 </div>
             </section>
 
-            <section className="content" ref={videoSectionRef}>
+            <section className="content video-section" ref={videoSectionRef}>
                 <div className="video-showcase">
                     <div className="video-copy">
                         <p className="section-kicker">Video</p>
                         <h2>用心做视频</h2>
-                        <p>把旅行、城市与片刻情绪剪成可以回访的时间切片。{isCompactScreen ? '左右滑动查看视频，点开卡片前往 B 站。' : '右侧卡组会自动轮换，点击任意一张直接打开 B 站。'}</p>
                         <div className="video-actions">
                             <a href={focusVideos[0]?.openUrl || 'https://www.bilibili.com/'} target="_blank" rel="noopener noreferrer">打开最新视频</a>
                             <a href="https://space.bilibili.com/" target="_blank" rel="noopener noreferrer">Bilibili</a>
@@ -1283,7 +1103,7 @@ export default function IndexPage() {
                         <div className="music-embed">
                             <iframe title="Apple Music 收藏歌单" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameBorder="0" width="100%" height="450" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" loading="lazy"></iframe>
                         </div>
-                        <p className="music-open-link"><a href="https://music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" target="_blank" rel="noopener noreferrer">在 Apple Music 打开 ↗</a><span>播放器未显示时可直接打开歌单</span></p>
+                        <p className="music-open-link"><a href="https://music.apple.com/cn/playlist/favorite-songs/pl.u-aeUR5YapmR" target="_blank" rel="noopener noreferrer">在 Apple Music 打开 ↗</a></p>
                     </BorderGlow>
                     <div className="music-model-card" aria-label="可旋转留声机模型">
                         <ModelErrorBoundary

@@ -1,6 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { gsap } from 'gsap';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { featuredProjects } from '../data/featuredProjects';
 import '../styles/project-showcase.css';
+
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 function ProjectPreview({ kind, step }) {
     if (kind === 'infohub') return (
@@ -52,51 +57,291 @@ function ProjectPreview({ kind, step }) {
     );
 }
 
-function ProjectRow({ project, index, reducedMotion, pageVisible }) {
-    const ref = useRef(null);
-    const [visible, setVisible] = useState(false);
-    const [seen, setSeen] = useState(false);
+function ProjectRow({ project, active, reducedMotion, pageVisible, interactive }) {
     const [step, setStep] = useState(0);
-    useEffect(() => {
-        if (!('IntersectionObserver' in window)) { setVisible(true); setSeen(true); return; }
-        const observer = new IntersectionObserver(([entry]) => {
-            setVisible(entry.isIntersecting);
-            if (entry.isIntersecting) setSeen(true);
-        }, { threshold: 0.15 });
-        observer.observe(ref.current);
-        return () => observer.disconnect();
-    }, []);
-    const playing = visible && pageVisible && !reducedMotion;
     const frameCount = project.screenshots?.length || project.steps.length;
     useEffect(() => {
-        if (!playing) return;
-        const timer = window.setInterval(() => setStep(current => (current + 1) % frameCount), project.screenshots ? 5000 : 2200);
+        if (!active || !pageVisible || reducedMotion || frameCount < 2) return;
+        const timer = window.setInterval(() => setStep(current => (current + 1) % frameCount),
+            project.screenshots ? 5000 : 2200);
         return () => window.clearInterval(timer);
-    }, [playing, frameCount, project.screenshots]);
+    }, [active, pageVisible, reducedMotion, frameCount, project.screenshots]);
+
+    const frame = reducedMotion ? 0 : step;
     return (
-        <article ref={ref} className={`ps-row ${seen ? 'ps-seen' : ''}`} style={{ '--ps-accent': project.color }} aria-labelledby={`project-${project.id}`}>
+        <article className="ps-row" id={`project-panel-${project.id}`}
+            style={{ '--ps-accent': project.color }} aria-labelledby={`project-${project.id}`} inert={!interactive}>
             <figure className="ps-figure" aria-label={`${project.name}：${project.caption}`}>
-                <div className={`ps-preview ps-preview--${project.id} ${project.screenshots ? 'ps-screenshots' : ''} ${playing ? 'ps-playing' : ''}`} data-step={reducedMotion ? 3 : step} aria-hidden="true">
-                    {project.screenshots ? project.screenshots.map((src, imageIndex) => (
-                        <img key={src} src={src} alt="" loading="lazy" decoding="async" className={`ps-screenshot ${imageIndex === (reducedMotion ? 0 : step) ? 'is-active' : ''}`} />
-                    )) : <ProjectPreview kind={project.id} step={reducedMotion ? 3 : step} />}
+                <div className={`ps-preview ps-preview--${project.id}`} data-step={frame} aria-hidden="true">
+                    {project.screenshots ? project.screenshots.map((src, imageIndex) => {
+                        const selected = imageIndex === frame;
+                        const activeClass = selected ? 'is-active' : '';
+                        const image = (
+                            <img key={src} src={src} alt="" loading={active && selected ? 'eager' : 'lazy'}
+                                decoding="async" className={`ps-screenshot ${activeClass}`} />
+                        );
+                        if (project.id !== 'colorpal' || imageIndex !== 0) return image;
+                        return (
+                            <div key={src} className={`ps-portrait-frame ${activeClass}`}>
+                                <img src={src} alt="" loading="lazy" decoding="async" className="ps-portrait-backdrop" />
+                                {image}
+                            </div>
+                        );
+                    }) : <ProjectPreview kind={project.id} step={frame} />}
                 </div>
+                <figcaption className="ps-copy">
+                    <h3 id={`project-${project.id}`}><a href={project.url} target="_blank" rel="noopener noreferrer">{project.name}</a></h3>
+                </figcaption>
             </figure>
-            <div className="ps-copy"><p className="ps-category"><span>{String(index + 1).padStart(2, '0')}</span>{project.category}</p><h3 id={`project-${project.id}`}><a href={project.url} target="_blank" rel="noopener noreferrer">{project.name}</a></h3><ul className="ps-tags">{project.tags.map(tag => <li key={tag}>{tag}</li>)}</ul></div>
         </article>
     );
 }
 
+const slideCount = featuredProjects.length;
+const stillMedia = '(prefers-reduced-motion: reduce), (max-height: 420px)';
+
 export default function ProjectShowcase() {
-    const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const sectionRef = useRef(null);
+    const stageRef = useRef(null);
+    const trackRef = useRef(null);
+    const activeRef = useRef(0);
+    const goToProjectRef = useRef(null);
+    const [active, setActive] = useState(0);
+    const [still, setStill] = useState(() => window.matchMedia(stillMedia).matches);
     const [pageVisible, setPageVisible] = useState(() => !document.hidden);
+    const [stageVisible, setStageVisible] = useState(false);
+
     useEffect(() => {
-        const media = window.matchMedia('(prefers-reduced-motion: reduce)');
-        const updateMotion = () => setReducedMotion(media.matches);
+        const media = window.matchMedia(stillMedia);
+        const updateMotion = () => setStill(media.matches);
         const updateVisibility = () => setPageVisible(!document.hidden);
         media.addEventListener('change', updateMotion);
         document.addEventListener('visibilitychange', updateVisibility);
-        return () => { media.removeEventListener('change', updateMotion); document.removeEventListener('visibilitychange', updateVisibility); };
+        const observer = new IntersectionObserver(([entry]) => setStageVisible(entry.intersectionRatio >= 0.25),
+            { threshold: 0.25 });
+        observer.observe(stageRef.current);
+        return () => {
+            media.removeEventListener('change', updateMotion);
+            document.removeEventListener('visibilitychange', updateVisibility);
+            observer.disconnect();
+        };
     }, []);
-    return <section id="projects" className="ps-section" aria-labelledby="projects-title"><div className="ps-heading"><div><p>SELECTED PROJECTS</p><h2 id="projects-title">精选项目</h2></div></div><div className="ps-grid">{featuredProjects.map((project, index) => <ProjectRow key={project.id} project={project} index={index} reducedMotion={reducedMotion} pageVisible={pageVisible} />)}</div></section>;
+
+    useLayoutEffect(() => {
+        if (still) return;
+        const section = sectionRef.current;
+        const stage = stageRef.current;
+        const track = trackRef.current;
+        const lastIndex = slideCount - 1;
+        let destination;
+        let transition;
+
+        function update({ progress }) {
+            const position = progress * lastIndex;
+            const current = Math.round(position);
+            const offset = Math.abs(position - current) < 0.003 ? current : position;
+            track.style.setProperty('--ps-shift', String(-offset * 100) + '%');
+            if (current !== activeRef.current) {
+                activeRef.current = current;
+                setActive(current);
+            }
+        }
+
+        const trigger = ScrollTrigger.create({
+            trigger: section,
+            start: () => 'top ' + getComputedStyle(stage).top,
+            end: () => '+=' + (section.offsetHeight - stage.offsetHeight),
+            onUpdate: update,
+            onRefresh: update,
+            snap: {
+                snapTo: progress => transition ? progress : Math.round(progress * lastIndex) / lastIndex,
+                inertia: false,
+                delay: 0.15,
+                duration: { min: 0.22, max: 0.42 },
+                ease: 'power2.out',
+            },
+        });
+
+        function goToProject(index) {
+            transition?.kill();
+            const snapTween = trigger.getTween(true);
+            if (snapTween) snapTween.kill();
+            destination = index;
+            const top = trigger.start + (trigger.end - trigger.start) * index / lastIndex;
+            transition = gsap.to(window, {
+                scrollTo: { y: Math.round(top), autoKill: true },
+                duration: 0.48,
+                ease: 'power2.inOut',
+                onComplete: clearTransition,
+                onInterrupt: clearTransition,
+            });
+        }
+
+        function clearTransition() {
+            transition = undefined;
+            destination = undefined;
+        }
+
+        function nextProject(direction, distance = 0) {
+            const y = trigger.scroll();
+            if (y < trigger.start - 2) {
+                return direction > 0 && y + distance >= trigger.start ? 0 : undefined;
+            }
+            if (y > trigger.end + 2) {
+                return direction < 0 && y - distance <= trigger.end ? lastIndex : undefined;
+            }
+
+            const next = (destination ?? activeRef.current) + direction;
+            return next >= 0 && next <= lastIndex ? next : undefined;
+        }
+
+        function ignoreInput(event) {
+            return event.ctrlKey || event.metaKey || event.target.closest?.(
+                '.agent-overlay, #private-bar-panel, dialog[open], input, textarea, select, [contenteditable="true"]'
+            );
+        }
+
+        let wheelDirection = 0;
+        let previousWheelTime = -Infinity;
+        let reverseDistance = 0;
+
+        function onWheel(event) {
+            if (!event.cancelable || ignoreInput(event) || event.shiftKey || !event.deltaY ||
+                Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+
+            const direction = Math.sign(event.deltaY);
+            const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
+            const distance = Math.abs(event.deltaY) * unit;
+            if (event.timeStamp - previousWheelTime > 150) {
+                wheelDirection = 0;
+                reverseDistance = 0;
+            }
+
+            const next = nextProject(direction, distance);
+            if (next === undefined && direction !== wheelDirection && !transition) return;
+            event.preventDefault();
+            previousWheelTime = event.timeStamp;
+            if (direction === wheelDirection) {
+                reverseDistance = 0;
+                return;
+            }
+
+            // Suppress momentum from the same swipe and allow a deliberate reversal.
+            if (wheelDirection) {
+                reverseDistance += distance;
+                if (reverseDistance < 20) return;
+            }
+
+            wheelDirection = direction;
+            reverseDistance = 0;
+            if (next !== undefined) goToProject(next);
+        }
+
+        let touchStart;
+        let touchHandled = false;
+
+        function resetTouch() {
+            touchStart = undefined;
+            touchHandled = false;
+        }
+
+        function onTouchStart(event) {
+            resetTouch();
+            if (event.touches.length !== 1 || ignoreInput(event)) return;
+            const y = trigger.scroll();
+            if (y < trigger.start - 2 || y > trigger.end + 2) return;
+            touchStart = event.touches[0];
+        }
+
+        function onTouchMove(event) {
+            if (!touchStart || !event.cancelable || event.touches.length !== 1) return;
+            if (touchHandled) {
+                event.preventDefault();
+                return;
+            }
+
+            const touch = event.touches[0];
+            const movement = touchStart.clientY - touch.clientY;
+            const sideways = touchStart.clientX - touch.clientX;
+            if (!movement || Math.abs(sideways) > Math.abs(movement)) return;
+
+            const next = nextProject(Math.sign(movement));
+            if (next === undefined) {
+                resetTouch();
+                return;
+            }
+            event.preventDefault();
+            if (Math.abs(movement) < 28) return;
+
+            touchHandled = true;
+            goToProject(next);
+        }
+
+        function onKeyDown(event) {
+            if (event.defaultPrevented || ignoreInput(event) || event.altKey ||
+                event.target.closest?.('button, a')) return;
+            const key = event.key === ' ' ? (event.shiftKey ? 'PageUp' : 'PageDown') : event.key;
+            if (!['ArrowDown', 'PageDown', 'ArrowUp', 'PageUp'].includes(key)) return;
+
+            const direction = key === 'ArrowDown' || key === 'PageDown' ? 1 : -1;
+            const next = nextProject(direction);
+            if (next === undefined) return;
+
+            event.preventDefault();
+            if (!event.repeat) goToProject(next);
+        }
+
+        window.addEventListener('wheel', onWheel, { passive: false });
+        window.addEventListener('touchstart', onTouchStart, { passive: true });
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('touchend', resetTouch);
+        window.addEventListener('touchcancel', resetTouch);
+        window.addEventListener('keydown', onKeyDown);
+
+        goToProjectRef.current = goToProject;
+        const resize = new ResizeObserver(() => trigger.refresh());
+        resize.observe(stage);
+        return () => {
+            goToProjectRef.current = null;
+            resize.disconnect();
+            window.removeEventListener('wheel', onWheel);
+            window.removeEventListener('touchstart', onTouchStart);
+            window.removeEventListener('touchmove', onTouchMove);
+            window.removeEventListener('touchend', resetTouch);
+            window.removeEventListener('touchcancel', resetTouch);
+            window.removeEventListener('keydown', onKeyDown);
+            transition?.kill();
+            trigger.kill();
+            track.style.removeProperty('--ps-shift');
+        };
+    }, [still]);
+
+    return (
+        <section ref={sectionRef} id="projects" className={`ps-section ${still ? 'ps-section--still' : ''}`}
+            aria-labelledby="projects-title" style={{ '--ps-transition-count': slideCount - 1 }}>
+            <div ref={stageRef} className="ps-stage">
+                <div className="ps-heading">
+                    <h2 id="projects-title">Project</h2>
+                    {!still && (
+                        <nav className="ps-pagination" aria-label="切换项目">
+                            {featuredProjects.map((project, index) => (
+                                <button key={project.id} type="button" aria-label={project.name}
+                                    title={project.name} aria-current={index === active ? 'true' : undefined}
+                                    aria-controls={`project-panel-${project.id}`}
+                                    onClick={() => goToProjectRef.current?.(index)} />
+                            ))}
+                        </nav>
+                    )}
+                </div>
+                <div className="ps-window">
+                    <div ref={trackRef} className="ps-track">
+                        {featuredProjects.map((project, index) => (
+                            <ProjectRow key={project.id} project={project} active={!still && stageVisible && index === active}
+                                reducedMotion={still} pageVisible={pageVisible} interactive={still || index === active} />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
 }

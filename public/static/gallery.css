@@ -582,31 +582,6 @@
     opacity: 1;
 }
 
-#header .site-header-inner {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-    max-width: 1240px;
-    justify-content: space-between;
-    padding: 0 30px;
-    box-sizing: border-box;
-}
-
-#header .site-brand a {
-    color: rgba(255, 255, 255, 0.92);
-    text-decoration: none;
-    font-weight: 700;
-    letter-spacing: 0;
-}
-
-#header .site-nav {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    justify-content: flex-end;
-}
-
 html.is-page-transitioning::before {
     content: "";
     position: fixed;

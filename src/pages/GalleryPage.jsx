@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getLighttraceLibrary } from '../data/siteData';
 import LighttraceMap from '../components/LighttraceMap';
 import SiteHeader from '../components/SiteHeader';
+import { loadPublishedLighttrace } from '../utils/publishedLighttrace';
 import { startStarfield } from '../utils/starfield';
 
 const GALLERY_KEY = 'gallery_images_v1';
@@ -70,6 +71,7 @@ function saveImages(images) {
 }
 
 export default function GalleryPage() {
+    const preferPhotoGrid = new URLSearchParams(window.location.search).get('view') === 'grid';
     const starfieldCanvas = useRef(null);
     const [images, setImages] = useState(() => (useLocalLibrary ? loadLocalLibrary() : loadImages()));
     const [publishedImages, setPublishedImages] = useState(null);
@@ -84,21 +86,18 @@ export default function GalleryPage() {
     const mapImages = useMemo(() => galleryImages.filter(image => image.latitude !== null && image.longitude !== null), [galleryImages]);
 
     useEffect(() => {
-        let active = true;
-        fetch(new URL('photos/lighttrace-published/manifest.json', window.location.href))
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return response.json();
-            })
-            .then(manifest => {
-                if (!active || !Array.isArray(manifest.photos)) return;
-                const photos = manifest.photos.map(normalizeImage);
+        const request = new AbortController();
+        loadPublishedLighttrace(request.signal)
+            .then(published => {
+                const photos = published.map(normalizeImage);
                 setPublishedImages(photos);
-                if (photos.some(image => image.latitude !== null && image.longitude !== null)) setView('map');
+                if (!preferPhotoGrid && photos.some(image => image.latitude !== null && image.longitude !== null)) setView('map');
             })
-            .catch(error => console.warn('Published Lighttrace album is unavailable:', error));
-        return () => { active = false; };
-    }, []);
+            .catch(error => {
+                if (error.name !== 'AbortError') console.warn('Published Lighttrace album is unavailable:', error);
+            });
+        return () => request.abort();
+    }, [preferPhotoGrid]);
 
     const totalPages = useMemo(() => {
         if (!shouldPaginate) return 1;
