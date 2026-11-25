@@ -194,6 +194,8 @@
 .ps-section--still .ps-stage { position: static; height: auto; }
 .ps-section--still .ps-track { display: grid; gap: 36px; transform: none; }
 .ps-section--still .ps-preview { height: clamp(200px, 61vw, 660px); }
+.ps-preview--notes .ps-screenshot { transition-duration: 100ms; }
+
 .ps-section--still :is(.ps-screenshot, .ps-portrait-frame) { transition: none; }
 
 @media (max-width: 768px) {

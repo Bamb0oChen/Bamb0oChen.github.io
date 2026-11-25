@@ -39,16 +39,6 @@ function ProjectPreview({ kind, step }) {
             <div className="ps-terminal-output"><span>›</span> {['等待模型响应', 'tool_use → read_file', 'tool_result → context', 'continue → next iteration'][step]}<i /></div>
         </div>
     );
-    if (kind === 'study') return (
-        <div className="ps-study">
-            <div className="ps-books"><span>教材 A</span><span>教材 B</span></div>
-            <svg viewBox="0 0 400 170" className="ps-graph">
-                <g className={step >= 1 ? 'connected' : ''} fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M70 45L180 50L300 30M70 45L140 130L260 130L300 30M180 50L260 130M180 50L140 130M300 30L350 105" /></g>
-                {[[70,45,'教材'],[180,50,'章节'],[300,30,'章节'],[140,130,'概念'],[260,130,'概念'],[350,105,'概念']].map(([x,y,label],i) => <g key={i} className={step >= 2 && [1,3,4].includes(i) ? 'highlight' : ''}><circle cx={x} cy={y} r="22" /><text x={x} y={y + 4} textAnchor="middle">{label}</text></g>)}
-            </svg>
-            <div className="ps-answer">{step >= 3 ? '回答依据 → 示例教材 · 第二章 §2.1' : '教材 → 章节 → 知识点'}</div>
-        </div>
-    );
     return (
         <div className="ps-notebook">
             <aside><b>学习笔记</b>{['计算机科学', '数学基础', '语言学习'].map((item, i) => <span key={item} className={i === 0 && step >= 1 ? 'selected' : ''}>{item}</span>)}</aside>
@@ -60,12 +50,13 @@ function ProjectPreview({ kind, step }) {
 function ProjectRow({ project, active, reducedMotion, pageVisible, interactive }) {
     const [step, setStep] = useState(0);
     const frameCount = project.screenshots?.length || project.steps.length;
+    const screenshotInterval = project.id === 'notes' ? 500 : 5000;
     useEffect(() => {
         if (!active || !pageVisible || reducedMotion || frameCount < 2) return;
         const timer = window.setInterval(() => setStep(current => (current + 1) % frameCount),
-            project.screenshots ? 5000 : 2200);
+            project.screenshots ? screenshotInterval : 2200);
         return () => window.clearInterval(timer);
-    }, [active, pageVisible, reducedMotion, frameCount, project.screenshots]);
+    }, [active, pageVisible, reducedMotion, frameCount, project.screenshots, screenshotInterval]);
 
     const frame = reducedMotion ? 0 : step;
     return (
@@ -77,7 +68,7 @@ function ProjectRow({ project, active, reducedMotion, pageVisible, interactive }
                         const selected = imageIndex === frame;
                         const activeClass = selected ? 'is-active' : '';
                         const image = (
-                            <img key={src} src={src} alt="" loading={active && selected ? 'eager' : 'lazy'}
+                            <img key={src} src={src} alt="" loading={active && (selected || project.id === 'notes') ? 'eager' : 'lazy'}
                                 decoding="async" className={`ps-screenshot ${activeClass}`} />
                         );
                         if (project.id !== 'colorpal' || imageIndex !== 0) return image;
