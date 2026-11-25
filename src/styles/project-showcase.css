@@ -2,9 +2,6 @@
     --ps-top: 96px;
     --ps-gutter: clamp(14px, 3vw, 48px);
     --ps-stage-height: calc(100svh - var(--ps-top) - 14px);
-    --ps-corner-shade: rgb(0 0 0 / 0.85) 0%, rgb(0 0 0 / 0.81) 22%,
-        rgb(0 0 0 / 0.71) 43%, rgb(0 0 0 / 0.57) 58%, rgb(0 0 0 / 0.34) 72%,
-        rgb(0 0 0 / 0.12) 86%, rgb(0 0 0 / 0.025) 95%, transparent 100%;
     position: relative;
     z-index: 1;
     margin: 0 0 36px;
@@ -37,32 +34,9 @@
     pointer-events: none;
 }
 
-.ps-heading::before,
-.ps-heading::after {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    pointer-events: none;
-}
-
-.ps-heading::before {
-    inset: 0 auto auto 0;
-    width: min(520px, 65%);
-    height: clamp(96px, 12vw, 160px);
-    background: radial-gradient(ellipse 100% 100% at left top, var(--ps-corner-shade));
-}
-
-.ps-section:not(.ps-section--still) .ps-heading::after {
-    inset: 0 0 auto auto;
-    width: min(380px, 72%);
-    height: clamp(88px, 12vw, 144px);
-    background: radial-gradient(ellipse 100% 100% at right top,
-        rgb(0 0 0 / 0.74), rgb(0 0 0 / 0.56) 44%, rgb(0 0 0 / 0.27) 74%, transparent);
-}
-
 .ps-heading h2 {
     margin: 0;
-    font-size: clamp(28px, 3.25vw, 46px);
+    font-size: clamp(32px, 3.9vw, 56px);
     font-weight: 650;
     letter-spacing: -.035em;
     color: white;
@@ -139,7 +113,7 @@
     height: 100%;
     object-fit: cover;
     opacity: 0;
-    transition: opacity 1s ease-in-out;
+    transition: opacity 300ms ease-in-out;
 }
 
 .ps-portrait-frame {
@@ -147,7 +121,7 @@
     inset: 0;
     isolation: isolate;
     opacity: 0;
-    transition: opacity 1s ease-in-out;
+    transition: opacity 300ms ease-in-out;
 }
 
 .ps-portrait-backdrop {
@@ -169,10 +143,8 @@
 .ps-figure::after {
     content: '';
     position: absolute;
-    inset: auto auto 0 0;
-    width: max(37rem, 59%);
-    height: clamp(176px, 26%, 240px);
-    background: radial-gradient(ellipse 100% 100% at left bottom, var(--ps-corner-shade));
+    inset: 0;
+    background: radial-gradient(ellipse farthest-corner at center, transparent 48%, rgb(0 0 0 / 0.22) 76%, rgb(0 0 0 / 0.56) 100%);
     pointer-events: none;
 }
 
@@ -194,17 +166,11 @@
 .ps-section--still .ps-stage { position: static; height: auto; }
 .ps-section--still .ps-track { display: grid; gap: 36px; transform: none; }
 .ps-section--still .ps-preview { height: clamp(200px, 61vw, 660px); }
-.ps-preview--notes .ps-screenshot { transition-duration: 100ms; }
-
 .ps-section--still :is(.ps-screenshot, .ps-portrait-frame) { transition: none; }
 
 @media (max-width: 768px) {
     .ps-section { --ps-top: 122px; }
     .ps-pagination button { width: 23px; }
-    .ps-figure::after {
-        width: 155%;
-        height: clamp(132px, 66%, 190px);
-    }
 }
 
 @media (max-width: 768px) and (orientation: portrait) {

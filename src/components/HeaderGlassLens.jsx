@@ -13,7 +13,6 @@ function makeEdgeMap(canvas, width, height, radius) {
     const pixels = context.createImageData(canvas.width, canvas.height);
     const halfWidth = width / 2;
     const halfHeight = height / 2;
-    const bevel = 9;
     for (let row = 0; row < canvas.height; row++) {
         for (let column = 0; column < canvas.width; column++) {
             const x = column + 0.5 - halfWidth;
@@ -24,6 +23,7 @@ function makeEdgeMap(canvas, width, height, radius) {
             const outsideY = Math.max(0, qy);
             const corner = Math.hypot(outsideX, outsideY);
             const depth = radius - corner - Math.min(Math.max(qx, qy), 0);
+            const bevel = 9 + 7 * (corner ? outsideY / corner : Number(qy >= qx));
             const offset = 4 * (row * canvas.width + column);
             let dx = 0;
             let dy = 0;

@@ -50,13 +50,12 @@ function ProjectPreview({ kind, step }) {
 function ProjectRow({ project, active, reducedMotion, pageVisible, interactive }) {
     const [step, setStep] = useState(0);
     const frameCount = project.screenshots?.length || project.steps.length;
-    const screenshotInterval = project.id === 'notes' ? 500 : 5000;
     useEffect(() => {
         if (!active || !pageVisible || reducedMotion || frameCount < 2) return;
         const timer = window.setInterval(() => setStep(current => (current + 1) % frameCount),
-            project.screenshots ? screenshotInterval : 2200);
+            project.screenshots ? 1500 : 2200);
         return () => window.clearInterval(timer);
-    }, [active, pageVisible, reducedMotion, frameCount, project.screenshots, screenshotInterval]);
+    }, [active, pageVisible, reducedMotion, frameCount, project.screenshots]);
 
     const frame = reducedMotion ? 0 : step;
     return (
@@ -68,7 +67,7 @@ function ProjectRow({ project, active, reducedMotion, pageVisible, interactive }
                         const selected = imageIndex === frame;
                         const activeClass = selected ? 'is-active' : '';
                         const image = (
-                            <img key={src} src={src} alt="" loading={active && (selected || project.id === 'notes') ? 'eager' : 'lazy'}
+                            <img key={src} src={src} alt="" loading={active ? 'eager' : 'lazy'}
                                 decoding="async" className={`ps-screenshot ${activeClass}`} />
                         );
                         if (project.id !== 'colorpal' || imageIndex !== 0) return image;
